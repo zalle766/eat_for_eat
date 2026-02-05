@@ -1,0 +1,313 @@
+
+import { useState, useEffect } from 'react';
+import { supabase } from '../../../lib/supabase';
+
+interface MyDeliveriesProps {
+  driver: any;
+}
+
+export default function MyDeliveries({ driver }: MyDeliveriesProps) {
+  const [deliveries, setDeliveries] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState('active');
+
+  useEffect(() => {
+    loadDeliveries();
+    const interval = setInterval(loadDeliveries, 10000);
+    return () => clearInterval(interval);
+  }, [driver, filter]);
+
+  const loadDeliveries = async () => {
+    try {
+      let query = supabase
+        .from('deliveries')
+        .select('*')
+        .eq('driver_id', driver.id)
+        .order('created_at', { ascending: false });
+
+      if (filter === 'active') {
+        query = query.in('status', ['assigned', 'picked_up']);
+      } else if (filter === 'completed') {
+        query = query.eq('status', 'delivered');
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setDeliveries(data || []);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('خطأ في تحميل التوصيلات:', error);
+      setIsLoading(false);
+    }
+  };
+
+  const updateDeliveryStatus = async (deliveryId: string, newStatus: string) => {
+    try {
+      const updateData: any = { status: newStatus };
+      
+      if (newStatus === 'picked_up') {
+        updateData.picked_up_at = new Date().toISOString();
+      } else if (newStatus === 'delivered') {
+        updateData.delivered_at = new Date().toISOString();
+        
+        // تحديث إحصائيات السائق
+        const delivery = deliveries.find(d => d.id === deliveryId);
+        if (delivery) {
+          await supabase
+            .from('drivers')
+            .update({ 
+              completed_deliveries: driver.completed_deliveries + 1,
+              total_earnings: driver.total_earnings + delivery.driver_earnings
+            })
+            .eq('id', driver.id);
+        }
+      }
+
+      const { error } = await supabase
+        .from('deliveries')
+        .update(updateData)
+        .eq('id', deliveryId);
+
+      if (error) throw error;
+
+      // تحديث حالة الطلب في localStorage
+      const delivery = deliveries.find(d => d.id === deliveryId);
+      if (delivery) {
+        const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const updatedOrders = allOrders.map((o: any) => {
+          if (o.id === delivery.order_id) {
+            let orderStatus = o.status;
+            if (newStatus === 'picked_up') orderStatus = 'out_for_delivery';
+            if (newStatus === 'delivered') orderStatus = 'delivered';
+            return { ...o, status: orderStatus };
+          }
+          return o;
+        });
+        localStorage.setItem('orders', JSON.stringify(updatedOrders));
+      }
+
+      loadDeliveries();
+      alert('تم تحديث حالة التوصيل بنجاح');
+    } catch (error) {
+      console.error('خطأ في تحديث الحالة:', error);
+      alert('حدث خطأ أثناء تحديث الحالة');
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: any = {
+      assigned: { label: 'بانتظار قبولك', color: 'bg-blue-100 text-blue-700' },
+      picked_up: { label: 'تم الاستلام', color: 'bg-orange-100 text-orange-700' },
+      delivered: { label: 'تم التوصيل', color: 'bg-green-100 text-green-700' }
+    };
+    
+    const config = statusConfig[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
+    return (
+      <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
+        {config.label}
+      </span>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">جاري تحميل التوصيلات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">توصيلاتي</h2>
+        <p className="text-gray-600">إدارة ومتابعة توصيلاتك</p>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setFilter('active')}
+          className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+            filter === 'active'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          التوصيلات النشطة
+        </button>
+        <button
+          onClick={() => setFilter('completed')}
+          className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+            filter === 'completed'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          التوصيلات المكتملة
+        </button>
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+            filter === 'all'
+              ? 'bg-orange-500 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          جميع التوصيلات
+        </button>
+      </div>
+
+      {deliveries.length === 0 ? (
+        <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="ri-truck-line text-4xl text-gray-400"></i>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">لا توجد توصيلات</h3>
+          <p className="text-gray-600">
+            {filter === 'active' ? 'ليس لديك توصيلات نشطة حالياً' : 'لم تقم بأي توصيلات بعد'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {deliveries.map((delivery) => (
+            <div key={delivery.id} className="bg-white rounded-xl p-6 border border-gray-200">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-200">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-semibold text-gray-900">طلب #{delivery.order_id.slice(0, 8)}</h3>
+                    {getStatusBadge(delivery.status)}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {new Date(delivery.created_at).toLocaleDateString('ar-MA', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+                <div className="text-left">
+                  <p className="text-2xl font-bold text-gray-900">{delivery.total_amount.toFixed(2)} د.م</p>
+                  <p className="text-sm text-green-600 font-medium">أرباحك: {delivery.driver_earnings.toFixed(2)} د.م</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                {/* Pickup Info */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <i className="ri-store-line text-orange-500"></i>
+                    الاستلام من
+                  </h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-medium text-gray-900 mb-1">{delivery.pickup_address}</p>
+                    <p className="text-sm text-gray-600">{delivery.delivery_city}</p>
+                  </div>
+                </div>
+
+                {/* Delivery Info */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <i className="ri-map-pin-line text-orange-500"></i>
+                    التوصيل إلى
+                  </h4>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-medium text-gray-900 mb-1">{delivery.customer_name}</p>
+                    <p className="text-sm text-gray-600 mb-1">{delivery.customer_phone}</p>
+                    <p className="text-sm text-gray-600">{delivery.delivery_address}</p>
+                  </div>
+                </div>
+              </div>
+
+              {delivery.notes && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-yellow-800">
+                    <i className="ri-information-line ml-2"></i>
+                    <strong>ملاحظات:</strong> {delivery.notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              {delivery.status === 'assigned' && (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => updateDeliveryStatus(delivery.id, 'picked_up')}
+                    className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                  >
+                    <i className="ri-checkbox-circle-line ml-2"></i>
+                    قبول هذا الطلب
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const { error } = await supabase
+                          .from('deliveries')
+                          .update({ status: 'rejected' })
+                          .eq('id', delivery.id);
+
+                        if (error) throw error;
+
+                        loadDeliveries();
+                        alert('تم رفض الطلب، سيتم إعلام المطعم.');
+                      } catch (error) {
+                        console.error('خطأ في رفض الطلب:', error);
+                        alert('حدث خطأ أثناء رفض الطلب');
+                      }
+                    }}
+                    className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                  >
+                    رفض الطلب
+                  </button>
+                </div>
+              )}
+
+              {delivery.status === 'picked_up' && (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => updateDeliveryStatus(delivery.id, 'delivered')}
+                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                  >
+                    <i className="ri-checkbox-circle-line ml-2"></i>
+                    تم توصيل الطلب
+                  </button>
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${delivery.delivery_address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                  >
+                    <i className="ri-navigation-line"></i>
+                  </a>
+                </div>
+              )}
+
+              {delivery.status === 'delivered' && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                  <i className="ri-checkbox-circle-fill text-3xl text-green-600 mb-2"></i>
+                  <p className="text-green-700 font-medium">تم التوصيل بنجاح</p>
+                  <p className="text-sm text-green-600">
+                    {new Date(delivery.delivered_at).toLocaleDateString('ar-MA', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,85 @@
+
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../../lib/supabase';
+
+interface RestaurantHeaderProps {
+  restaurant: any;
+}
+
+export default function RestaurantHeader({ restaurant }: RestaurantHeaderProps) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('خطأ في تسجيل الخروج:', error);
+    }
+  };
+
+  return (
+    <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">لوحة تحكم المطعم</h1>
+          <p className="text-sm text-gray-600">إدارة شاملة لمطعمك</p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {/* إشعارات */}
+          <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+            <i className="ri-notification-3-line text-xl"></i>
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+              3
+            </span>
+          </button>
+
+          {/* معلومات المطعم */}
+          <div className="flex items-center gap-3">
+            <img 
+              src={restaurant.image || 'https://readdy.ai/api/search-image?query=modern%20restaurant%20interior%20with%20warm%20lighting%20and%20elegant%20dining%20tables%2C%20professional%20food%20photography%20style%2C%20clean%20and%20inviting%20atmosphere&width=40&height=40&seq=restaurant-avatar&orientation=squarish'}
+              alt={restaurant.name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div className="text-right">
+              <p className="text-sm font-semibold text-gray-900">{restaurant.name}</p>
+              <p className="text-xs text-gray-500">{restaurant.cuisine_type}</p>
+            </div>
+          </div>
+
+          {/* قائمة المستخدم */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <i className="ri-more-2-line text-xl"></i>
+            </button>
+
+            {showDropdown && (
+              <div className="absolute left-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                >
+                  <i className="ri-home-line"></i>
+                  العودة للموقع
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                >
+                  <i className="ri-logout-circle-line"></i>
+                  تسجيل الخروج
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}

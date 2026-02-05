@@ -1,0 +1,136 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RTL Support */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+/* Custom Font */
+body {
+  font-family: 'Cairo', sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Smooth Transitions */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom Button Styles */
+.btn-primary {
+  @apply bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer;
+}
+
+/* Card Hover Effects */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* Loading Animation */
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500;
+}
+
+/* Custom Input Styles */
+.input-field {
+  @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent;
+}
+
+/* Gradient Backgrounds */
+.gradient-orange {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+}
+
+.gradient-overlay {
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.6s ease-out;
+}
+
+/* Custom Shadows */
+.shadow-custom {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-custom-lg {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Responsive Text */
+@media (max-width: 640px) {
+  .text-responsive {
+    font-size: 0.875rem;
+  }
+}
+
+/* Custom Grid */
+.grid-auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Status Indicators */
+.status-online {
+  @apply bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.status-offline {
+  @apply bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.status-busy {
+  @apply bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold;
+}
