@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-  "start": "npm run build && vite preview"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite preview --port 4173"
+  },
 
   "dependencies": {
     "@stripe/react-stripe-js": "4.0.2",
