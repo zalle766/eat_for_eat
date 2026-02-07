@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 
@@ -9,7 +9,19 @@ interface RestaurantHeaderProps {
 
 export default function RestaurantHeader({ restaurant }: RestaurantHeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!showDropdown) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showDropdown]);
 
   const handleLogout = async () => {
     try {
@@ -21,8 +33,8 @@ export default function RestaurantHeader({ restaurant }: RestaurantHeaderProps) 
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
+    <header className="bg-white border-b border-gray-200 px-6 py-4 overflow-visible">
+      <div className="flex items-center justify-between overflow-visible">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tableau de bord restaurant</h1>
           <p className="text-sm text-gray-600">Gestion complète de votre restaurant</p>
@@ -50,27 +62,36 @@ export default function RestaurantHeader({ restaurant }: RestaurantHeaderProps) 
             </div>
           </div>
 
-          {/* قائمة المستخدم */}
-          <div className="relative">
+          {/* Menu utilisateur */}
+          <div className="relative" ref={dropdownRef}>
             <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(!showDropdown);
+              }}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             >
               <i className="ri-more-2-line text-xl"></i>
             </button>
 
             {showDropdown && (
-              <div className="absolute left-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[100] min-w-[12rem]">
                 <button
-                  onClick={() => navigate('/')}
-                  className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    navigate('/');
+                  }}
+                  className="w-full text-right px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 whitespace-nowrap cursor-pointer"
                 >
                   <i className="ri-home-line"></i>
                   Retour au site
                 </button>
                 <button
-                  onClick={handleLogout}
-                  className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                  onClick={() => {
+                    setShowDropdown(false);
+                    handleLogout();
+                  }}
+                  className="w-full text-right px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 whitespace-nowrap cursor-pointer"
                 >
                   <i className="ri-logout-circle-line"></i>
                   Déconnexion

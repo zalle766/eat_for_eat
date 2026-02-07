@@ -193,6 +193,7 @@ export default function OrdersManagement() {
       if (orderIndex !== -1) {
         allOrders[orderIndex].status = newStatus;
         localStorage.setItem('orders', JSON.stringify(allOrders));
+        window.dispatchEvent(new CustomEvent('ordersUpdated'));
         
         // تحديث الطلب الحالي إذا كان موجوداً
         const currentOrder = localStorage.getItem('currentOrder');

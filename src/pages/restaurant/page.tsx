@@ -152,22 +152,22 @@ export default function RestaurantPage() {
 
     setReviewsLoading(true);
     try {
-      const { headers } = await getRatingsHeaders();
-      const params = new URLSearchParams();
-      params.append('restaurant_id', id);
-
-      const response = await fetch(`${ratingsFunctionUrl}?${params.toString()}`, {
-        headers,
+      const { data: ratings, error } = await supabase.rpc('get_ratings_with_names', {
+        p_restaurant_id: id,
+        p_product_id: null,
       });
 
-      if (!response.ok) {
-        throw new Error('Échec du chargement des avis');
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-      setReviews(data.ratings || []);
-      setAverageRating(data.average_rating || 0);
-      setTotalReviews(data.total_count || 0);
+      const ratingsList = Array.isArray(ratings) ? ratings : [];
+      const validRatings = ratingsList.filter((r: any) => r.rating != null && r.rating > 0);
+      const average = validRatings.length > 0
+        ? validRatings.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / validRatings.length
+        : 0;
+
+      setReviews(ratingsList);
+      setAverageRating(average);
+      setTotalReviews(ratingsList.length);
     } catch (error) {
       console.error('خطأ في تحميل التقييمات:', error);
       setReviews([]);
@@ -180,24 +180,24 @@ export default function RestaurantPage() {
 
   const loadProductRating = async (productId: string) => {
     try {
-      const { headers } = await getRatingsHeaders();
-      const params = new URLSearchParams();
-      params.append('product_id', productId);
-
-      const response = await fetch(`${ratingsFunctionUrl}?${params.toString()}`, {
-        headers,
+      const { data: ratings, error } = await supabase.rpc('get_ratings_with_names', {
+        p_restaurant_id: null,
+        p_product_id: productId,
       });
 
-      if (!response.ok) {
-        return;
-      }
+      if (error) return;
 
-      const data = await response.json();
+      const ratingsList = Array.isArray(ratings) ? ratings : [];
+      const validRatings = ratingsList.filter((r: any) => r.rating != null && r.rating > 0);
+      const average = validRatings.length > 0
+        ? validRatings.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / validRatings.length
+        : 0;
+
       setProductRatings((prev) => ({
         ...prev,
         [productId]: {
-          average: data.average_rating || 0,
-          count: data.total_count || 0,
+          average,
+          count: ratingsList.length,
         },
       }));
     } catch (error) {

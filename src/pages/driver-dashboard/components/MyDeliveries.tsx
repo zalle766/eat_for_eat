@@ -38,7 +38,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
       setDeliveries(data || []);
       setIsLoading(false);
     } catch (error) {
-      console.error('خطأ في تحميل التوصيلات:', error);
+      console.error('Erreur lors du chargement des livraisons:', error);
       setIsLoading(false);
     }
   };
@@ -91,7 +91,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
       loadDeliveries();
       toast.success('État de livraison mis à jour avec succès');
     } catch (error) {
-      console.error('خطأ في تحديث الحالة:', error);
+      console.error('Erreur lors de la mise à jour du statut:', error);
       toast.error('Erreur lors de la mise à jour de l\'état');
     }
   };
@@ -259,7 +259,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                         loadDeliveries();
                         toast.info('Commande refusée. Le restaurant sera notifié.');
                       } catch (error) {
-                        console.error('خطأ في رفض الطلب:', error);
+                        console.error('Erreur lors du refus de la commande:', error);
                         toast.error('Erreur lors du refus de la commande');
                       }
                     }}

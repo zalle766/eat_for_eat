@@ -63,7 +63,7 @@ export default function Earnings({ driver }: EarningsProps) {
 
       setIsLoading(false);
     } catch (error) {
-      console.error('خطأ في تحميل الأرباح:', error);
+      console.error('Erreur lors du chargement des revenus:', error);
       setIsLoading(false);
     }
   };
@@ -73,7 +73,7 @@ export default function Earnings({ driver }: EarningsProps) {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">جاري تحميل الأرباح...</p>
+          <p className="text-gray-600">Chargement des revenus...</p>
         </div>
       </div>
     );
@@ -82,8 +82,8 @@ export default function Earnings({ driver }: EarningsProps) {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">الأرباح</h2>
-        <p className="text-gray-600">تتبع أرباحك من التوصيلات</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Revenus</h2>
+        <p className="text-gray-600">Suivez vos revenus des livraisons</p>
       </div>
 
       {/* Earnings Stats */}
@@ -93,10 +93,10 @@ export default function Earnings({ driver }: EarningsProps) {
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
               <i className="ri-calendar-line text-2xl"></i>
             </div>
-            <span className="text-sm opacity-90">اليوم</span>
+            <span className="text-sm opacity-90">Aujourd'hui</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.today.toFixed(2)} د.م</h3>
-          <p className="text-sm opacity-90">أرباح اليوم</p>
+          <h3 className="text-3xl font-bold mb-1">{earnings.today.toFixed(2)} DH</h3>
+          <p className="text-sm opacity-90">Revenus du jour</p>
         </div>
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
@@ -104,10 +104,10 @@ export default function Earnings({ driver }: EarningsProps) {
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
               <i className="ri-calendar-week-line text-2xl"></i>
             </div>
-            <span className="text-sm opacity-90">هذا الأسبوع</span>
+            <span className="text-sm opacity-90">Cette semaine</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.week.toFixed(2)} د.م</h3>
-          <p className="text-sm opacity-90">أرباح الأسبوع</p>
+          <h3 className="text-3xl font-bold mb-1">{earnings.week.toFixed(2)} DH</h3>
+          <p className="text-sm opacity-90">Revenus de la semaine</p>
         </div>
 
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
@@ -115,10 +115,10 @@ export default function Earnings({ driver }: EarningsProps) {
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
               <i className="ri-calendar-month-line text-2xl"></i>
             </div>
-            <span className="text-sm opacity-90">هذا الشهر</span>
+            <span className="text-sm opacity-90">Ce mois</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.month.toFixed(2)} د.م</h3>
-          <p className="text-sm opacity-90">أرباح الشهر</p>
+          <h3 className="text-3xl font-bold mb-1">{earnings.month.toFixed(2)} DH</h3>
+          <p className="text-sm opacity-90">Revenus du mois</p>
         </div>
 
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
@@ -126,17 +126,17 @@ export default function Earnings({ driver }: EarningsProps) {
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
               <i className="ri-money-dollar-circle-line text-2xl"></i>
             </div>
-            <span className="text-sm opacity-90">الإجمالي</span>
+            <span className="text-sm opacity-90">Total</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.total.toFixed(2)} د.م</h3>
-          <p className="text-sm opacity-90">إجمالي الأرباح</p>
+          <h3 className="text-3xl font-bold mb-1">{earnings.total.toFixed(2)} DH</h3>
+          <p className="text-sm opacity-90">Revenus totaux</p>
         </div>
       </div>
 
       {/* Earnings History */}
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">سجل الأرباح</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Historique des revenus</h3>
         </div>
 
         {deliveries.length === 0 ? (
@@ -144,20 +144,20 @@ export default function Earnings({ driver }: EarningsProps) {
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="ri-money-dollar-circle-line text-4xl text-gray-400"></i>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">لا توجد أرباح بعد</h3>
-            <p className="text-gray-600">ابدأ بقبول الطلبات لتحقيق أرباحك الأولى</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun revenu pour le moment</h3>
+            <p className="text-gray-600">Commencez par accepter des commandes pour réaliser vos premiers revenus</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">رقم الطلب</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التاريخ</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">العميل</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المبلغ الكلي</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">رسوم التوصيل</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">أرباحك</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N° commande</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Montant total</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Frais de livraison</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vos revenus</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -179,13 +179,13 @@ export default function Earnings({ driver }: EarningsProps) {
                       <span className="text-sm text-gray-900">{delivery.customer_name}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{delivery.total_amount.toFixed(2)} د.م</span>
+                      <span className="text-sm text-gray-900">{delivery.total_amount.toFixed(2)} DH</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{delivery.delivery_fee.toFixed(2)} د.م</span>
+                      <span className="text-sm text-gray-900">{delivery.delivery_fee.toFixed(2)} DH</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-green-600">{delivery.driver_earnings.toFixed(2)} د.م</span>
+                      <span className="text-sm font-semibold text-green-600">{delivery.driver_earnings.toFixed(2)} DH</span>
                     </td>
                   </tr>
                 ))}

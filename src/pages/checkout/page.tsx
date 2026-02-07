@@ -239,9 +239,16 @@ export default function CheckoutPage() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const deliveryFee = 25;
-  const discount = appliedPromo ? 
-    (appliedPromo.type === 'percentage' ? subtotal * (appliedPromo.discount / 100) : appliedPromo.discount) : 0;
-  const total = subtotal + deliveryFee - discount;
+  const getDiscount = () => {
+    if (!appliedPromo) return 0;
+    let d = 0;
+    if (appliedPromo.type === 'percentage') d = subtotal * (appliedPromo.discount / 100);
+    else if (appliedPromo.type === 'delivery') d = deliveryFee;
+    else d = appliedPromo.discount || 0;
+    return Math.min(d, subtotal + deliveryFee);
+  };
+  const discount = getDiscount();
+  const total = Math.max(0, subtotal + deliveryFee - discount);
 
   const handleSubmitOrder = async () => {
     if (!validateForm()) return;
@@ -344,6 +351,7 @@ export default function CheckoutPage() {
       
       // إرسال حدث مخصص لتحديث عداد السلة في الهيدر
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+      window.dispatchEvent(new CustomEvent('ordersUpdated'));
       
       // محاكاة تحديث حالة الطلب إلى "preparing" بعد 30 ثانية
       setTimeout(() => {

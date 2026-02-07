@@ -22,6 +22,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
 
   // تحميل عناصر السلة من localStorage وقاعدة البيانات
   useEffect(() => {
@@ -134,13 +135,70 @@ export default function CartPage() {
     }
   };
 
-  const applyPromoCode = () => {
-    if (promoCode === 'FIRST50') {
-      setAppliedPromo({ code: 'FIRST50', discount: 50, type: 'percentage' });
-    } else if (promoCode === 'FREE100') {
-      setAppliedPromo({ code: 'FREE100', discount: 40, type: 'fixed' });
-    } else if (promoCode.trim()) {
+  const parseDiscount = (discountStr: string): { type: string; discount: number } | null => {
+    if (!discountStr || !discountStr.trim()) return null;
+    const s = discountStr.trim();
+    const percentMatch = s.match(/(\d+)\s*%/);
+    if (percentMatch) return { type: 'percentage', discount: parseInt(percentMatch[1], 10) };
+    const dhMatch = s.match(/(\d+(?:[.,]\d+)?)\s*(?:DH|dh|د\.م)?/);
+    if (dhMatch) return { type: 'fixed', discount: parseFloat(dhMatch[1].replace(',', '.')) };
+    if (/livraison\s*gratuite|free\s*delivery/i.test(s)) return { type: 'delivery', discount: 0 };
+    return null;
+  };
+
+  const applyPromoCode = async () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) return;
+
+    setPromoLoading(true);
+    const restaurantIds = [...new Set(cartItems.map(i => i.restaurant_id).filter(Boolean))];
+    const subtotalForCheck = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    try {
+      const { data: offers, error } = await supabase
+        .from('offers')
+        .select('*')
+        .eq('is_active', true)
+        .ilike('code', code);
+
+      if (error) throw error;
+
+      const today = new Date().toISOString().slice(0, 10);
+      const validOffer = (offers || []).find((o: any) => {
+        if (!o.code || o.code.toUpperCase() !== code) return false;
+        if (o.valid_until && o.valid_until < today) return false;
+        if (restaurantIds.length > 0 && o.restaurant_id && !restaurantIds.includes(o.restaurant_id)) return false;
+        if (o.min_order && o.min_order > 0 && subtotalForCheck < o.min_order) return false;
+        return true;
+      });
+
+      if (validOffer) {
+        const parsed = parseDiscount(validOffer.discount);
+        if (parsed) {
+          setAppliedPromo({
+            code: validOffer.code,
+            type: parsed.type,
+            discount: parsed.discount,
+            offer_id: validOffer.id,
+          });
+          toast.success(`Code ${validOffer.code} appliqué !`);
+        } else {
+          setAppliedPromo({
+            code: validOffer.code,
+            type: 'percentage',
+            discount: 10,
+            offer_id: validOffer.id,
+          });
+          toast.success(`Code ${validOffer.code} appliqué !`);
+        }
+      } else {
+        toast.error('Code promo invalide ou expiré. Vérifiez le code et le montant minimum.');
+      }
+    } catch (err) {
+      console.error('Erreur vérification code promo:', err);
       toast.error('Code promo invalide');
+    } finally {
+      setPromoLoading(false);
     }
   };
 
@@ -167,9 +225,16 @@ export default function CartPage() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const deliveryFee = 25;
-  const discount = appliedPromo ? 
-    (appliedPromo.type === 'percentage' ? subtotal * (appliedPromo.discount / 100) : appliedPromo.discount) : 0;
-  const total = subtotal + deliveryFee - discount;
+  const getDiscount = () => {
+    if (!appliedPromo) return 0;
+    let d = 0;
+    if (appliedPromo.type === 'percentage') d = subtotal * (appliedPromo.discount / 100);
+    else if (appliedPromo.type === 'delivery') d = deliveryFee;
+    else d = appliedPromo.discount || 0;
+    return Math.min(d, subtotal + deliveryFee);
+  };
+  const discount = getDiscount();
+  const total = Math.max(0, subtotal + deliveryFee - discount);
 
   if (loading) {
     return (
@@ -306,14 +371,16 @@ export default function CartPage() {
                       onKeyPress={(e) => e.key === 'Enter' && applyPromoCode()}
                     />
                     <button 
-                      onClick={applyPromoCode}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
+                      type="button"
+                      onClick={() => applyPromoCode()}
+                      disabled={promoLoading}
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg transition-colors cursor-pointer whitespace-nowrap disabled:opacity-50"
                     >
-                      Appliquer
+                      {promoLoading ? '...' : 'Appliquer'}
                     </button>
                   </div>
                 )}
-                <p className="text-xs text-gray-500 mt-2">Essayez: FIRST50 ou FREE100</p>
+                <p className="text-xs text-gray-500 mt-2">Utilisez un code créé par le restaurant</p>
               </div>
 
               {/* Price Breakdown */}

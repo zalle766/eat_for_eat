@@ -30,22 +30,14 @@ serve(async (req) => {
     const method = req.method
 
     if (method === 'GET') {
-      // جلب التقييمات - لا يتطلب مصادقة
+      // جلب التقييمات عبر دالة قاعدة البيانات (تضمن الحصول على أسماء المستخدمين)
       const restaurantId = url.searchParams.get('restaurant_id')
       const productId = url.searchParams.get('product_id')
 
-      let query = supabaseClient
-        .from('ratings')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (restaurantId) {
-        query = query.eq('restaurant_id', restaurantId)
-      } else if (productId) {
-        query = query.eq('product_id', productId)
-      }
-
-      const { data: ratings, error } = await query
+      const { data: ratings, error } = await supabaseClient.rpc('get_ratings_with_names', {
+        p_restaurant_id: restaurantId || null,
+        p_product_id: productId || null
+      })
 
       if (error) {
         console.error('Error fetching ratings:', error)
@@ -55,76 +47,17 @@ serve(async (req) => {
         )
       }
 
-      // التأكد من أن ratings هو array
-      if (!ratings || !Array.isArray(ratings)) {
-        return new Response(
-          JSON.stringify({ 
-            ratings: [], 
-            average_rating: 0, 
-            total_count: 0 
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-
-      // جلب أسماء المستخدمين (user_id يشير إلى auth.users.id)
-      const authIds = [...new Set(ratings.map(r => r.user_id).filter(Boolean))]
-      let usersMap: Record<string, string> = {}
-
-      const serviceRoleKey = Deno.env.get('SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-      const supabaseAdmin = serviceRoleKey ? createClient(Deno.env.get('SUPABASE_URL') ?? '', serviceRoleKey) : null
-
-      if (authIds.length > 0) {
-        // 1. جلب من جدول users باستخدام Service Role (لتجاوز RLS)
-        const usersClient = supabaseAdmin || supabaseClient
-        const { data: users } = await usersClient
-          .from('users')
-          .select('auth_id, full_name, name')
-          .in('auth_id', authIds)
-
-        if (users && users.length > 0) {
-          users.forEach(u => {
-            const name = u.full_name || u.name
-            if (name) usersMap[u.auth_id] = name
-          })
-        }
-
-        // 2. للمستخدمين غير الموجودين، جلب الاسم من auth.users
-        const missingIds = authIds.filter(id => !usersMap[id])
-        if (missingIds.length > 0 && supabaseAdmin) {
-          for (const authId of missingIds) {
-            const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(authId)
-            if (authUser?.user) {
-              const u = authUser.user
-              const name = u.user_metadata?.name || u.user_metadata?.full_name || 
-                (u.email ? u.email.split('@')[0] : null)
-              if (name) usersMap[authId] = name
-            }
-          }
-        }
-      }
-
-      // حساب متوسط التقييم
-      const validRatings = ratings.filter(r => r.rating != null && r.rating > 0)
+      const ratingsList = Array.isArray(ratings) ? ratings : []
+      const validRatings = ratingsList.filter((r: any) => r.rating != null && r.rating > 0)
       const averageRating = validRatings.length > 0 
-        ? validRatings.reduce((sum, rating) => sum + (rating.rating || 0), 0) / validRatings.length
+        ? validRatings.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / validRatings.length
         : 0
-
-      // تنسيق البيانات
-      const formattedRatings = ratings.map(rating => ({
-        id: rating.id,
-        user_id: rating.user_id,
-        rating: rating.rating || 0,
-        comment: rating.comment || '',
-        created_at: rating.created_at,
-        user_name: usersMap[rating.user_id] || 'مستخدم'
-      }))
 
       return new Response(
         JSON.stringify({
-          ratings: formattedRatings,
+          ratings: ratingsList,
           average_rating: averageRating,
-          total_count: ratings.length
+          total_count: ratingsList.length
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -178,8 +111,7 @@ serve(async (req) => {
         await supabaseAdmin.from('users').upsert({
           auth_id: userId,
           name: userName,
-          email: user.email || '',
-          phone: user.user_metadata?.phone || null
+          email: user.email || ''
         }, { onConflict: 'auth_id' })
       }
 

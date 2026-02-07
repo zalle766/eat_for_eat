@@ -80,14 +80,18 @@ export default function NearbyRestaurants({ userLocation }: NearbyRestaurantsPro
       const { data, error } = await supabase
         .from('restaurants')
         .select('*')
+        .eq('status', 'approved')
         .eq('is_open', true);
 
       if (error) throw error;
 
       const restaurantsWithDistance = (data || []).map(restaurant => {
-        const distance = userLocation 
-          ? calculateDistance(userLocation.lat, userLocation.lng, restaurant.latitude, restaurant.longitude)
-          : 0;
+        let distance = 0;
+        if (userLocation && restaurant.latitude != null && restaurant.longitude != null) {
+          distance = calculateDistance(userLocation.lat, userLocation.lng, restaurant.latitude, restaurant.longitude);
+        } else if (userLocation) {
+          distance = Infinity;
+        }
         return { ...restaurant, distance };
       });
 
@@ -168,7 +172,7 @@ export default function NearbyRestaurants({ userLocation }: NearbyRestaurantsPro
             >
               <div className="relative overflow-hidden">
                 <img 
-                  src={restaurant.image_url} 
+                  src={restaurant.image_url || restaurant.image} 
                   alt={restaurant.name}
                   className="w-full h-48 object-cover object-top group-hover:scale-105 transition-transform duration-300"
                 />
@@ -178,7 +182,7 @@ export default function NearbyRestaurants({ userLocation }: NearbyRestaurantsPro
                 >
                   <i className={`${isFavorite(restaurant.id) ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'} text-xl`}></i>
                 </button>
-                {userLocation && (
+                {userLocation && restaurant.distance < Infinity && (
                   <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-gray-700 flex items-center gap-1">
                     <i className="ri-map-pin-line text-orange-500"></i>
                     {restaurant.distance.toFixed(1)} km

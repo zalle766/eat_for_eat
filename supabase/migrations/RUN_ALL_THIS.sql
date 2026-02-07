@@ -171,6 +171,146 @@ CREATE POLICY "Allow authenticated update restaurant-images"
 ON storage.objects FOR UPDATE TO authenticated
 USING (bucket_id = 'restaurant-images');
 
+-- 5. دالة جلب التقييمات مع أسماء المستخدمين
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.get_ratings_with_names(
+  p_restaurant_id UUID DEFAULT NULL,
+  p_product_id UUID DEFAULT NULL
+)
+RETURNS TABLE (
+  id UUID,
+  user_id UUID,
+  restaurant_id UUID,
+  product_id UUID,
+  rating INTEGER,
+  comment TEXT,
+  created_at TIMESTAMPTZ,
+  user_name TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.id,
+    r.user_id,
+    r.restaurant_id,
+    r.product_id,
+    r.rating,
+    r.comment,
+    r.created_at,
+    COALESCE(
+      CASE 
+        WHEN u.name IS NOT NULL AND TRIM(u.name) != '' AND TRIM(u.name) != 'مستخدم' 
+        THEN u.name 
+        ELSE NULL 
+      END,
+      (SELECT COALESCE(
+        NULLIF(TRIM(a.raw_user_meta_data->>'full_name'), ''),
+        NULLIF(TRIM(a.raw_user_meta_data->>'name'), ''),
+        NULLIF(TRIM(split_part(COALESCE(a.email, ''), '@', 1)), '')
+      ) FROM auth.users a WHERE a.id = r.user_id LIMIT 1),
+      'مستخدم'
+    )::TEXT AS user_name
+  FROM public.ratings r
+  LEFT JOIN public.users u ON u.auth_id = r.user_id
+  WHERE (p_restaurant_id IS NULL OR r.restaurant_id = p_restaurant_id)
+    AND (p_product_id IS NULL OR r.product_id = p_product_id)
+  ORDER BY r.created_at DESC;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_ratings_with_names(UUID, UUID) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_ratings_with_names(UUID, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_ratings_with_names(UUID, UUID) TO service_role;
+
+-- دالة لجلب جميع التقييمات للمطعم (تقييم المطعم + تقييمات منتجاته)
+CREATE OR REPLACE FUNCTION public.get_ratings_for_restaurant(p_restaurant_id UUID)
+RETURNS TABLE (
+  id UUID,
+  user_id UUID,
+  restaurant_id UUID,
+  product_id UUID,
+  rating INTEGER,
+  comment TEXT,
+  created_at TIMESTAMPTZ,
+  user_name TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.id, r.user_id, r.restaurant_id, r.product_id, r.rating, r.comment, r.created_at,
+    COALESCE(
+      CASE WHEN u.name IS NOT NULL AND TRIM(u.name) != '' AND TRIM(u.name) != 'مستخدم' THEN u.name ELSE NULL END,
+      (SELECT COALESCE(NULLIF(TRIM(a.raw_user_meta_data->>'full_name'), ''), NULLIF(TRIM(a.raw_user_meta_data->>'name'), ''), NULLIF(TRIM(split_part(COALESCE(a.email, ''), '@', 1)), '')) FROM auth.users a WHERE a.id = r.user_id LIMIT 1),
+      'مستخدم'
+    )::TEXT AS user_name
+  FROM public.ratings r
+  LEFT JOIN public.users u ON u.auth_id = r.user_id
+  WHERE r.restaurant_id = p_restaurant_id
+     OR r.product_id IN (SELECT id FROM public.products WHERE restaurant_id = p_restaurant_id)
+  ORDER BY r.created_at DESC;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_ratings_for_restaurant(UUID) TO anon;
+GRANT EXECUTE ON FUNCTION public.get_ratings_for_restaurant(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_ratings_for_restaurant(UUID) TO service_role;
+
+-- تحديث المستخدمين الذين لديهم "مستخدم" لاستخدام جزء البريد الإلكتروني
+UPDATE public.users u
+SET name = COALESCE(
+  (SELECT raw_user_meta_data->>'full_name' FROM auth.users a WHERE a.id = u.auth_id),
+  (SELECT raw_user_meta_data->>'name' FROM auth.users a WHERE a.id = u.auth_id),
+  (SELECT split_part(email, '@', 1) FROM auth.users a WHERE a.id = u.auth_id)
+)
+WHERE (u.name IS NULL OR TRIM(u.name) = '' OR TRIM(u.name) = 'مستخدم')
+  AND EXISTS (SELECT 1 FROM auth.users a WHERE a.id = u.auth_id);
+
+-- 6. جدول العروض (Offres)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.offers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  restaurant_id UUID NOT NULL REFERENCES public.restaurants(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  discount TEXT NOT NULL,
+  code TEXT NOT NULL,
+  valid_until DATE,
+  image_url TEXT,
+  min_order NUMERIC(10,2) DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_offers_restaurant_id ON public.offers(restaurant_id);
+CREATE INDEX IF NOT EXISTS idx_offers_is_active ON public.offers(is_active);
+CREATE INDEX IF NOT EXISTS idx_offers_valid_until ON public.offers(valid_until);
+
+ALTER TABLE public.offers ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "offers_select_all" ON public.offers;
+CREATE POLICY "offers_select_all" ON public.offers FOR SELECT TO public USING (true);
+
+DROP POLICY IF EXISTS "offers_insert_restaurant_owner" ON public.offers;
+CREATE POLICY "offers_insert_restaurant_owner" ON public.offers FOR INSERT TO authenticated
+  WITH CHECK (restaurant_id IN (SELECT id FROM public.restaurants WHERE owner_id = auth.uid()));
+
+DROP POLICY IF EXISTS "offers_update_restaurant_owner" ON public.offers;
+CREATE POLICY "offers_update_restaurant_owner" ON public.offers FOR UPDATE TO authenticated
+  USING (restaurant_id IN (SELECT id FROM public.restaurants WHERE owner_id = auth.uid()));
+
+DROP POLICY IF EXISTS "offers_delete_restaurant_owner" ON public.offers;
+CREATE POLICY "offers_delete_restaurant_owner" ON public.offers FOR DELETE TO authenticated
+  USING (restaurant_id IN (SELECT id FROM public.restaurants WHERE owner_id = auth.uid()));
+
 -- ============================================================
 -- تم! تأكد من إنشاء bucket باسم restaurant-images في Storage
 -- ============================================================

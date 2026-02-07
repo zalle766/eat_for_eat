@@ -6,6 +6,7 @@ import RestaurantHeader from './components/RestaurantHeader';
 import RestaurantSidebar from './components/RestaurantSidebar';
 import DashboardOverview from './components/DashboardOverview';
 import MenuManagement from './components/MenuManagement';
+import OffersManagement from './components/OffersManagement';
 import OrdersManagement from './components/OrdersManagement';
 import RestaurantProfile from './components/RestaurantProfile';
 import Analytics from './components/Analytics';
@@ -87,9 +88,11 @@ export default function RestaurantDashboardPage() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <DashboardOverview restaurant={restaurant} />;
+        return <DashboardOverview restaurant={restaurant} setActiveTab={setActiveTab} />;
       case 'menu':
         return <MenuManagement restaurant={restaurant} />;
+      case 'offers':
+        return <OffersManagement restaurant={restaurant} />;
       case 'orders':
         return <OrdersManagement restaurant={restaurant} />;
       case 'profile':
@@ -99,7 +102,7 @@ export default function RestaurantDashboardPage() {
       case 'settings':
         return <Settings restaurant={restaurant} setRestaurant={setRestaurant} />;
       default:
-        return <DashboardOverview restaurant={restaurant} />;
+        return <DashboardOverview restaurant={restaurant} setActiveTab={setActiveTab} />;
     }
   };
 
@@ -107,7 +110,7 @@ export default function RestaurantDashboardPage() {
     <div className="min-h-screen bg-gray-50 flex">
       <RestaurantSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-visible">
         <RestaurantHeader restaurant={restaurant} />
         
         <main className="flex-1 p-6">

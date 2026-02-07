@@ -139,23 +139,22 @@ export default function ProductPage() {
   const loadReviews = async (productId: string) => {
     setReviewsLoading(true);
     try {
-      const { headers } = await getRatingsHeaders();
-      const params = new URLSearchParams();
-      params.append('product_id', productId);
-
-      const response = await fetch(`${ratingsFunctionUrl}?${params.toString()}`, {
-        headers,
+      const { data: ratings, error } = await supabase.rpc('get_ratings_with_names', {
+        p_restaurant_id: null,
+        p_product_id: productId,
       });
 
-      if (!response.ok) {
-        throw new Error('Échec du chargement des évaluations');
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-      const average = typeof data.average_rating === 'number' ? data.average_rating : 0;
-      setReviews(data.ratings || []);
+      const ratingsList = Array.isArray(ratings) ? ratings : [];
+      const validRatings = ratingsList.filter((r: any) => r.rating != null && r.rating > 0);
+      const average = validRatings.length > 0
+        ? validRatings.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / validRatings.length
+        : 0;
+
+      setReviews(ratingsList);
       setAverageRating(Number(average.toFixed(1)));
-      setTotalReviews(data.total_count || 0);
+      setTotalReviews(ratingsList.length);
     } catch (error) {
       console.error('خطأ في تحميل التقييمات:', error);
       setReviews([]);

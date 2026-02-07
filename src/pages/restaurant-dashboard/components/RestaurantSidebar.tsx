@@ -17,6 +17,11 @@ export default function RestaurantSidebar({ activeTab, setActiveTab }: Restauran
       icon: 'ri-restaurant-line'
     },
     {
+      id: 'offers',
+      label: 'Offres',
+      icon: 'ri-coupon-line'
+    },
+    {
       id: 'orders',
       label: 'Commandes',
       icon: 'ri-shopping-bag-3-line'

@@ -47,7 +47,7 @@ export default function DashboardOverview({ driver }: DashboardOverviewProps) {
         });
       }
     } catch (error) {
-      console.error('خطأ في تحميل الإحصائيات:', error);
+      console.error('Erreur lors du chargement des statistiques:', error);
     }
   };
 
@@ -59,14 +59,14 @@ export default function DashboardOverview({ driver }: DashboardOverviewProps) {
         .eq('id', driver.id);
 
       if (error) {
-        console.error('خطأ في تفعيل حالة السائق:', error);
+        console.error('Erreur lors de l\'activation du statut:', error);
         toast.error('Erreur lors de l\'activation. Vérifiez la connexion ou les permissions de la base de données.');
         return;
       }
 
       window.location.reload();
     } catch (error) {
-      console.error('خطأ غير متوقع في تفعيل الحالة:', error);
+      console.error('Erreur inattendue lors de l\'activation:', error);
         toast.error('Une erreur inattendue s\'est produite lors de l\'activation.');
     }
   };

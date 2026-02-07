@@ -6,11 +6,11 @@ interface DriverSidebarProps {
 
 export default function DriverSidebar({ currentView, setCurrentView }: DriverSidebarProps) {
   const menuItems = [
-    { id: 'overview', label: 'لوحة المعلومات', icon: 'ri-dashboard-line' },
-    { id: 'available-orders', label: 'الطلبات المتاحة', icon: 'ri-shopping-bag-line' },
-    { id: 'my-deliveries', label: 'توصيلاتي', icon: 'ri-truck-line' },
-    { id: 'earnings', label: 'الأرباح', icon: 'ri-money-dollar-circle-line' },
-    { id: 'profile', label: 'الملف الشخصي', icon: 'ri-user-line' }
+    { id: 'overview', label: 'Tableau de bord', icon: 'ri-dashboard-line' },
+    { id: 'available-orders', label: 'Commandes disponibles', icon: 'ri-shopping-bag-line' },
+    { id: 'my-deliveries', label: 'Mes livraisons', icon: 'ri-truck-line' },
+    { id: 'earnings', label: 'Revenus', icon: 'ri-money-dollar-circle-line' },
+    { id: 'profile', label: 'Mon profil', icon: 'ri-user-line' }
   ];
 
   return (
@@ -43,10 +43,10 @@ export default function DriverSidebar({ currentView, setCurrentView }: DriverSid
               <i className="ri-customer-service-2-line text-orange-600 text-xl"></i>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">تحتاج مساعدة؟</h3>
-              <p className="text-sm text-gray-600 mb-3">فريق الدعم متاح لمساعدتك</p>
+              <h3 className="font-semibold text-gray-900 mb-1">Besoin d'aide ?</h3>
+              <p className="text-sm text-gray-600 mb-3">Notre équipe de support est disponible pour vous aider</p>
               <button className="text-sm text-orange-600 hover:text-orange-700 font-medium cursor-pointer whitespace-nowrap">
-                تواصل معنا
+                Contactez-nous
               </button>
             </div>
           </div>

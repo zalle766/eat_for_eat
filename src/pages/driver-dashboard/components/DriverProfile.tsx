@@ -33,10 +33,10 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
 
       setDriver({ ...driver, ...formData });
       setIsEditing(false);
-      toast.success('تم تحديث الملف الشخصي بنجاح');
+      toast.success('Profil mis à jour avec succès');
     } catch (error) {
-      console.error('خطأ في تحديث الملف:', error);
-      toast.error('حدث خطأ أثناء تحديث الملف');
+      console.error('Erreur lors de la mise à jour du profil:', error);
+      toast.error('Une erreur s\'est produite lors de la mise à jour du profil');
     } finally {
       setIsLoading(false);
     }
@@ -52,8 +52,8 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">الملف الشخصي</h2>
-        <p className="text-gray-600">إدارة معلوماتك الشخصية</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Mon profil</h2>
+        <p className="text-gray-600">Gérez vos informations personnelles</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -83,23 +83,23 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
                   driver.status === 'approved' ? 'bg-green-500' : 'bg-yellow-500'
                 }`}></div>
                 <span className="text-sm font-medium">
-                  {driver.status === 'approved' ? 'حساب نشط' : 'قيد المراجعة'}
+                  {driver.status === 'approved' ? 'Compte actif' : 'En cours de vérification'}
                 </span>
               </div>
             </div>
 
             <div className="space-y-4 pt-6 border-t border-gray-200">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">إجمالي التوصيلات</span>
+                <span className="text-sm text-gray-600">Total des livraisons</span>
                 <span className="font-semibold text-gray-900">{driver.total_deliveries}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">التوصيلات المكتملة</span>
+                <span className="text-sm text-gray-600">Livraisons terminées</span>
                 <span className="font-semibold text-gray-900">{driver.completed_deliveries}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">إجمالي الأرباح</span>
-                <span className="font-semibold text-green-600">{driver.total_earnings.toFixed(2)} د.م</span>
+                <span className="text-sm text-gray-600">Revenus totaux</span>
+                <span className="font-semibold text-green-600">{driver.total_earnings.toFixed(2)} DH</span>
               </div>
             </div>
           </div>
@@ -109,14 +109,14 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">المعلومات الشخصية</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Informations personnelles</h3>
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   <i className="ri-edit-line"></i>
-                  تعديل
+                  Modifier
                 </button>
               )}
             </div>
@@ -125,7 +125,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الاسم الكامل
+                    Nom complet
                   </label>
                   <input
                     type="text"
@@ -139,7 +139,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    رقم الهاتف
+                    Numéro de téléphone
                   </label>
                   <input
                     type="tel"
@@ -153,7 +153,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    المدينة
+                    Ville
                   </label>
                   <input
                     type="text"
@@ -167,7 +167,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    نوع المركبة
+                    Type de véhicule
                   </label>
                   <select
                     name="vehicle_type"
@@ -176,15 +176,15 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
                     disabled={!isEditing}
                     className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-50 disabled:text-gray-600"
                   >
-                    <option value="motorcycle">دراجة نارية</option>
-                    <option value="car">سيارة</option>
-                    <option value="bicycle">دراجة هوائية</option>
+                    <option value="motorcycle">Moto</option>
+                    <option value="car">Voiture</option>
+                    <option value="bicycle">Vélo</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    رقم اللوحة
+                    N° de plaque
                   </label>
                   <input
                     type="text"
@@ -198,7 +198,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    رقم البطاقة الوطنية
+                    N° carte d'identité
                   </label>
                   <input
                     type="text"
@@ -210,7 +210,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    رقم رخصة القيادة
+                    N° permis de conduire
                   </label>
                   <input
                     type="text"
@@ -228,7 +228,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
                     disabled={isLoading}
                     className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
                   >
-                    {isLoading ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                    {isLoading ? 'Enregistrement...' : 'Enregistrer les modifications'}
                   </button>
                   <button
                     type="button"
@@ -244,7 +244,7 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
                     }}
                     className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors cursor-pointer whitespace-nowrap"
                   >
-                    إلغاء
+                    Annuler
                   </button>
                 </div>
               )}

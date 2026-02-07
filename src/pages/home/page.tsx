@@ -104,7 +104,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Nearby Products Section */}
+      {/* Nearby Products Section - في الأعلى */}
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Produits près de chez vous</h2>

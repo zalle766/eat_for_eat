@@ -48,7 +48,7 @@ export default function DriverDashboardPage() {
       setDriver(driverData);
       setIsLoading(false);
     } catch (error) {
-      console.error('خطأ في التحقق من السائق:', error);
+      console.error('Erreur lors de la vérification du chauffeur:', error);
       navigate('/driver-login', { replace: true });
     }
   };

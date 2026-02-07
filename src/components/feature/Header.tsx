@@ -195,14 +195,13 @@ export default function Header() {
           <div className="flex items-center min-w-0 flex-shrink">
             <button 
               onClick={() => navigate('/')}
-              className="flex items-center gap-2 cursor-pointer min-w-0"
+              className="flex items-center cursor-pointer min-w-0"
             >
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i className="ri-restaurant-line text-white text-lg"></i>
-              </div>
-              <span className="text-lg sm:text-xl font-bold text-gray-800 truncate" style={{ fontFamily: '"Pacifico", serif' }}>
-                Eat for Eat
-              </span>
+              <img 
+                src="/logo%20(2).png" 
+                alt="Eat for Eat" 
+                className="h-[70px] w-auto object-contain"
+              />
             </button>
           </div>
 
