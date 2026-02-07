@@ -6,11 +6,11 @@ export default function Footer() {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-2xl font-bold mb-4" style={{ fontFamily: '"Pacifico", serif' }}>
-              Eat to Eat
+              Eat for Eat
             </h3>
             <p className="text-gray-300 mb-4 max-w-md">
-              La plateforme de livraison de nourriture leader qui vous connecte aux meilleurs restaurants de votre région. 
-              Nous offrons un service de livraison rapide et fiable pour des repas délicieux.
+              La plateforme de livraison de nourriture leader au Maroc. Commandez vos plats préférés 
+              auprès des meilleurs restaurants de votre ville et recevez-les rapidement à domicile.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-300 hover:text-orange-500 cursor-pointer">
@@ -66,15 +66,15 @@ export default function Footer() {
             <ul className="space-y-2">
               <li className="flex items-center gap-2">
                 <i className="ri-phone-line text-orange-500"></i>
-                <span className="text-gray-300">+33 1 23 45 67 89</span>
+                <span className="text-gray-300">+212 5 22 34 56 78</span>
               </li>
               <li className="flex items-center gap-2">
                 <i className="ri-mail-line text-orange-500"></i>
-                <span className="text-gray-300">info@eat-to-eat.fr</span>
+                <span className="text-gray-300">contact@eat-for-eat.ma</span>
               </li>
               <li className="flex items-center gap-2">
                 <i className="ri-map-pin-line text-orange-500"></i>
-                <span className="text-gray-300">Paris, France</span>
+                <span className="text-gray-300">Marrakech, Maroc</span>
               </li>
             </ul>
           </div>
@@ -83,7 +83,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-300 text-sm">
-            © 2024 Eat to Eat. Tous droits réservés.
+            © 2025 Eat for Eat. Tous droits réservés.
           </p>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             <a href="#" className="text-gray-300 hover:text-orange-500 text-sm cursor-pointer">

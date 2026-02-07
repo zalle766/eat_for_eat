@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface Order {
   id: string;
@@ -36,6 +37,7 @@ interface Order {
 }
 
 export default function OrdersManagement() {
+  const toast = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -288,7 +290,7 @@ export default function OrdersManagement() {
       setAvailableDrivers(driversWithDistance);
     } catch (error) {
       console.error('خطأ في جلب السائقين المتاحين:', error);
-      alert('Erreur lors du chargement des livreurs disponibles');
+      toast.error('Erreur lors du chargement des livreurs disponibles');
     } finally {
       setIsDriversLoading(false);
     }
@@ -324,10 +326,10 @@ export default function OrdersManagement() {
 
       setDriverModalOrder(null);
       loadOrders();
-      alert('Commande assignée au livreur avec succès');
+      toast.success('Commande assignée au livreur avec succès');
     } catch (error) {
       console.error('خطأ في إسناد الموصّل للطلب:', error);
-      alert('Erreur lors de l\'assignation du livreur à la commande');
+      toast.error('Erreur lors de l\'assignation du livreur à la commande');
     }
   };
 

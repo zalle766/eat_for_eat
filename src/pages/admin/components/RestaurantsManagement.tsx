@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 export default function RestaurantsManagement() {
+  const toast = useToast();
   const [restaurants, setRestaurants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,10 +59,10 @@ export default function RestaurantsManagement() {
         suspended: 'Restaurant suspendu'
       };
 
-      alert(statusText[newStatus as keyof typeof statusText] || 'Statut du restaurant mis à jour');
+      toast.success(statusText[newStatus as keyof typeof statusText] || 'Statut du restaurant mis à jour');
     } catch (error) {
       console.error('خطأ في تحديث حالة المطعم:', error);
-      alert('Erreur lors de la mise à jour du statut du restaurant');
+      toast.error('Erreur lors de la mise à jour du statut du restaurant');
     }
   };
 
@@ -80,11 +82,11 @@ export default function RestaurantsManagement() {
       await fetchRestaurants();
 
       // إرسال إشعار للمطعم (يمكن إضافة إشعار بريد إلكتروني هنا)
-      alert('Restaurant approuvé avec succès ! Le propriétaire peut maintenant accéder au tableau de bord.');
+      toast.success('Restaurant approuvé avec succès ! Le propriétaire peut maintenant accéder au tableau de bord.');
 
     } catch (error) {
       console.error('خطأ في قبول المطعم:', error);
-      alert('Erreur lors de l\'approbation du restaurant');
+      toast.error('Erreur lors de l\'approbation du restaurant');
     }
   };
 
@@ -100,10 +102,10 @@ export default function RestaurantsManagement() {
       if (error) throw error;
       
       setRestaurants(prev => prev.filter((restaurant: any) => restaurant.id !== restaurantId));
-      alert('Restaurant supprimé avec succès');
+      toast.success('Restaurant supprimé avec succès');
     } catch (error) {
       console.error('خطأ في حذف المطعم:', error);
-      alert('Erreur lors de la suppression du restaurant');
+      toast.error('Erreur lors de la suppression du restaurant');
     }
   };
 

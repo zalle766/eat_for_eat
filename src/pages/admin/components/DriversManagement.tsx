@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface Driver {
   id: string;
@@ -21,6 +22,7 @@ interface Driver {
 }
 
 export default function DriversManagement() {
+  const toast = useToast();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,10 +63,10 @@ export default function DriversManagement() {
         driver.id === driverId ? { ...driver, status: newStatus } : driver
       ));
 
-      alert('تم تحديث حالة السائق بنجاح');
+      toast.success('تم تحديث حالة السائق بنجاح');
     } catch (error) {
       console.error('خطأ في التحديث:', error);
-      alert('حدث خطأ أثناء تحديث الحالة');
+      toast.error('حدث خطأ أثناء تحديث الحالة');
     }
   };
 
@@ -80,10 +82,10 @@ export default function DriversManagement() {
       if (error) throw error;
 
       setDrivers(drivers.filter(driver => driver.id !== driverId));
-      alert('تم حذف السائق بنجاح');
+      toast.success('تم حذف السائق بنجاح');
     } catch (error) {
       console.error('خطأ في الحذف:', error);
-      alert('حدث خطأ أثناء حذف السائق');
+      toast.error('حدث خطأ أثناء حذف السائق');
     }
   };
 

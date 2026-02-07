@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useToast } from '../../../context/ToastContext';
 
 interface LocationInputProps {
   userLocation: {lat: number, lng: number} | null;
@@ -8,6 +8,7 @@ interface LocationInputProps {
 }
 
 export default function LocationInput({ userLocation, isLoading, onLocationChange }: LocationInputProps) {
+  const toast = useToast();
   const [manualLocation, setManualLocation] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -46,12 +47,12 @@ export default function LocationInput({ userLocation, isLoading, onLocationChang
               break;
           }
           
-          alert(errorMessage);
+          toast.error(errorMessage);
         },
         options
       );
     } else {
-      alert('Votre navigateur ne prend pas en charge la géolocalisation');
+      toast.error('Votre navigateur ne prend pas en charge la géolocalisation');
     }
   };
 
@@ -122,7 +123,7 @@ export default function LocationInput({ userLocation, isLoading, onLocationChang
         setShowManualInput(false);
         setManualLocation('');
       } catch (error) {
-        alert('Localisation saisie non trouvée. Veuillez vérifier l\'exactitude de l\'adresse ou essayer une adresse plus détaillée.');
+        toast.error('Localisation saisie non trouvée. Veuillez vérifier l\'exactitude de l\'adresse ou essayer une adresse plus détaillée.');
       }
     }
   };

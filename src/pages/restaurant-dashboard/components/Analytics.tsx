@@ -156,7 +156,7 @@ export default function Analytics({ restaurant }: AnalyticsProps) {
             {analytics.revenue.data.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">
-                  {new Date(item.date).toLocaleDateString('ar-SA', { weekday: 'short' })}
+                  {new Date(item.date).toLocaleDateString('fr-FR', { weekday: 'short' })}
                 </span>
                 <div className="flex-1 mx-4">
                   <div className="bg-gray-200 rounded-full h-2">
@@ -179,7 +179,7 @@ export default function Analytics({ restaurant }: AnalyticsProps) {
             {analytics.orders.data.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">
-                  {new Date(item.date).toLocaleDateString('ar-SA', { weekday: 'short' })}
+                  {new Date(item.date).toLocaleDateString('fr-FR', { weekday: 'short' })}
                 </span>
                 <div className="flex-1 mx-4">
                   <div className="bg-gray-200 rounded-full h-2">

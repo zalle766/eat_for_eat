@@ -5,6 +5,7 @@ import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/currency';
+import { useToast } from '../../context/ToastContext';
 
 interface OrderItem {
   id: string;
@@ -75,6 +76,7 @@ const statusInfo = {
 };
 
 export default function TrackOrderPage() {
+  const toast = useToast();
   const [orderNumber, setOrderNumber] = useState('');
   const [searchedOrder, setSearchedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -190,12 +192,12 @@ export default function TrackOrderPage() {
 
   const handleSearch = async () => {
     if (!orderNumber.trim()) {
-      alert('Veuillez entrer le numéro de commande');
+      toast.warning('Veuillez entrer le numéro de commande');
       return;
     }
 
     if (!currentUser) {
-      alert('Veuillez vous connecter d\'abord');
+      toast.error('Veuillez vous connecter d\'abord');
       navigate('/auth');
       return;
     }
@@ -220,11 +222,11 @@ export default function TrackOrderPage() {
       setSearchedOrder(order || null);
       
       if (!order) {
-        alert('Commande introuvable. Vérifiez le numéro et assurez-vous qu\'il vous appartient.');
+        toast.error('Commande introuvable. Vérifiez le numéro et assurez-vous qu\'il vous appartient.');
       }
     } catch (error) {
       console.error('خطأ في البحث:', error);
-      alert('Erreur lors de la recherche. Veuillez réessayer.');
+      toast.error('Erreur lors de la recherche. Veuillez réessayer.');
     } finally {
       setIsLoading(false);
     }

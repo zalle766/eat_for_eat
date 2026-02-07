@@ -168,7 +168,7 @@ export default function Earnings({ driver }: EarningsProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">
-                        {new Date(delivery.delivered_at).toLocaleDateString('ar-MA', {
+                        {new Date(delivery.delivered_at).toLocaleDateString('fr-FR', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric'

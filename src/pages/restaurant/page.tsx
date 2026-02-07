@@ -6,6 +6,7 @@ import RatingStars from '../../components/feature/RatingStars';
 import RatingModal from '../../components/feature/RatingModal';
 import ReviewsList from '../../components/feature/ReviewsList';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../context/ToastContext';
 
 interface FavoriteItem {
   id: string;
@@ -13,6 +14,7 @@ interface FavoriteItem {
 }
 
 export default function RestaurantPage() {
+  const toast = useToast();
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
   const [restaurant, setRestaurant] = useState<any>(null);
@@ -261,19 +263,19 @@ export default function RestaurantPage() {
         setShowRatingModal(false);
         setRatingTarget(null);
         // عرض رسالة نجاح
-        alert('Avis enregistré avec succès !');
+        toast.success('Avis enregistré avec succès !');
       } else {
         throw new Error(result.error || 'Échec de l\'envoi de l\'avis');
       }
     } catch (error) {
       if ((error as Error).message === 'AUTH_REQUIRED') {
-        alert('Veuillez vous connecter pour ajouter un avis');
+        toast.warning('Veuillez vous connecter pour ajouter un avis');
         setShowRatingModal(false);
         setRatingTarget(null);
       } else {
         const errorMessage = (error as Error).message || 'Erreur lors de l\'envoi de l\'avis';
         console.error('خطأ في إرسال التقييم:', error);
-        alert(errorMessage);
+        toast.error(errorMessage);
         // لا نغلق المودال عند حدوث خطأ حتى يتمكن المستخدم من المحاولة مرة أخرى
         throw error;
       }

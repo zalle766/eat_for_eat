@@ -5,6 +5,7 @@ import Footer from '../../components/feature/Footer';
 import RatingStars from '../../components/feature/RatingStars';
 import RatingModal from '../../components/feature/RatingModal';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../context/ToastContext';
 
 interface FavoriteItem {
   id: string;
@@ -12,6 +13,7 @@ interface FavoriteItem {
 }
 
 export default function RestaurantsPage() {
+  const toast = useToast();
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
@@ -136,7 +138,7 @@ export default function RestaurantsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        alert('Veuillez vous connecter pour ajouter un avis');
+        toast.warning('Veuillez vous connecter pour ajouter un avis');
         setShowRatingModal(false);
         setRatingTarget(null);
         return;
@@ -159,7 +161,7 @@ export default function RestaurantsPage() {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.error || 'Erreur lors de l\'envoi de l\'avis';
         console.error('خطأ من الخادم:', errorMessage);
-        alert(errorMessage);
+        toast.error(errorMessage);
         throw new Error(errorMessage);
       }
 
@@ -169,14 +171,14 @@ export default function RestaurantsPage() {
         await loadRestaurantRatings();
         setShowRatingModal(false);
         setRatingTarget(null);
-        alert('Avis enregistré avec succès !');
+        toast.success('Avis enregistré avec succès !');
       } else {
         throw new Error(result.error || 'Échec de l\'envoi de l\'avis');
       }
     } catch (error) {
       console.error('خطأ في إرسال التقييم:', error);
       const errorMessage = (error as Error).message || 'Erreur lors de l\'envoi de l\'évaluation';
-      alert(errorMessage);
+      toast.error(errorMessage);
     }
   };
 

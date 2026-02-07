@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 
 export default function AuthPage() {
@@ -19,7 +18,9 @@ export default function AuthPage() {
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+  const redirectTo = (location.state as { from?: string })?.from === 'checkout' ? '/checkout' : '/';
 
   useEffect(() => {
     checkUser();
@@ -35,11 +36,11 @@ export default function AuthPage() {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      await redirectUserBasedOnType(user);
+      await redirectUserBasedOnType(user, redirectTo);
     }
   };
 
-  const redirectUserBasedOnType = async (user: any) => {
+  const redirectUserBasedOnType = async (user: any, defaultRedirect = '/') => {
     try {
       const { data: restaurant, error: restaurantError } = await supabase
         .from('restaurants')
@@ -76,14 +77,14 @@ export default function AuthPage() {
         return;
       }
 
-      navigate('/');
+      navigate(defaultRedirect);
     } catch (error) {
       console.error('Erreur lors de la vérification du type d\'utilisateur:', error);
-      navigate('/');
+      navigate(defaultRedirect);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -110,6 +111,11 @@ export default function AuthPage() {
     if (!isLogin) {
       if (!formData.name.trim()) {
         setMessage('Veuillez entrer votre nom');
+        setMessageType('error');
+        return false;
+      }
+      if (!formData.phone.trim()) {
+        setMessage('Veuillez entrer votre numéro de téléphone');
         setMessageType('error');
         return false;
       }
@@ -157,10 +163,60 @@ export default function AuthPage() {
           setMessage('Connexion réussie !');
           setMessageType('success');
           setTimeout(async () => {
-            await redirectUserBasedOnType(data.user);
+            await redirectUserBasedOnType(data.user, redirectTo);
           }, 1000);
         }
       } else {
+        // التقاط موقع الزبون تلقائياً (كما في عرض المطاعم القريبة)
+        const locationData = await new Promise<{ latitude: number; longitude: number; address: string; city: string } | null>((resolve) => {
+          if (!navigator.geolocation) {
+            setMessage('La géolocalisation n\'est pas supportée par votre navigateur');
+            setMessageType('error');
+            resolve(null);
+            return;
+          }
+
+          setMessage('Localisation en cours... Autorisez l\'accès à votre position.');
+          setMessageType('success');
+
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              const { latitude, longitude } = position.coords;
+              try {
+                const response = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=fr`
+                );
+                const data = await response.json();
+                const address = data.display_name || `${latitude}, ${longitude}`;
+                const city = data.address?.city || data.address?.town || data.address?.village || '';
+                resolve({ latitude, longitude, address, city });
+              } catch (err) {
+                console.error('Erreur reverse geocoding:', err);
+                resolve({ latitude, longitude, address: `${latitude}, ${longitude}`, city: '' });
+              }
+            },
+            (error) => {
+              let errorMessage = 'Impossible d\'obtenir votre position';
+              if (error.code === error.PERMISSION_DENIED) {
+                errorMessage = 'Veuillez autoriser l\'accès à la localisation pour créer un compte.';
+              } else if (error.code === error.POSITION_UNAVAILABLE) {
+                errorMessage = 'Localisation indisponible. Activez le GPS.';
+              } else if (error.code === error.TIMEOUT) {
+                errorMessage = 'Délai de localisation expiré. Réessayez.';
+              }
+              setMessage(errorMessage);
+              setMessageType('error');
+              resolve(null);
+            },
+            { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
+          );
+        });
+
+        if (!locationData) {
+          setIsLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email: formData.email.trim(),
           password: formData.password,
@@ -186,10 +242,24 @@ export default function AuthPage() {
         }
 
         if (data.user) {
+          try {
+            await supabase
+              .from('users')
+              .update({
+                phone: formData.phone.trim() || null,
+                address: locationData.address,
+                city: locationData.city || null,
+                latitude: locationData.latitude,
+                longitude: locationData.longitude
+              })
+              .eq('auth_id', data.user.id);
+          } catch (err) {
+            console.error('Erreur lors de la mise à jour du profil:', err);
+          }
           setMessage('Compte créé avec succès !');
           setMessageType('success');
           if (data.session) {
-            await redirectUserBasedOnType(data.user);
+            await redirectUserBasedOnType(data.user, redirectTo);
           } else {
             navigate('/?registered=1', { replace: true });
           }
@@ -206,9 +276,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-      <Header />
-      
-      <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
+      <main className="pt-12 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -281,7 +349,7 @@ export default function AuthPage() {
               {!isLogin && !isRestaurantMode && (
                 <div>
                   <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Téléphone
+                    Téléphone *
                   </label>
                   <input
                     type="tel"
@@ -290,7 +358,7 @@ export default function AuthPage() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                    placeholder="+33 6 12 34 56 78"
+                    placeholder="06 12 34 56 78"
                   />
                 </div>
               )}
@@ -299,7 +367,7 @@ export default function AuthPage() {
                 <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                   Mot de passe *
                 </label>
-                <div className="relative">
+                <div className="flex border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -307,15 +375,15 @@ export default function AuthPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
                     placeholder={isLogin ? "Mot de passe" : "Mot de passe (6 caractères minimum)"}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
                   >
-                    <i className={showPassword ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
+                    <i className={showPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
                   </button>
                 </div>
               </div>

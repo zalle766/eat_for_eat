@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../context/ToastContext';
 
 interface CartItem {
   id: string;
@@ -24,6 +25,7 @@ interface DeliveryInfo {
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
@@ -40,18 +42,67 @@ export default function CheckoutPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
-    checkUser();
-    loadCartData();
-    loadDeliveryInfo();
-    loadAppliedPromo();
+    const init = async () => {
+      const { user } = await checkUser();
+      loadCartData();
+      if (!user) loadDeliveryInfo();
+      loadAppliedPromo();
+    };
+    init();
   }, []);
 
-  const checkUser = async () => {
+  const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
+
+  const checkUser = async (): Promise<{ user: any }> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       setCurrentUser(user);
+      if (user) {
+        const complete = await loadUserProfile(user.id);
+        setProfileComplete(complete);
+        return { user };
+      }
+      setProfileComplete(false);
+      return { user: null };
     } catch (error) {
-      console.error('خطأ في التحقق من المستخدم:', error);
+      console.error('Erreur lors de la vérification de l\'utilisateur:', error);
+      setProfileComplete(false);
+      return { user: null };
+    }
+  };
+
+  const loadUserProfile = async (authId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('name, phone, address, city')
+        .eq('auth_id', authId)
+        .single();
+
+      if (!error && data) {
+        setDeliveryInfo(prev => ({
+          ...prev,
+          name: data.name || prev.name,
+          phone: data.phone || prev.phone,
+          address: data.address || prev.address,
+          city: data.city || prev.city
+        }));
+        const hasAddress = (data.address || '').trim().length >= 10;
+        const hasCity = !!(data.city || '').trim();
+        return hasAddress && hasCity;
+      } else {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setDeliveryInfo(prev => ({
+            ...prev,
+            name: user.user_metadata?.name || user.email?.split('@')[0] || ''
+          }));
+        }
+        return false;
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du profil:', error);
+      return false;
     }
   };
 
@@ -159,7 +210,12 @@ export default function CheckoutPage() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError);
+      return false;
+    }
+    return true;
   };
 
   const handleInputChange = (field: keyof DeliveryInfo, value: string) => {
@@ -188,23 +244,15 @@ export default function CheckoutPage() {
   const total = subtotal + deliveryFee - discount;
 
   const handleSubmitOrder = async () => {
-    if (!validateForm()) {
-      // التمرير إلى أول خطأ
-      const firstErrorField = Object.keys(errors)[0];
-      const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-      if (errorElement) {
-        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
-    }
+    if (!validateForm()) return;
 
     if (cartItems.length === 0) {
-      alert('Le panier est vide. Impossible de passer la commande.');
+      toast.warning('Le panier est vide. Impossible de passer la commande.');
       return;
     }
 
     if (!currentUser) {
-      alert('Veuillez vous connecter pour passer la commande');
+      toast.error('Veuillez vous connecter pour passer la commande');
       navigate('/auth');
       return;
     }
@@ -212,54 +260,8 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     
     try {
-      // إنشاء الطلب في Supabase
-      const { data: createdOrder, error: createOrderError } = await supabase
-        .from('orders')
-        .insert({
-          customer_id: currentUser.id,
-          restaurant_id: cartItems[0]?.restaurant_id || null,
-          status: 'pending', // في انتظار تأكيد المطعم
-          subtotal,
-          delivery_fee: deliveryFee,
-          total,
-          customer_name: deliveryInfo.name,
-          customer_phone: deliveryInfo.phone,
-          delivery_address: deliveryInfo.address,
-          delivery_city: deliveryInfo.city,
-          delivery_latitude: null,
-          delivery_longitude: null,
-          notes: deliveryInfo.notes || null,
-        })
-        .select('*')
-        .single();
-
-      if (createOrderError || !createdOrder) {
-        console.error('خطأ في إنشاء الطلب في Supabase:', createOrderError);
-        throw new Error('Impossible de créer la commande. Veuillez réessayer.');
-      }
-
-      const orderId = createdOrder.id as string;
-
-      // حفظ عناصر الطلب في جدول order_items
-      const orderItemsPayload = cartItems.map((item) => ({
-        order_id: orderId,
-        product_id: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        total_price: item.price * item.quantity,
-      }));
-
-      const { error: orderItemsError } = await supabase
-        .from('order_items')
-        .insert(orderItemsPayload);
-
-      if (orderItemsError) {
-        console.error('خطأ في حفظ عناصر الطلب في Supabase:', orderItemsError);
-        throw new Error('La commande a été créée mais une erreur s\'est produite lors de l\'enregistrement des détails.');
-      }
-
-      const orderTime = new Date().toLocaleString('ar-MA', {
+      const orderId = crypto.randomUUID?.() || `order-${Date.now()}`;
+      const orderTime = new Date().toLocaleString('fr-FR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -269,14 +271,15 @@ export default function CheckoutPage() {
 
       const orderData = {
         id: orderId,
-        user_id: currentUser.id, // إضافة معرف المستخدم
+        user_id: currentUser.id,
         restaurant: cartItems[0]?.restaurant || 'Plusieurs restaurants',
         items: cartItems.map(item => ({
           id: item.id,
           name: item.name,
           price: item.price,
           quantity: item.quantity,
-          image: item.image
+          image: item.image,
+          restaurant_id: item.restaurant_id
         })),
         total: total,
         status: 'confirmed',
@@ -291,10 +294,44 @@ export default function CheckoutPage() {
         estimatedDelivery: new Date(Date.now() + 45 * 60 * 1000).toISOString()
       };
 
-      // محاكاة إرسال الطلب
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // محاولة حفظ الطلب في Supabase (اختياري - لو فشل نكمل مع localStorage)
+      try {
+        const { data: createdOrder, error: createOrderError } = await supabase
+          .from('orders')
+          .insert({
+            customer_id: currentUser.id,
+            restaurant_id: cartItems[0]?.restaurant_id || null,
+            status: 'pending',
+            subtotal,
+            delivery_fee: deliveryFee,
+            total,
+            customer_name: deliveryInfo.name,
+            customer_phone: deliveryInfo.phone,
+            delivery_address: deliveryInfo.address,
+            delivery_city: deliveryInfo.city,
+            delivery_latitude: null,
+            delivery_longitude: null,
+            notes: deliveryInfo.notes || null,
+          })
+          .select('id')
+          .single();
+
+        if (!createOrderError && createdOrder) {
+          const orderItemsPayload = cartItems.map((item) => ({
+            order_id: createdOrder.id,
+            product_id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            unit_price: item.price,
+            total_price: item.price * item.quantity,
+          }));
+          await supabase.from('order_items').insert(orderItemsPayload);
+        }
+      } catch (supabaseErr) {
+        console.warn('Supabase order save failed (localStorage used):', supabaseErr);
+      }
       
-      // حفظ الطلب في localStorage
+      // حفظ الطلب في localStorage (يعمل دائماً - لوحة المطعم تقرأ منه)
       const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
       existingOrders.push(orderData);
       localStorage.setItem('orders', JSON.stringify(existingOrders));
@@ -324,7 +361,7 @@ export default function CheckoutPage() {
       navigate('/track-order', { state: { orderId } });
     } catch (error) {
       console.error('خطأ في إرسال الطلب:', error);
-      alert('Erreur lors de l\'envoi de la commande. Veuillez réessayer.');
+      toast.error('Erreur lors de l\'envoi de la commande. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -339,6 +376,72 @@ export default function CheckoutPage() {
           <div className="text-center py-16">
             <i className="ri-loader-4-line text-6xl text-orange-500 animate-spin mb-4"></i>
             <p className="text-gray-600">Chargement du panier...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // المستخدم غير مسجل - توجيه للتسجيل
+  if (!isLoading && !currentUser) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 pt-24">
+          <div className="text-center py-16">
+            <i className="ri-user-add-line text-8xl text-orange-500 mb-6"></i>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Connexion requise</h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              Vous devez créer un compte ou vous connecter pour finaliser votre commande.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => navigate('/auth', { state: { from: 'checkout' } })}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Créer un compte / Se connecter
+              </button>
+              <button 
+                onClick={() => navigate('/cart')}
+                className="text-orange-500 hover:text-orange-600 px-8 py-3 rounded-lg font-medium border-2 border-orange-500 cursor-pointer"
+              >
+                Retour au panier
+              </button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // المستخدم مسجل لكن الملف الشخصي غير مكتمل (العنوان أو المدينة)
+  if (!isLoading && currentUser && profileComplete === false) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 pt-24">
+          <div className="text-center py-16">
+            <i className="ri-map-pin-line text-8xl text-orange-500 mb-6"></i>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Profil incomplet</h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              Veuillez compléter votre adresse et votre ville dans votre profil pour continuer la commande.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => navigate('/profile')}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Compléter mon profil
+              </button>
+              <button 
+                onClick={() => navigate('/cart')}
+                className="text-orange-500 hover:text-orange-600 px-8 py-3 rounded-lg font-medium border-2 border-orange-500 cursor-pointer"
+              >
+                Retour au panier
+              </button>
+            </div>
           </div>
         </main>
         <Footer />
@@ -396,112 +499,57 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* معلومات التوصيل */}
           <div className="lg:col-span-2 space-y-6">
-            {/* معلومات العميل */}
+            {/* معلومات العميل - من الملف الشخصي للزبون المسجل */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <i className="ri-user-line text-orange-500 w-5 h-5 flex items-center justify-center"></i>
                 Informations de livraison
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom complet *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={deliveryInfo.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm ${
-                      errors.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Entrez votre nom complet"
-                    required
-                  />
-                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Téléphone *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={deliveryInfo.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="0612345678"
-                    required
-                  />
-                  {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-                </div>
-                
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Adresse détaillée *
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={deliveryInfo.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm ${
-                      errors.address ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Rue, quartier, numéro, points de repère"
-                    required
-                  />
-                  {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ville *
-                  </label>
-                  <select
-                    name="city"
-                    value={deliveryInfo.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                    className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm pr-8 ${
-                      errors.city ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    required
+              <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide">Nom</p>
+                    <p className="font-medium text-gray-800">{deliveryInfo.name}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/profile')}
+                    className="text-orange-500 hover:text-orange-600 text-sm font-medium cursor-pointer flex items-center gap-1"
                   >
-                    <option value="">Choisir la ville</option>
-                    <option value="Casablanca">Casablanca</option>
-                    <option value="Rabat">Rabat</option>
-                    <option value="Fès">Fès</option>
-                    <option value="Marrakech">Marrakech</option>
-                    <option value="Tanger">Tanger</option>
-                    <option value="Agadir">Agadir</option>
-                    <option value="Meknès">Meknès</option>
-                    <option value="Oujda">Oujda</option>
-                    <option value="Kénitra">Kénitra</option>
-                    <option value="Tétouan">Tétouan</option>
-                  </select>
-                  {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                    <i className="ri-pencil-line"></i>
+                    Modifier
+                  </button>
                 </div>
-                
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Notes supplémentaires
-                  </label>
-                  <textarea
-                    value={deliveryInfo.notes}
-                    onChange={(e) => handleInputChange('notes', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
-                    rows={3}
-                    maxLength={500}
-                    placeholder="Notes pour la livraison (optionnel)..."
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {deliveryInfo.notes.length}/500 caractères
-                  </p>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Téléphone</p>
+                  <p className="font-medium text-gray-800">{deliveryInfo.phone}</p>
                 </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Adresse</p>
+                  <p className="font-medium text-gray-800">{deliveryInfo.address}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Ville</p>
+                  <p className="font-medium text-gray-800">{deliveryInfo.city}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes supplémentaires
+                </label>
+                <textarea
+                  value={deliveryInfo.notes}
+                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                  rows={3}
+                  maxLength={500}
+                  placeholder="Notes pour la livraison (optionnel)..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {deliveryInfo.notes.length}/500 caractères
+                </p>
               </div>
             </div>
 

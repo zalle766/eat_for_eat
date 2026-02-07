@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../context/ToastContext';
 
 interface CartItem {
   id: string;
@@ -16,6 +17,7 @@ interface CartItem {
 
 export default function CartPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [promoCode, setPromoCode] = useState('');
@@ -138,7 +140,7 @@ export default function CartPage() {
     } else if (promoCode === 'FREE100') {
       setAppliedPromo({ code: 'FREE100', discount: 40, type: 'fixed' });
     } else if (promoCode.trim()) {
-      alert('Code promo invalide');
+      toast.error('Code promo invalide');
     }
   };
 
@@ -149,7 +151,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      alert('Le panier est vide');
+      toast.warning('Le panier est vide');
       return;
     }
 

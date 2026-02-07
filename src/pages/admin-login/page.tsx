@@ -9,6 +9,7 @@ const AdminLoginPage: React.FC = () => {
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -114,18 +115,24 @@ const AdminLoginPage: React.FC = () => {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Mot de Passe
             </label>
-            <div className="relative">
+            <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
                 placeholder="Entrez votre mot de passe"
                 required
               />
-              <i className="ri-lock-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+              >
+                <i className={showPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
+              </button>
             </div>
           </div>
 

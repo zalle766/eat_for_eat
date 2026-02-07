@@ -9,7 +9,9 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
-    phone: ''
+    phone: '',
+    address: '',
+    city: ''
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -87,8 +89,10 @@ export default function ProfilePage() {
       } else if (data) {
         setProfile(data);
         setFormData({
-          name: data.name,
-          phone: data.phone
+          name: data.name || '',
+          phone: data.phone || '',
+          address: data.address || '',
+          city: data.city || ''
         });
       }
     } catch (error) {
@@ -133,7 +137,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -165,7 +169,9 @@ export default function ProfilePage() {
         .from('users')
         .update({
           name: formData.name.trim(),
-          phone: formData.phone.trim()
+          phone: formData.phone.trim(),
+          address: formData.address.trim() || null,
+          city: formData.city.trim() || null
         })
         .eq('auth_id', user.id);
 
@@ -290,8 +296,50 @@ export default function ProfilePage() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  placeholder="+966 50 123 4567"
+                  placeholder="+33 6 12 34 56 78"
                 />
+              </div>
+
+              {/* Address */}
+              <div>
+                <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Adresse de livraison
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                  placeholder="Rue, quartier, numéro..."
+                />
+              </div>
+
+              {/* City */}
+              <div>
+                <label htmlFor="city" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Ville
+                </label>
+                <select
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                >
+                  <option value="">Choisir la ville</option>
+                  <option value="Casablanca">Casablanca</option>
+                  <option value="Rabat">Rabat</option>
+                  <option value="Fès">Fès</option>
+                  <option value="Marrakech">Marrakech</option>
+                  <option value="Tanger">Tanger</option>
+                  <option value="Agadir">Agadir</option>
+                  <option value="Meknès">Meknès</option>
+                  <option value="Oujda">Oujda</option>
+                  <option value="Kénitra">Kénitra</option>
+                  <option value="Tétouan">Tétouan</option>
+                </select>
               </div>
 
               {/* Submit Button */}

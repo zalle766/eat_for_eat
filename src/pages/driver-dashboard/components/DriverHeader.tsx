@@ -1,11 +1,13 @@
-
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface DriverHeaderProps {
   driver: any;
 }
 
 export default function DriverHeader({ driver }: DriverHeaderProps) {
+  const toast = useToast();
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     window.REACT_APP_NAVIGATE('/driver-login');
@@ -21,7 +23,7 @@ export default function DriverHeader({ driver }: DriverHeaderProps) {
 
       if (error) {
         console.error('خطأ في تحديث الحالة:', error);
-        alert('Erreur lors de la mise à jour. Vérifiez la connexion ou les permissions de la base de données.');
+        toast.error('Erreur lors de la mise à jour. Vérifiez la connexion ou les permissions de la base de données.');
         return;
       }
 
@@ -30,7 +32,7 @@ export default function DriverHeader({ driver }: DriverHeaderProps) {
       window.location.reload();
     } catch (error) {
       console.error('خطأ في تحديث الحالة:', error);
-        alert('Une erreur inattendue s\'est produite lors de la mise à jour.');
+        toast.error('Une erreur inattendue s\'est produite lors de la mise à jour.');
     }
   };
 

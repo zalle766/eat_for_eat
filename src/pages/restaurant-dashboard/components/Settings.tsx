@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useToast } from '../../../context/ToastContext';
 
 interface SettingsProps {
   restaurant: any;
@@ -7,6 +7,7 @@ interface SettingsProps {
 }
 
 export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState({
     general: {
@@ -59,7 +60,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
   ];
 
   const handleSaveSettings = () => {
-    alert('Paramètres enregistrés avec succès !');
+    toast.success('Paramètres enregistrés avec succès !');
   };
 
   const toggleRestaurantStatus = () => {

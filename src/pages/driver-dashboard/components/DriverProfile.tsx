@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface DriverProfileProps {
   driver: any;
@@ -8,6 +8,7 @@ interface DriverProfileProps {
 }
 
 export default function DriverProfile({ driver, setDriver }: DriverProfileProps) {
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: driver.name,
@@ -32,10 +33,10 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
 
       setDriver({ ...driver, ...formData });
       setIsEditing(false);
-      alert('تم تحديث الملف الشخصي بنجاح');
+      toast.success('تم تحديث الملف الشخصي بنجاح');
     } catch (error) {
       console.error('خطأ في تحديث الملف:', error);
-      alert('حدث خطأ أثناء تحديث الملف');
+      toast.error('حدث خطأ أثناء تحديث الملف');
     } finally {
       setIsLoading(false);
     }

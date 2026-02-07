@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useToast } from '../../../context/ToastContext';
 
 interface RestaurantProfileProps {
   restaurant: any;
@@ -7,6 +7,7 @@ interface RestaurantProfileProps {
 }
 
 export default function RestaurantProfile({ restaurant, setRestaurant }: RestaurantProfileProps) {
+  const toast = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: restaurant.name || '',
@@ -50,10 +51,10 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
       const updatedRestaurant = { ...restaurant, ...formData };
       setRestaurant(updatedRestaurant);
       setIsEditing(false);
-      alert('Modifications enregistrées avec succès !');
+      toast.success('Modifications enregistrées avec succès !');
     } catch (error) {
       console.error('خطأ في حفظ البيانات:', error);
-      alert('Erreur lors de l\'enregistrement des données');
+      toast.error('Erreur lors de l\'enregistrement des données');
     }
   };
 
@@ -340,7 +341,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Date d'inscription</label>
             <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">
-              {new Date(restaurant.created_at).toLocaleDateString('ar-SA')}
+              {new Date(restaurant.created_at).toLocaleDateString('fr-FR')}
             </p>
           </div>
 

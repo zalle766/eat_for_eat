@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface Product {
   id: string;
@@ -33,6 +33,7 @@ const categories = [
 ];
 
 const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSave, product }) => {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -67,7 +68,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price) {
-      alert('Veuillez remplir les champs obligatoires');
+      toast.warning('Veuillez remplir les champs obligatoires');
       return;
     }
 
@@ -206,6 +207,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
 };
 
 export default function MenuManagement() {
+  const toast = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -279,11 +281,11 @@ export default function MenuManagement() {
         setEditingProduct(null);
       } else {
         console.error('خطأ في حفظ المنتج:', result.error);
-        alert('Erreur lors de l\'enregistrement du produit');
+        toast.error('Erreur lors de l\'enregistrement du produit');
       }
     } catch (error) {
       console.error('خطأ في حفظ المنتج:', error);
-      alert('حدث خطأ أثناء حفظ المنتج');
+      toast.error('حدث خطأ أثناء حفظ المنتج');
     }
   };
 
@@ -310,11 +312,11 @@ export default function MenuManagement() {
         setProducts(products.filter(p => p.id !== productId));
       } else {
         console.error('خطأ في حذف المنتج:', result.error);
-        alert('Erreur lors de la suppression du produit');
+        toast.error('Erreur lors de la suppression du produit');
       }
     } catch (error) {
       console.error('خطأ في حذف المنتج:', error);
-      alert('حدث خطأ أثناء حذف المنتج');
+      toast.error('حدث خطأ أثناء حذف المنتج');
     }
   };
 
@@ -344,11 +346,11 @@ export default function MenuManagement() {
         ));
       } else {
         console.error('خطأ في تحديث حالة المنتج:', result.error);
-        alert('Erreur lors de la mise à jour du statut du produit');
+        toast.error('Erreur lors de la mise à jour du statut du produit');
       }
     } catch (error) {
       console.error('خطأ في تحديث حالة المنتج:', error);
-      alert('حدث خطأ أثناء تحديث حالة المنتج');
+      toast.error('حدث خطأ أثناء تحديث حالة المنتج');
     }
   };
 

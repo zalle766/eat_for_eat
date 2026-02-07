@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 
 export default function DriverSignupPage() {
@@ -16,6 +15,7 @@ export default function DriverSignupPage() {
     city: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -77,8 +77,7 @@ export default function DriverSignupPage() {
   if (success) {
     return (
       <>
-        <Header />
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 pt-24 pb-16">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 pt-12 pb-16">
           <div className="max-w-2xl mx-auto px-4">
             <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -110,8 +109,7 @@ export default function DriverSignupPage() {
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 pt-24 pb-16">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 pt-12 pb-16">
         <div className="max-w-4xl mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
@@ -216,16 +214,25 @@ export default function DriverSignupPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Mot de passe <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      minLength={6}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="••••••••"
-                    />
+                    <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                        minLength={6}
+                        className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <i className={showPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
+                      </button>
+                    </div>
                   </div>
 
                   <div>

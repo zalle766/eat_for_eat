@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface AvailableOrdersProps {
   driver: any;
 }
 
 export default function AvailableOrders({ driver }: AvailableOrdersProps) {
+  const toast = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -80,11 +81,11 @@ export default function AvailableOrders({ driver }: AvailableOrdersProps) {
         })
         .eq('id', driver.id);
 
-      alert('تم قبول الطلب بنجاح! يمكنك الآن البدء في التوصيل');
+      toast.success('تم قبول الطلب بنجاح! يمكنك الآن البدء في التوصيل');
       loadAvailableOrders();
     } catch (error) {
       console.error('خطأ في قبول الطلب:', error);
-      alert('حدث خطأ أثناء قبول الطلب');
+      toast.error('حدث خطأ أثناء قبول الطلب');
     }
   };
 

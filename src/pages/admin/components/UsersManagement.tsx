@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface User {
   id: string;
@@ -13,6 +13,7 @@ interface User {
 }
 
 export default function UsersManagement() {
+  const toast = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +56,7 @@ export default function UsersManagement() {
       ));
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
-      alert('Erreur lors de la mise à jour du statut');
+      toast.error('Erreur lors de la mise à jour du statut');
     }
   };
 
@@ -73,7 +74,7 @@ export default function UsersManagement() {
       setUsers(users.filter(user => user.id !== userId));
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
-      alert('Erreur lors de la suppression de l\'utilisateur');
+      toast.error('Erreur lors de la suppression de l\'utilisateur');
     }
   };
 

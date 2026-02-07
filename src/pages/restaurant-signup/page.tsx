@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useToast } from '../../context/ToastContext';
 
 export default function RestaurantSignupPage() {
   const [formData, setFormData] = useState({
@@ -26,6 +27,7 @@ export default function RestaurantSignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
 
   // معالجة تغيير المدخلات
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -72,13 +74,13 @@ export default function RestaurantSignupPage() {
               break;
           }
           
-          alert(errorMessage);
+          toast.error(errorMessage);
           setIsGettingLocation(false);
         },
         options
       );
     } else {
-      alert('Votre navigateur ne supporte pas la géolocalisation');
+      toast.error('Votre navigateur ne supporte pas la géolocalisation');
       setIsGettingLocation(false);
     }
   };
@@ -89,13 +91,13 @@ export default function RestaurantSignupPage() {
     if (file) {
       // التحقق من نوع الملف
       if (!file.type.startsWith('image/')) {
-        alert('Veuillez choisir une image valide');
+        toast.warning('Veuillez choisir une image valide');
         return;
       }
       
       // التحقق من حجم الملف (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        alert('La taille de l\'image ne doit pas dépasser 5 Mo');
+        toast.warning('La taille de l\'image ne doit pas dépasser 5 Mo');
         return;
       }
       
@@ -118,47 +120,47 @@ export default function RestaurantSignupPage() {
 
   const validateForm = () => {
     if (!formData.restaurantName.trim()) {
-      alert('Veuillez entrer le nom du restaurant');
+      toast.warning('Veuillez entrer le nom du restaurant');
       return false;
     }
     if (!formData.ownerName.trim()) {
-      alert('Veuillez entrer le nom du propriétaire');
+      toast.warning('Veuillez entrer le nom du propriétaire');
       return false;
     }
     if (!formData.email.trim()) {
-      alert('Veuillez entrer l\'adresse e-mail');
+      toast.warning('Veuillez entrer l\'adresse e-mail');
       return false;
     }
     if (!formData.email.includes('@')) {
-      alert('Veuillez entrer une adresse e-mail valide');
+      toast.warning('Veuillez entrer une adresse e-mail valide');
       return false;
     }
     if (!formData.phone.trim()) {
-      alert('Veuillez entrer le numéro de téléphone');
+      toast.warning('Veuillez entrer le numéro de téléphone');
       return false;
     }
     if (!formData.password.trim()) {
-      alert('Veuillez entrer le mot de passe');
+      toast.warning('Veuillez entrer le mot de passe');
       return false;
     }
     if (formData.password.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères');
+      toast.warning('Le mot de passe doit contenir au moins 6 caractères');
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      alert('Le mot de passe et la confirmation ne correspondent pas');
+      toast.warning('Le mot de passe et la confirmation ne correspondent pas');
       return false;
     }
     if (!formData.address.trim()) {
-      alert('Veuillez entrer l\'adresse');
+      toast.warning('Veuillez entrer l\'adresse');
       return false;
     }
     if (!formData.city.trim()) {
-      alert('Veuillez entrer la ville');
+      toast.warning('Veuillez entrer la ville');
       return false;
     }
     if (!formData.cuisineType) {
-      alert('Veuillez choisir le type de cuisine');
+      toast.warning('Veuillez choisir le type de cuisine');
       return false;
     }
     return true;
@@ -189,15 +191,15 @@ export default function RestaurantSignupPage() {
 
       if (authError) {
         if (authError.message.includes('already registered')) {
-          alert('Cette adresse e-mail est déjà utilisée');
+          toast.error('Cette adresse e-mail est déjà utilisée');
         } else {
-          alert('Erreur lors de la création du compte : ' + authError.message);
+          toast.error('Erreur lors de la création du compte : ' + authError.message);
         }
         return;
       }
 
       if (!authData.user) {
-        alert('Échec de la création du compte');
+        toast.error('Échec de la création du compte');
         return;
       }
 
@@ -248,11 +250,11 @@ export default function RestaurantSignupPage() {
 
       if (restaurantError) {
         console.error('خطأ في حفظ بيانات المطعم:', restaurantError);
-        alert('Compte créé mais erreur lors de l\'enregistrement du restaurant. Veuillez réessayer.');
+        toast.error('Compte créé mais erreur lors de l\'enregistrement du restaurant. Veuillez réessayer.');
         return;
       }
 
-      alert('Votre demande a été envoyée avec succès ! Elle sera examinée par l\'équipe et vous recevrez une confirmation par e-mail.');
+      toast.success('Votre demande a été envoyée avec succès ! Elle sera examinée par l\'équipe et vous recevrez une confirmation par e-mail.');
       
       // إعادة تعيين النموذج
       setFormData({
@@ -281,7 +283,7 @@ export default function RestaurantSignupPage() {
 
     } catch (error) {
       console.error('خطأ غير متوقع:', error);
-      alert('Une erreur inattendue s\'est produite. Veuillez réessayer.');
+      toast.error('Une erreur inattendue s\'est produite. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -467,7 +469,7 @@ export default function RestaurantSignupPage() {
                 <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                   Mot de passe *
                 </label>
-                <div className="relative">
+                <div className="flex border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -475,15 +477,15 @@ export default function RestaurantSignupPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
                     placeholder="Mot de passe (6 caractères minimum)"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
                   >
-                    <i className={showPassword ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
+                    <i className={showPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
                   </button>
                 </div>
               </div>
@@ -492,7 +494,7 @@ export default function RestaurantSignupPage() {
                 <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
                   Confirmer le mot de passe *
                 </label>
-                <div className="relative">
+                <div className="flex border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     id="confirmPassword"
@@ -500,15 +502,15 @@ export default function RestaurantSignupPage() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                    className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
                     placeholder="Répétez le mot de passe"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
                   >
-                    <i className={showConfirmPassword ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
+                    <i className={showConfirmPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
                   </button>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface Product {
   id: string;
@@ -23,6 +24,7 @@ interface Restaurant {
 }
 
 export default function ProductsManagement() {
+  const toast = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,7 +80,7 @@ export default function ProductsManagement() {
       setProducts(products.filter(p => p.id !== productId));
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
-      alert('Erreur lors de la suppression du produit');
+      toast.error('Erreur lors de la suppression du produit');
     }
   };
 
@@ -96,7 +98,7 @@ export default function ProductsManagement() {
       ));
     } catch (error) {
       console.error('Erreur lors de la mise à jour:', error);
-      alert('Erreur lors de la mise à jour du statut');
+      toast.error('Erreur lors de la mise à jour du statut');
     }
   };
 

@@ -206,7 +206,7 @@ export default function DashboardOverview({ restaurant }: DashboardOverviewProps
                   </div>
                   <p className="text-sm text-gray-600 mb-1">{order.items}</p>
                   <p className="text-xs text-gray-500">
-                    {new Date(order.created_at).toLocaleString('ar-SA')}
+                    {new Date(order.created_at).toLocaleString('fr-FR')}
                   </p>
                 </div>
                 <div className="text-left">

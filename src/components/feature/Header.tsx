@@ -188,7 +188,7 @@ export default function Header() {
                 <i className="ri-restaurant-line text-white text-lg"></i>
               </div>
               <span className="text-xl font-bold text-gray-800" style={{ fontFamily: '"Pacifico", serif' }}>
-                logo
+                Eat for Eat
               </span>
             </button>
           </div>

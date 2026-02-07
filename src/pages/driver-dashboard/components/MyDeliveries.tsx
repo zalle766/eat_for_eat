@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface MyDeliveriesProps {
   driver: any;
 }
 
 export default function MyDeliveries({ driver }: MyDeliveriesProps) {
+  const toast = useToast();
   const [deliveries, setDeliveries] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('active');
@@ -88,10 +89,10 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
       }
 
       loadDeliveries();
-      alert('État de livraison mis à jour avec succès');
+      toast.success('État de livraison mis à jour avec succès');
     } catch (error) {
       console.error('خطأ في تحديث الحالة:', error);
-      alert('Erreur lors de la mise à jour de l\'état');
+      toast.error('Erreur lors de la mise à jour de l\'état');
     }
   };
 
@@ -256,10 +257,10 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                         if (error) throw error;
 
                         loadDeliveries();
-                        alert('Commande refusée. Le restaurant sera notifié.');
+                        toast.info('Commande refusée. Le restaurant sera notifié.');
                       } catch (error) {
                         console.error('خطأ في رفض الطلب:', error);
-                        alert('Erreur lors du refus de la commande');
+                        toast.error('Erreur lors du refus de la commande');
                       }
                     }}
                     className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"

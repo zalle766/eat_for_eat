@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
+import { useToast } from '../../../context/ToastContext';
 
 interface DashboardOverviewProps {
   driver: any;
 }
 
 export default function DashboardOverview({ driver }: DashboardOverviewProps) {
+  const toast = useToast();
   const [stats, setStats] = useState({
     todayDeliveries: 0,
     todayEarnings: 0,
@@ -59,14 +60,14 @@ export default function DashboardOverview({ driver }: DashboardOverviewProps) {
 
       if (error) {
         console.error('خطأ في تفعيل حالة السائق:', error);
-        alert('Erreur lors de l\'activation. Vérifiez la connexion ou les permissions de la base de données.');
+        toast.error('Erreur lors de l\'activation. Vérifiez la connexion ou les permissions de la base de données.');
         return;
       }
 
       window.location.reload();
     } catch (error) {
       console.error('خطأ غير متوقع في تفعيل الحالة:', error);
-        alert('Une erreur inattendue s\'est produite lors de l\'activation.');
+        toast.error('Une erreur inattendue s\'est produite lors de l\'activation.');
     }
   };
 
