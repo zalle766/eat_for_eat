@@ -69,6 +69,124 @@ serve(async (req) => {
     if (method === 'POST') {
       const body = await req.json()
       
+      // رفع صورة المنتج (يستخدم service role لتجاوز RLS)
+      if (action === 'upload-image') {
+        const { image_base64, file_name } = body
+        if (!image_base64 || !file_name) {
+          return new Response(JSON.stringify({ error: 'Données image manquantes' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        const { data: restaurant } = await supabaseClient
+          .from('restaurants')
+          .select('id')
+          .eq('owner_id', user.id)
+          .eq('status', 'approved')
+          .single()
+
+        if (!restaurant) {
+          return new Response(JSON.stringify({ error: 'المطعم غير موجود' }), {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        const base64Data = image_base64.replace(/^data:image\/\w+;base64,/, '')
+        const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
+        const ext = file_name.split('.').pop() || 'jpg'
+        const fileName = `products/${restaurant.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const mimeTypes: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }
+        const contentType = mimeTypes[ext.toLowerCase()] || 'image/jpeg'
+
+        const { error: uploadError } = await supabaseClient.storage
+          .from('restaurant-images')
+          .upload(fileName, buffer, { 
+            contentType,
+            upsert: true 
+          })
+
+        if (uploadError) {
+          return new Response(JSON.stringify({ error: uploadError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        const { data: { publicUrl } } = supabaseClient.storage
+          .from('restaurant-images')
+          .getPublicUrl(fileName)
+
+        return new Response(JSON.stringify({ image_url: publicUrl }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+
+      // رفع صورة المطعم وتحديث السجل
+      if (action === 'upload-restaurant-image') {
+        const { image_base64, file_name } = body
+        if (!image_base64 || !file_name) {
+          return new Response(JSON.stringify({ error: 'Données image manquantes' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        const { data: restaurant } = await supabaseClient
+          .from('restaurants')
+          .select('id')
+          .eq('owner_id', user.id)
+          .eq('status', 'approved')
+          .single()
+
+        if (!restaurant) {
+          return new Response(JSON.stringify({ error: 'المطعم غير موجود' }), {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        const base64Data = image_base64.replace(/^data:image\/\w+;base64,/, '')
+        const buffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
+        const ext = file_name.split('.').pop() || 'jpg'
+        const fileName = `restaurants/${restaurant.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+        const mimeTypes: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' }
+        const contentType = mimeTypes[ext.toLowerCase()] || 'image/jpeg'
+
+        const { error: uploadError } = await supabaseClient.storage
+          .from('restaurant-images')
+          .upload(fileName, buffer, { contentType, upsert: true })
+
+        if (uploadError) {
+          return new Response(JSON.stringify({ error: uploadError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        const { data: { publicUrl } } = supabaseClient.storage
+          .from('restaurant-images')
+          .getPublicUrl(fileName)
+
+        const { error: updateError } = await supabaseClient
+          .from('restaurants')
+          .update({ image_url: publicUrl })
+          .eq('id', restaurant.id)
+          .eq('owner_id', user.id)
+
+        if (updateError) {
+          return new Response(JSON.stringify({ error: updateError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
+        return new Response(JSON.stringify({ image_url: publicUrl, success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
+      
       // التحقق من وجود المطعم
       const { data: restaurant } = await supabaseClient
         .from('restaurants')

@@ -391,7 +391,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
         
         <div className="flex items-center gap-6">
           <img
-            src={restaurant.image || 'https://readdy.ai/api/search-image?query=modern%20restaurant%20interior%20with%20warm%20lighting%20and%20elegant%20dining%20tables%2C%20professional%20food%20photography%20style%2C%20clean%20and%20inviting%20atmosphere&width=200&height=150&seq=restaurant-profile&orientation=landscape'}
+            src={restaurant.image || restaurant.image_url || 'https://readdy.ai/api/search-image?query=modern%20restaurant%20interior%20with%20warm%20lighting%20and%20elegant%20dining%20tables%2C%20professional%20food%20photography%20style%2C%20clean%20and%20inviting%20atmosphere&width=200&height=150&seq=restaurant-profile&orientation=landscape'}
             alt={restaurant.name}
             className="w-32 h-24 object-cover object-top rounded-lg border border-gray-200"
           />

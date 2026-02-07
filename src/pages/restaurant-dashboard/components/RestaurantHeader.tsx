@@ -40,7 +40,7 @@ export default function RestaurantHeader({ restaurant }: RestaurantHeaderProps) 
           {/* معلومات المطعم */}
           <div className="flex items-center gap-3">
             <img 
-              src={restaurant.image || 'https://readdy.ai/api/search-image?query=modern%20restaurant%20interior%20with%20warm%20lighting%20and%20elegant%20dining%20tables%2C%20professional%20food%20photography%20style%2C%20clean%20and%20inviting%20atmosphere&width=40&height=40&seq=restaurant-avatar&orientation=squarish'}
+              src={restaurant.image || restaurant.image_url || 'https://readdy.ai/api/search-image?query=modern%20restaurant%20interior%20with%20warm%20lighting%20and%20elegant%20dining%20tables%2C%20professional%20food%20photography%20style%2C%20clean%20and%20inviting%20atmosphere&width=40&height=40&seq=restaurant-avatar&orientation=squarish'}
               alt={restaurant.name}
               className="w-10 h-10 rounded-full object-cover"
             />

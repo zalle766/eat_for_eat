@@ -42,6 +42,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
     image_url: '',
     is_available: true
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (product) {
@@ -53,6 +57,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
         image_url: product.image_url,
         is_available: product.is_available
       });
+      setImagePreview(product.image_url || null);
+      setImageFile(null);
     } else {
       setFormData({
         name: '',
@@ -62,24 +68,114 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
         image_url: '',
         is_available: true
       });
+      setImagePreview(null);
+      setImageFile(null);
     }
-  }, [product]);
+  }, [product, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.warning('Veuillez choisir une image valide (JPG, PNG, etc.)');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.warning('La taille de l\'image ne doit pas dépasser 5 Mo');
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+      setFormData(prev => ({ ...prev, image_url: '' }));
+    }
+    e.target.value = '';
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(product?.image_url ? product.image_url : null);
+    setFormData(prev => ({ ...prev, image_url: product?.image_url || '' }));
+  };
+
+  const uploadImageViaEdgeFunction = async (file: File): Promise<string> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Non connecté');
+
+    const reader = new FileReader();
+    const base64 = await new Promise<string>((resolve, reject) => {
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        const base64Data = result.includes(',') ? result.split(',')[1] : result;
+        resolve(base64Data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const response = await fetch(
+      `${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/manage-products?action=upload-image`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image_base64: base64, file_name: file.name }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Erreur upload');
+    return data.image_url;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price) {
       toast.warning('Veuillez remplir les champs obligatoires');
       return;
     }
 
-    onSave({
-      name: formData.name,
-      price: parseFloat(formData.price),
-      category: formData.category,
-      description: formData.description,
-      image_url: formData.image_url,
-      is_available: formData.is_available
-    });
+    setIsUploading(true);
+    let finalImageUrl = formData.image_url;
+
+    try {
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop() || 'jpg';
+        const fileName = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        try {
+          const { error: uploadError } = await supabase.storage
+            .from('restaurant-images')
+            .upload(fileName, imageFile, { upsert: true });
+
+          if (!uploadError) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('restaurant-images')
+              .getPublicUrl(fileName);
+            finalImageUrl = publicUrl;
+          } else {
+            finalImageUrl = await uploadImageViaEdgeFunction(imageFile);
+          }
+        } catch {
+          finalImageUrl = await uploadImageViaEdgeFunction(imageFile);
+        }
+      }
+
+      onSave({
+        name: formData.name,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        description: formData.description,
+        image_url: finalImageUrl,
+        is_available: formData.is_available
+      });
+    } catch (err) {
+      toast.error((err as Error).message || 'Erreur lors de l\'enregistrement');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -158,18 +254,57 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              URL de l'image (optionnel)
+              Image du produit
             </label>
-            <input
-              type="url"
-              value={formData.image_url}
-              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-              placeholder="https://example.com/image.jpg"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Si vide, une image sera générée automatiquement
-            </p>
+            <div className="space-y-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              {imagePreview ? (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Aperçu"
+                    className="w-full h-40 object-cover rounded-lg border border-gray-200"
+                  />
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="bg-white/90 hover:bg-white text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium shadow"
+                    >
+                      <i className="ri-refresh-line ml-1"></i>
+                      Changer
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="bg-red-500/90 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium"
+                    >
+                      <i className="ri-delete-bin-line ml-1"></i>
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 hover:bg-orange-50/50 transition-colors flex flex-col items-center justify-center gap-2"
+                >
+                  <i className="ri-image-add-line text-4xl text-gray-400"></i>
+                  <span className="text-gray-600 font-medium">Cliquez pour télécharger une image</span>
+                  <span className="text-xs text-gray-500">JPG, PNG (max 5 Mo)</span>
+                </button>
+              )}
+              <p className="text-xs text-gray-500">
+                Si aucune image, une image sera générée automatiquement
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center">
@@ -189,15 +324,24 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 whitespace-nowrap"
+              disabled={isUploading}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 whitespace-nowrap disabled:opacity-50"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 whitespace-nowrap"
+              disabled={isUploading}
+              className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 whitespace-nowrap disabled:opacity-70 flex items-center justify-center gap-2"
             >
-              {product ? 'Mettre à jour' : 'Ajouter'}
+              {isUploading ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin text-lg"></i>
+                  {imageFile ? 'Téléchargement...' : (product ? 'Mise à jour...' : 'Ajout...')}
+                </>
+              ) : (
+                product ? 'Mettre à jour' : 'Ajouter'
+              )}
             </button>
           </div>
         </form>
@@ -518,9 +662,9 @@ export default function MenuManagement() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <img
-                          src={product.image_url}
+                          src={product.image_url || `https://readdy.ai/api/search-image?query=delicious%20${encodeURIComponent(product.name)}%20food&width=96&height=96&seq=product-${product.id}`}
                           alt={product.name}
-                          className="w-12 h-12 rounded-lg object-cover object-top"
+                          className="w-12 h-12 rounded-lg object-cover object-top bg-gray-100"
                         />
                         <div className="mr-4">
                           <div className="text-sm font-medium text-gray-900">

@@ -333,15 +333,15 @@ export default function RestaurantPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <Header />
       
-      <main className="pt-20">
-        <div>
+      <main className="pt-20 pb-8 overflow-x-hidden">
+        <div className="w-full max-w-full">
           {/* Restaurant Header */}
-          <div className="relative h-64 bg-gradient-to-r from-orange-500 to-red-500">
+          <div className="relative h-48 sm:h-64 bg-gradient-to-r from-orange-500 to-red-500">
             <img
-              src={restaurant.image || `https://readdy.ai/api/search-image?query=modern%20restaurant%20interior%20with%20warm%20lighting%20and%20elegant%20dining%20atmosphere%2C%20professional%20food%20photography%20style%2C%20clean%20and%20inviting%20ambiance&width=800&height=400&seq=restaurant-${restaurant.id}&orientation=landscape`}
+              src={restaurant.image || restaurant.image_url || `https://readdy.ai/api/search-image?query=modern%20restaurant%20interior%20with%20warm%20lighting%20and%20elegant%20dining%20atmosphere%2C%20professional%20food%20photography%20style%2C%20clean%20and%20inviting%20ambiance&width=800&height=400&seq=restaurant-${restaurant.id}&orientation=landscape`}
               alt={restaurant.name}
               className="w-full h-full object-cover object-top"
             />
@@ -359,13 +359,13 @@ export default function RestaurantPage() {
 
           {/* Restaurant Info */}
           <div className="bg-white shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 py-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{restaurant.name}</h1>
-                  <p className="text-gray-600 mb-4">{restaurant.description || 'Un restaurant qui propose des plats délicieux'}</p>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full box-border">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 break-words">{restaurant.name}</h1>
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base">{restaurant.description || 'Un restaurant qui propose des plats délicieux'}</p>
                   
-                  <div className="flex items-center gap-6 mb-4">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-6 mb-4">
                     <div className="flex items-center gap-2">
                       <RatingStars 
                         rating={averageRating} 
@@ -374,17 +374,17 @@ export default function RestaurantPage() {
                         count={totalReviews}
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <i className="ri-time-line w-4 h-4"></i>
-                      <span>{restaurant.delivery_time || '30-45 min'}</span>
+                    <div className="flex items-center gap-2 text-gray-600 shrink-0">
+                      <i className="ri-time-line w-4 h-4 flex-shrink-0"></i>
+                      <span className="whitespace-nowrap">{restaurant.delivery_time || '30-45 min'}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <i className="ri-truck-line w-4 h-4"></i>
-                      <span>{restaurant.delivery_fee || 15} DH</span>
+                    <div className="flex items-center gap-2 text-gray-600 shrink-0">
+                      <i className="ri-truck-line w-4 h-4 flex-shrink-0"></i>
+                      <span className="whitespace-nowrap">{restaurant.delivery_fee || 15} DH</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                       restaurant.status === 'closed' 
                         ? 'bg-red-100 text-red-800' 
@@ -397,9 +397,9 @@ export default function RestaurantPage() {
 
                 <button
                   onClick={() => handleRateClick('restaurant', restaurant.id, restaurant.name)}
-                  className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap cursor-pointer"
+                  className="w-full sm:w-auto shrink-0 px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <i className="ri-star-line w-4 h-4 ml-2"></i>
+                  <i className="ri-star-line w-4 h-4"></i>
                   Évaluer le restaurant
                 </button>
               </div>
@@ -407,8 +407,8 @@ export default function RestaurantPage() {
           </div>
 
           {/* Products */}
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Produits</h2>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Produits</h2>
             
             {products.length === 0 ? (
               <div className="text-center py-12">
@@ -488,7 +488,7 @@ export default function RestaurantPage() {
           </div>
 
           {/* Reviews Section */}
-          <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Avis et évaluations</h2>
               

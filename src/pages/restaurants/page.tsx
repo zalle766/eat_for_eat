@@ -241,7 +241,7 @@ export default function RestaurantsPage() {
                   <div key={restaurant.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                     <div className="relative">
                       <img
-                        src={restaurant.image || `https://readdy.ai/api/search-image?query=modern%20restaurant%20exterior%20with%20inviting%20entrance%2C%20professional%20photography%2C%20warm%20lighting%20and%20welcoming%20atmosphere%2C%20clean%20and%20elegant%20design&width=400&height=300&seq=restaurant-${restaurant.id}&orientation=landscape`}
+                        src={restaurant.image || restaurant.image_url || `https://readdy.ai/api/search-image?query=modern%20restaurant%20exterior%20with%20inviting%20entrance%2C%20professional%20photography%2C%20warm%20lighting%20and%20welcoming%20atmosphere%2C%20clean%20and%20elegant%20design&width=400&height=300&seq=restaurant-${restaurant.id}&orientation=landscape`}
                         alt={restaurant.name}
                         className="w-full h-48 object-cover object-top"
                       />

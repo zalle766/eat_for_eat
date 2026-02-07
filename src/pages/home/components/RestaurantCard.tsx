@@ -13,7 +13,7 @@ export default function RestaurantCard({ restaurant }: RestaurantCardProps) {
     >
       <div className="relative">
         <img
-          src={restaurant.image_url}
+          src={restaurant.image_url || restaurant.image}
           alt={restaurant.name}
           className="w-full h-48 object-cover object-top"
         />

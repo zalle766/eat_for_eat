@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../context/ToastContext';
 
 interface SettingsProps {
@@ -9,6 +10,14 @@ interface SettingsProps {
 export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState('general');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    setImagePreview(restaurant?.image || restaurant?.image_url || null);
+  }, [restaurant?.image, restaurant?.image_url]);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [settings, setSettings] = useState({
     general: {
       isOpen: true,
@@ -44,6 +53,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
   const tabs = [
     { id: 'general', label: 'Paramètres généraux', icon: 'ri-settings-3-line' },
+    { id: 'image', label: 'Image du restaurant', icon: 'ri-image-line' },
     { id: 'hours', label: 'Horaires', icon: 'ri-time-line' },
     { id: 'notifications', label: 'Notifications', icon: 'ri-notification-3-line' },
     { id: 'payment', label: 'Paiement', icon: 'ri-money-dollar-circle-line' }
@@ -61,6 +71,99 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
   const handleSaveSettings = () => {
     toast.success('Paramètres enregistrés avec succès !');
+  };
+
+  const uploadRestaurantImage = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop() || 'jpg';
+    const fileName = `restaurants/${restaurant.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+    // محاولة الرفع المباشر إلى Storage
+    const { error: uploadError } = await supabase.storage
+      .from('restaurant-images')
+      .upload(fileName, file, { upsert: true });
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+        .from('restaurant-images')
+        .getPublicUrl(fileName);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error: updateError } = await supabase
+        .from('restaurants')
+        .update({ image_url: publicUrl })
+        .eq('id', restaurant.id)
+        .eq('owner_id', user?.id);
+
+      if (!updateError) return publicUrl;
+    }
+
+    // بديل: استخدام Edge Function
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Non connecté');
+
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        resolve(result.includes(',') ? result.split(',')[1] : result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const response = await fetch(
+      `${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/manage-products?action=upload-restaurant-image`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image_base64: base64, file_name: file.name }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Erreur lors du téléchargement de l\'image');
+    return data.image_url;
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast.warning('Veuillez choisir une image valide (JPG, PNG, etc.)');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.warning('La taille de l\'image ne doit pas dépasser 5 Mo');
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+  };
+
+  const handleSaveRestaurantImage = async () => {
+    if (!imageFile) {
+      toast.warning('Veuillez sélectionner une image');
+      return;
+    }
+    setIsUploadingImage(true);
+    try {
+      const imageUrl = await uploadRestaurantImage(imageFile);
+      setRestaurant({ ...restaurant, image: imageUrl, image_url: imageUrl });
+      setImageFile(null);
+      setImagePreview(imageUrl);
+      toast.success('Image du restaurant enregistrée avec succès !');
+    } catch (err) {
+      toast.error((err as Error).message || 'Erreur lors du téléchargement de l\'image');
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const toggleRestaurantStatus = () => {
@@ -171,6 +274,73 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
             />
           </div>
         </div>
+      </div>
+    </div>
+  );
+
+  const renderImageSettings = () => (
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Image du restaurant</h3>
+      <p className="text-sm text-gray-600 mb-6">
+        Cette image apparaîtra sur le site dans la liste des restaurants et sur la page de votre restaurant.
+      </p>
+      <div className="space-y-4">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
+        />
+        {imagePreview ? (
+          <div className="relative">
+            <img
+              src={imagePreview}
+              alt={restaurant.name}
+              className="w-full max-w-md h-56 object-cover rounded-lg border border-gray-200"
+            />
+            <div className="absolute top-3 right-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-white/90 hover:bg-white text-gray-700 px-3 py-2 rounded-lg text-sm font-medium shadow"
+              >
+                <i className="ri-refresh-line ml-1"></i>
+                Changer
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full max-w-md py-12 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-400 hover:bg-orange-50/50 transition-colors flex flex-col items-center justify-center gap-2"
+          >
+            <i className="ri-image-add-line text-5xl text-gray-400"></i>
+            <span className="text-gray-600 font-medium">Cliquez pour télécharger une image</span>
+            <span className="text-xs text-gray-500">JPG, PNG (max 5 Mo)</span>
+          </button>
+        )}
+        <p className="text-xs text-gray-500">JPG, PNG ou WebP. Taille recommandée : 800×400 px</p>
+        {imageFile && (
+          <button
+            onClick={handleSaveRestaurantImage}
+            disabled={isUploadingImage}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-70"
+          >
+            {isUploadingImage ? (
+              <>
+                <i className="ri-loader-4-line animate-spin text-lg"></i>
+                Téléchargement...
+              </>
+            ) : (
+              <>
+                <i className="ri-upload-line"></i>
+                Enregistrer l'image
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -434,6 +604,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
     switch (activeTab) {
       case 'general':
         return renderGeneralSettings();
+      case 'image':
+        return renderImageSettings();
       case 'hours':
         return renderHoursSettings();
       case 'notifications':

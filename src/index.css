@@ -8,6 +8,11 @@
   direction: rtl;
 }
 
+/* Prevent horizontal scroll on mobile */
+html, body {
+  overflow-x: hidden;
+}
+
 /* Custom Font */
 body {
   font-family: 'Cairo', sans-serif;

@@ -55,7 +55,7 @@ export default function NearbyRestaurants({ userLocation }: NearbyRestaurantsPro
       type: 'restaurant',
       name: restaurant.name,
       description: restaurant.cuisine_type,
-      image: restaurant.image_url,
+      image: restaurant.image_url || restaurant.image,
       rating: restaurant.rating,
       deliveryTime: restaurant.delivery_time,
       deliveryFee: restaurant.delivery_fee,
