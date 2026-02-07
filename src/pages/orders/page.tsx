@@ -41,7 +41,7 @@ export default function OrdersPage() {
       setUser(user);
       loadOrders(user.id);
     } catch (error) {
-      console.error('خطأ في التحقق من المستخدم:', error);
+      console.error('Erreur lors de la vérification de l\'utilisateur:', error);
       navigate('/auth');
     }
   };
@@ -56,7 +56,7 @@ export default function OrdersPage() {
         setOrders(userOrders.reverse());
       }
     } catch (error) {
-      console.error('خطأ في تحميل الطلبات:', error);
+      console.error('Erreur lors du chargement des commandes:', error);
     } finally {
       setIsLoading(false);
     }
@@ -64,12 +64,12 @@ export default function OrdersPage() {
 
   const getStatusInfo = (status: string) => {
     const statusMap: any = {
-      pending: { text: 'قيد الانتظار', color: 'bg-yellow-100 text-yellow-700', icon: 'ri-time-line' },
-      confirmed: { text: 'تم التأكيد', color: 'bg-blue-100 text-blue-700', icon: 'ri-check-line' },
-      preparing: { text: 'قيد التحضير', color: 'bg-purple-100 text-purple-700', icon: 'ri-restaurant-line' },
-      on_the_way: { text: 'في الطريق', color: 'bg-orange-100 text-orange-700', icon: 'ri-truck-line' },
-      delivered: { text: 'تم التوصيل', color: 'bg-green-100 text-green-700', icon: 'ri-check-double-line' },
-      cancelled: { text: 'ملغي', color: 'bg-red-100 text-red-700', icon: 'ri-close-line' }
+      pending: { text: 'En attente', color: 'bg-yellow-100 text-yellow-700', icon: 'ri-time-line' },
+      confirmed: { text: 'Confirmé', color: 'bg-blue-100 text-blue-700', icon: 'ri-check-line' },
+      preparing: { text: 'En préparation', color: 'bg-purple-100 text-purple-700', icon: 'ri-restaurant-line' },
+      on_the_way: { text: 'En route', color: 'bg-orange-100 text-orange-700', icon: 'ri-truck-line' },
+      delivered: { text: 'Livré', color: 'bg-green-100 text-green-700', icon: 'ri-check-double-line' },
+      cancelled: { text: 'Annulé', color: 'bg-red-100 text-red-700', icon: 'ri-close-line' }
     };
     return statusMap[status] || statusMap.pending;
   };
@@ -88,7 +88,7 @@ export default function OrdersPage() {
         <main className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center py-16">
             <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">جاري تحميل الطلبات...</p>
+            <p className="text-gray-600">Chargement des commandes...</p>
           </div>
         </main>
         <Footer />
@@ -102,8 +102,8 @@ export default function OrdersPage() {
       
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">طلباتي</h1>
-          <p className="text-gray-600">تتبع وإدارة طلباتك</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Mes commandes</h1>
+          <p className="text-gray-600">Suivez et gérez vos commandes</p>
         </div>
 
         {/* التبويبات */}
@@ -116,7 +116,7 @@ export default function OrdersPage() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            الكل ({orders.length})
+            Toutes ({orders.length})
           </button>
           <button
             onClick={() => setActiveTab('active')}
@@ -126,7 +126,7 @@ export default function OrdersPage() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            النشطة ({orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length})
+            Actives ({orders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length})
           </button>
           <button
             onClick={() => setActiveTab('completed')}
@@ -136,7 +136,7 @@ export default function OrdersPage() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            المكتملة ({orders.filter(o => ['delivered', 'cancelled'].includes(o.status)).length})
+            Terminées ({orders.filter(o => ['delivered', 'cancelled'].includes(o.status)).length})
           </button>
         </div>
 
@@ -146,17 +146,17 @@ export default function OrdersPage() {
             <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6">
               <i className="ri-shopping-bag-line text-8xl text-gray-300"></i>
             </div>
-            <h2 className="text-2xl font-bold text-gray-600 mb-4">لا توجد طلبات</h2>
+            <h2 className="text-2xl font-bold text-gray-600 mb-4">Aucune commande</h2>
             <p className="text-gray-500 mb-8">
-              {activeTab === 'all' && 'لم تقم بأي طلبات بعد'}
-              {activeTab === 'active' && 'لا توجد طلبات نشطة حالياً'}
-              {activeTab === 'completed' && 'لا توجد طلبات مكتملة'}
+              {activeTab === 'all' && "Vous n'avez pas encore passé de commande"}
+              {activeTab === 'active' && 'Aucune commande active pour le moment'}
+              {activeTab === 'completed' && 'Aucune commande terminée'}
             </p>
             <button
               onClick={() => navigate('/restaurants')}
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
             >
-              تصفح المطاعم
+              Parcourir les restaurants
             </button>
           </div>
         ) : (
@@ -170,7 +170,7 @@ export default function OrdersPage() {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-bold text-gray-800">طلب #{order.id.split('-')[1]}</h3>
+                          <h3 className="text-lg font-bold text-gray-800">Commande #{order.id.split('-')[1]}</h3>
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusInfo.color} flex items-center gap-1`}>
                             <i className={`${statusInfo.icon}`}></i>
                             {statusInfo.text}
@@ -178,7 +178,7 @@ export default function OrdersPage() {
                         </div>
                         <p className="text-sm text-gray-600">
                           <i className="ri-calendar-line ml-1"></i>
-                          {new Date(order.createdAt).toLocaleDateString('ar-SA', {
+                          {new Date(order.createdAt).toLocaleDateString('fr-FR', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
@@ -189,7 +189,7 @@ export default function OrdersPage() {
                       </div>
                       <div className="text-left">
                         <div className="text-2xl font-bold text-orange-600">{order.total} DH</div>
-                        <p className="text-xs text-gray-500">{order.items.length} منتج</p>
+                        <p className="text-xs text-gray-500">{order.items.length} produit{order.items.length > 1 ? 's' : ''}</p>
                       </div>
                     </div>
 
@@ -207,7 +207,7 @@ export default function OrdersPage() {
                               <h4 className="font-medium text-gray-800">{item.name}</h4>
                               <p className="text-sm text-gray-600">{item.restaurant}</p>
                               <div className="flex justify-between items-center mt-1">
-                                <span className="text-sm text-gray-500">الكمية: {item.quantity}</span>
+                                <span className="text-sm text-gray-500">Qté : {item.quantity}</span>
                                 <span className="font-medium text-orange-600">{item.price * item.quantity} DH</span>
                               </div>
                             </div>
@@ -215,7 +215,7 @@ export default function OrdersPage() {
                         ))}
                         {order.items.length > 2 && (
                           <p className="text-sm text-gray-500 text-center">
-                            + {order.items.length - 2} منتج آخر
+                            + {order.items.length - 2} autre(s) produit(s)
                           </p>
                         )}
                       </div>
@@ -227,14 +227,14 @@ export default function OrdersPage() {
                         <div>
                           <p className="text-gray-600 mb-1">
                             <i className="ri-map-pin-line ml-1 text-orange-500"></i>
-                            <strong>العنوان:</strong>
+                            <strong>Adresse :</strong>
                           </p>
                           <p className="text-gray-700 mr-6">{order.deliveryInfo.address}, {order.deliveryInfo.city}</p>
                         </div>
                         <div>
                           <p className="text-gray-600 mb-1">
                             <i className="ri-phone-line ml-1 text-orange-500"></i>
-                            <strong>الهاتف:</strong>
+                            <strong>Téléphone :</strong>
                           </p>
                           <p className="text-gray-700 mr-6">{order.deliveryInfo.phone}</p>
                         </div>
@@ -248,13 +248,13 @@ export default function OrdersPage() {
                         className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
                       >
                         <i className="ri-map-pin-line"></i>
-                        تتبع الطلب
+                        Suivre la commande
                       </button>
                       <button
                         className="px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
                       >
                         <i className="ri-file-list-line"></i>
-                        التفاصيل
+                        Détails
                       </button>
                     </div>
                   </div>

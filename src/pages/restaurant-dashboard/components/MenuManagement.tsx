@@ -22,14 +22,14 @@ interface AddProductModalProps {
 }
 
 const categories = [
-  'المقبلات',
-  'الأطباق الرئيسية',
-  'الحلويات',
-  'المشروبات',
-  'السلطات',
-  'البرجر',
-  'البيتزا',
-  'المعجنات'
+  'Entrées',
+  'Plats principaux',
+  'Desserts',
+  'Boissons',
+  'Salades',
+  'Burgers',
+  'Pizza',
+  'Pâtisseries'
 ];
 
 const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSave, product }) => {
@@ -67,7 +67,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price) {
-      alert('يرجى ملء الحقول المطلوبة');
+      alert('Veuillez remplir les champs obligatoires');
       return;
     }
 
@@ -88,7 +88,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">
-            {product ? 'تعديل المنتج' : 'إضافة منتج جديد'}
+            {product ? 'Modifier le produit' : 'Ajouter un produit'}
           </h3>
           <button
             onClick={onClose}
@@ -101,7 +101,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              اسم المنتج *
+              Nom du produit *
             </label>
             <input
               type="text"
@@ -114,7 +114,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              السعر (ريال) *
+              Prix (DH) *
             </label>
             <input
               type="number"
@@ -128,7 +128,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              الفئة
+              Catégorie
             </label>
             <select
               value={formData.category}
@@ -145,7 +145,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              الوصف
+              Description
             </label>
             <textarea
               value={formData.description}
@@ -157,7 +157,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              رابط الصورة (اختياري)
+              URL de l'image (optionnel)
             </label>
             <input
               type="url"
@@ -167,7 +167,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
               placeholder="https://example.com/image.jpg"
             />
             <p className="text-xs text-gray-500 mt-1">
-              إذا تركت هذا الحقل فارغاً، سيتم إنشاء صورة تلقائياً
+              Si vide, une image sera générée automatiquement
             </p>
           </div>
 
@@ -180,7 +180,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
               className="mr-2"
             />
             <label htmlFor="is_available" className="text-sm text-gray-700">
-              متاح للطلب
+              Disponible à la commande
             </label>
           </div>
 
@@ -190,13 +190,13 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 whitespace-nowrap"
             >
-              إلغاء
+              Annuler
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 whitespace-nowrap"
             >
-              {product ? 'تحديث' : 'إضافة'}
+              {product ? 'Mettre à jour' : 'Ajouter'}
             </button>
           </div>
         </form>
@@ -211,7 +211,7 @@ export default function MenuManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('الكل');
+  const [selectedCategory, setSelectedCategory] = useState('Tous');
 
   // جلب المنتجات من Edge Function
   const fetchProducts = async () => {
@@ -279,7 +279,7 @@ export default function MenuManagement() {
         setEditingProduct(null);
       } else {
         console.error('خطأ في حفظ المنتج:', result.error);
-        alert('حدث خطأ أثناء حفظ المنتج');
+        alert('Erreur lors de l\'enregistrement du produit');
       }
     } catch (error) {
       console.error('خطأ في حفظ المنتج:', error);
@@ -289,7 +289,7 @@ export default function MenuManagement() {
 
   // حذف منتج
   const handleDeleteProduct = async (productId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -310,7 +310,7 @@ export default function MenuManagement() {
         setProducts(products.filter(p => p.id !== productId));
       } else {
         console.error('خطأ في حذف المنتج:', result.error);
-        alert('حدث خطأ أثناء حذف المنتج');
+        alert('Erreur lors de la suppression du produit');
       }
     } catch (error) {
       console.error('خطأ في حذف المنتج:', error);
@@ -344,7 +344,7 @@ export default function MenuManagement() {
         ));
       } else {
         console.error('خطأ في تحديث حالة المنتج:', result.error);
-        alert('حدث خطأ أثناء تحديث حالة المنتج');
+        alert('Erreur lors de la mise à jour du statut du produit');
       }
     } catch (error) {
       console.error('خطأ في تحديث حالة المنتج:', error);
@@ -356,7 +356,7 @@ export default function MenuManagement() {
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'الكل' || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'Tous' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -373,15 +373,15 @@ export default function MenuManagement() {
       {/* رأس الصفحة */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">إدارة القائمة</h1>
-          <p className="text-gray-600">إدارة منتجات مطعمك</p>
+          <h1 className="text-2xl font-bold text-gray-900">Gestion du menu</h1>
+          <p className="text-gray-600">Gérez les produits de votre restaurant</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
           className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 flex items-center gap-2 whitespace-nowrap"
         >
           <i className="ri-add-line"></i>
-          إضافة منتج جديد
+          Ajouter un produit
         </button>
       </div>
 
@@ -390,7 +390,7 @@ export default function MenuManagement() {
         <div className="bg-white p-4 rounded-lg border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">إجمالي المنتجات</p>
+              <p className="text-sm text-gray-600">Total des produits</p>
               <p className="text-2xl font-bold text-gray-900">{products.length}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -402,7 +402,7 @@ export default function MenuManagement() {
         <div className="bg-white p-4 rounded-lg border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">المنتجات المتاحة</p>
+              <p className="text-sm text-gray-600">Produits disponibles</p>
               <p className="text-2xl font-bold text-green-600">
                 {products.filter(p => p.is_available).length}
               </p>
@@ -416,7 +416,7 @@ export default function MenuManagement() {
         <div className="bg-white p-4 rounded-lg border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">غير متاحة</p>
+              <p className="text-sm text-gray-600">Indisponibles</p>
               <p className="text-2xl font-bold text-red-600">
                 {products.filter(p => !p.is_available).length}
               </p>
@@ -430,7 +430,7 @@ export default function MenuManagement() {
         <div className="bg-white p-4 rounded-lg border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">الفئات</p>
+              <p className="text-sm text-gray-600">Catégories</p>
               <p className="text-2xl font-bold text-purple-600">
                 {new Set(products.map(p => p.category)).size}
               </p>
@@ -450,7 +450,7 @@ export default function MenuManagement() {
               <i className="ri-search-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
               <input
                 type="text"
-                placeholder="البحث في المنتجات..."
+                placeholder="Rechercher des produits..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -463,7 +463,7 @@ export default function MenuManagement() {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 pr-8"
             >
-              <option value="الكل">جميع الفئات</option>
+              <option value="Tous">Toutes les catégories</option>
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -479,13 +479,13 @@ export default function MenuManagement() {
         {filteredProducts.length === 0 ? (
           <div className="text-center py-12">
             <i className="ri-restaurant-line text-4xl text-gray-400 mb-4"></i>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد منتجات</h3>
-            <p className="text-gray-600 mb-4">ابدأ بإضافة منتجات لقائمة مطعمك</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun produit</h3>
+            <p className="text-gray-600 mb-4">Commencez par ajouter des produits à votre menu</p>
             <button
               onClick={() => setShowAddModal(true)}
               className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 whitespace-nowrap"
             >
-              إضافة منتج جديد
+              Ajouter un produit
             </button>
           </div>
         ) : (
@@ -494,19 +494,19 @@ export default function MenuManagement() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    المنتج
+                    Produit
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الفئة
+                    Catégorie
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    السعر
+                    Prix
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الحالة
+                    Statut
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    الإجراءات
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -537,7 +537,7 @@ export default function MenuManagement() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.price} ريال
+                      {product.price} DH
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -545,7 +545,7 @@ export default function MenuManagement() {
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {product.is_available ? 'متاح' : 'غير متاح'}
+                        {product.is_available ? 'Disponible' : 'Indisponible'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -556,7 +556,7 @@ export default function MenuManagement() {
                             setShowAddModal(true);
                           }}
                           className="text-blue-600 hover:text-blue-900"
-                          title="تعديل"
+                          title="Modifier"
                         >
                           <i className="ri-edit-line"></i>
                         </button>
@@ -565,14 +565,14 @@ export default function MenuManagement() {
                           className={`${
                             product.is_available ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'
                           }`}
-                          title={product.is_available ? 'إخفاء' : 'إظهار'}
+                          title={product.is_available ? 'Masquer' : 'Afficher'}
                         >
                           <i className={product.is_available ? 'ri-eye-off-line' : 'ri-eye-line'}></i>
                         </button>
                         <button
                           onClick={() => handleDeleteProduct(product.id)}
                           className="text-red-600 hover:text-red-900"
-                          title="حذف"
+                          title="Supprimer"
                         >
                           <i className="ri-delete-bin-line"></i>
                         </button>

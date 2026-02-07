@@ -100,16 +100,24 @@ SELECT * FROM pg_trigger WHERE tgname = 'on_auth_user_created';
 ## الخطوات السريعة
 
 ```bash
-# 1. تطبيق Trigger
-# في SQL Editor، نفّذ: ensure_user_exists_trigger.sql
+# 1. تطبيق Migrations في Supabase SQL Editor (بالترتيب):
+#    - ensure_user_exists_trigger.sql
+#    - ensure_users_table_and_functions.sql  (إصلاح دالة ensure_user_exists)
+#    - add_ratings_columns.sql
 
-# 2. إضافة Secret
+# 2. إضافة Secret (اختياري - Supabase يضيف SUPABASE_SERVICE_ROLE_KEY تلقائياً):
 # في Dashboard: Edge Functions → Secrets → Add Secret
-# Name: SERVICE_ROLE_KEY
+# Name: SERVICE_ROLE_KEY (إذا لم يعمل التقييم)
 # Value: service_role key من Settings → API
 
-# 3. اختبار
-# سجّل الدخول وأضف تقييم
+# 3. للمستخدمين الحاليين: نسخ المستخدمين من auth.users إلى users (إذا لزم الأمر)
+# نفّذ في SQL Editor بعد تطبيق ensure_users_table_and_functions.sql:
+INSERT INTO users (auth_id, name, email, created_at)
+SELECT id, COALESCE(raw_user_meta_data->>'name', split_part(email, '@', 1), 'مستخدم'), email, NOW()
+FROM auth.users
+WHERE id NOT IN (SELECT auth_id FROM users);
+
+# 4. اختبار: سجّل الدخول وأضف تقييم
 ```
 
 

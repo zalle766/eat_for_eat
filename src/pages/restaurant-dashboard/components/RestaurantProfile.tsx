@@ -25,15 +25,15 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
   });
 
   const cuisineTypes = [
-    'عربي',
-    'إيطالي',
-    'آسيوي',
-    'مكسيكي',
-    'هندي',
-    'لبناني',
-    'وجبات سريعة',
-    'نباتي',
-    'أخرى'
+    'Arabe',
+    'Italien',
+    'Asiatique',
+    'Mexicain',
+    'Indien',
+    'Libanais',
+    'Fast-food',
+    'Végétarien',
+    'Autre'
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -50,10 +50,10 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
       const updatedRestaurant = { ...restaurant, ...formData };
       setRestaurant(updatedRestaurant);
       setIsEditing(false);
-      alert('تم حفظ التغييرات بنجاح!');
+      alert('Modifications enregistrées avec succès !');
     } catch (error) {
       console.error('خطأ في حفظ البيانات:', error);
-      alert('حدث خطأ أثناء حفظ البيانات');
+      alert('Erreur lors de l\'enregistrement des données');
     }
   };
 
@@ -81,8 +81,8 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
       {/* رأس القسم */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">ملف المطعم</h2>
-          <p className="text-gray-600">إدارة معلومات وإعدادات مطعمك</p>
+          <h2 className="text-2xl font-bold text-gray-900">Profil du restaurant</h2>
+          <p className="text-gray-600">Gérez les informations et paramètres de votre restaurant</p>
         </div>
         
         {!isEditing ? (
@@ -91,7 +91,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
             className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
           >
             <i className="ri-edit-line"></i>
-            تعديل المعلومات
+            Modifier
           </button>
         ) : (
           <div className="flex gap-3">
@@ -99,14 +99,14 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
               onClick={handleCancel}
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold transition-colors"
             >
-              إلغاء
+              Annuler
             </button>
             <button
               onClick={handleSave}
               className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
             >
               <i className="ri-save-line"></i>
-              حفظ التغييرات
+              Enregistrer
             </button>
           </div>
         )}
@@ -114,11 +114,11 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
 
       {/* معلومات المطعم الأساسية */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">معلومات المطعم الأساسية</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Informations du restaurant</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">اسم المطعم</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Nom du restaurant</label>
             {isEditing ? (
               <input
                 type="text"
@@ -133,7 +133,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">نوع المطبخ</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Type de cuisine</label>
             {isEditing ? (
               <select
                 name="cuisine_type"
@@ -151,7 +151,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
             {isEditing ? (
               <input
                 type="tel"
@@ -166,7 +166,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">المدينة</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
             {isEditing ? (
               <input
                 type="text"
@@ -181,7 +181,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">العنوان</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
             {isEditing ? (
               <input
                 type="text"
@@ -196,7 +196,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">وصف المطعم</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
             {isEditing ? (
               <textarea
                 name="description"
@@ -204,11 +204,11 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
                 onChange={handleInputChange}
                 rows={4}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
-                placeholder="اكتب وصفاً مختصراً عن مطعمك..."
+                placeholder="Décrivez brièvement votre restaurant..."
               />
             ) : (
               <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg min-h-[100px]">
-                {restaurant.description || 'لم يتم إضافة وصف بعد'}
+                {restaurant.description || 'Aucune description'}
               </p>
             )}
           </div>
@@ -217,18 +217,18 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
 
       {/* إعدادات التوصيل */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">إعدادات التوصيل</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Paramètres de livraison</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">وقت التوصيل المتوقع</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Délai de livraison</label>
             {isEditing ? (
               <input
                 type="text"
                 name="delivery_time"
                 value={formData.delivery_time}
                 onChange={handleInputChange}
-                placeholder="مثال: 30-45 دقيقة"
+                placeholder="Ex: 30-45 min"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             ) : (
@@ -237,7 +237,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">رسوم التوصيل (dh)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Frais de livraison (DH)</label>
             {isEditing ? (
               <input
                 type="number"
@@ -254,7 +254,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">الحد الأدنى للطلب (dh)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Commande minimum (DH)</label>
             {isEditing ? (
               <input
                 type="number"
@@ -274,11 +274,11 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
 
       {/* معلومات المالك */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">معلومات المالك</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Informations du propriétaire</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">اسم المالك</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Nom du propriétaire</label>
             {isEditing ? (
               <input
                 type="text"
@@ -293,13 +293,13 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">E-mail</label>
             <p className="text-gray-900 bg-gray-100 px-4 py-2 rounded-lg">{restaurant.owner_email}</p>
-            <p className="text-xs text-gray-500 mt-1">لا يمكن تغيير البريد الإلكتروني</p>
+            <p className="text-xs text-gray-500 mt-1">L'e-mail ne peut pas être modifié</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">رقم هاتف المالك</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone du propriétaire</label>
             {isEditing ? (
               <input
                 type="tel"
@@ -314,7 +314,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">رقم الرخصة التجارية</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">N° licence commerciale</label>
             {isEditing ? (
               <input
                 type="text"
@@ -325,7 +325,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
               />
             ) : (
               <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">
-                {restaurant.business_license || 'غير محدد'}
+                {restaurant.business_license || 'Non défini'}
               </p>
             )}
           </div>
@@ -334,18 +334,18 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
 
       {/* معلومات إضافية */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">معلومات إضافية</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Informations supplémentaires</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">تاريخ التسجيل</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Date d'inscription</label>
             <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">
               {new Date(restaurant.created_at).toLocaleDateString('ar-SA')}
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">حالة المطعم</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 restaurant.status === 'approved' 
@@ -354,14 +354,14 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
                   ? 'bg-yellow-100 text-yellow-800'
                   : 'bg-red-100 text-red-800'
               }`}>
-                {restaurant.status === 'approved' ? 'مقبول' : 
-                 restaurant.status === 'pending' ? 'في الانتظار' : 'مرفوض'}
+                {restaurant.status === 'approved' ? 'Approuvé' : 
+                 restaurant.status === 'pending' ? 'En attente' : 'Refusé'}
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">التقييم</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Note</label>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-gray-900">{restaurant.rating || 0}</span>
               <div className="flex text-yellow-400">
@@ -373,11 +373,11 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">الموقع</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Localisation</label>
             <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">
               {restaurant.latitude && restaurant.longitude 
                 ? `${restaurant.latitude.toFixed(6)}, ${restaurant.longitude.toFixed(6)}`
-                : 'غير محدد'
+                : 'Non défini'
               }
             </p>
           </div>
@@ -386,7 +386,7 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
 
       {/* صورة المطعم */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">صورة المطعم</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Photo du restaurant</h3>
         
         <div className="flex items-center gap-6">
           <img
@@ -396,10 +396,10 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           />
           <div>
             <p className="text-sm text-gray-600 mb-3">
-              صورة المطعم الحالية. يمكنك تغييرها من خلال رفع صورة جديدة.
+              Photo actuelle. Vous pouvez la modifier en téléchargeant une nouvelle image.
             </p>
             <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-              تغيير الصورة
+              Changer l'image
             </button>
           </div>
         </div>

@@ -39,15 +39,15 @@ export default function ReviewsList({ reviews, loading }: ReviewsListProps) {
     return (
       <div className="text-center py-8">
         <i className="ri-chat-3-line w-12 h-12 text-gray-300 mx-auto mb-3"></i>
-        <p className="text-gray-500">لا توجد تقييمات بعد</p>
-        <p className="text-sm text-gray-400">كن أول من يقيم هذا العنصر</p>
+        <p className="text-gray-500">Aucun avis pour le moment</p>
+        <p className="text-sm text-gray-400">Soyez le premier à évaluer cet élément</p>
       </div>
     );
   }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ar-SA', {
+    return date.toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -67,7 +67,7 @@ export default function ReviewsList({ reviews, loading }: ReviewsListProps) {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <h4 className="font-medium text-gray-900">
-                    {review.user_name || 'مستخدم'}
+                    {review.user_name || 'Utilisateur'}
                   </h4>
                   <p className="text-sm text-gray-500">
                     {formatDate(review.created_at)}

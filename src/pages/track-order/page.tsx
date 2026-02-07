@@ -38,36 +38,36 @@ interface Order {
 
 const statusInfo = {
   confirmed: {
-    title: 'تم تأكيد الطلب',
-    description: 'تم استلام طلبك وجاري المراجعة',
+    title: 'Commande confirmée',
+    description: 'Votre commande a été reçue et est en cours de traitement',
     icon: 'ri-check-line',
     color: 'text-blue-500',
     bgColor: 'bg-blue-100'
   },
   preparing: {
-    title: 'جاري التحضير',
-    description: 'المطعم يحضر طلبك الآن',
+    title: 'En préparation',
+    description: 'Le restaurant prépare votre commande',
     icon: 'ri-restaurant-line',
     color: 'text-orange-500',
     bgColor: 'bg-orange-100'
   },
   ready: {
-    title: 'جاهز للاستلام',
-    description: 'طلبك جاهز وينتظر السائق',
+    title: 'Prêt à récupérer',
+    description: 'Votre commande est prête et attend le livreur',
     icon: 'ri-time-line',
     color: 'text-purple-500',
     bgColor: 'bg-purple-100'
   },
   on_way: {
-    title: 'في الطريق إليك',
-    description: 'السائق في طريقه لتوصيل طلبك',
+    title: 'En route',
+    description: 'Le livreur est en chemin pour vous livrer',
     icon: 'ri-truck-line',
     color: 'text-green-500',
     bgColor: 'bg-green-100'
   },
   delivered: {
-    title: 'تم التوصيل',
-    description: 'تم توصيل طلبك بنجاح',
+    title: 'Livré',
+    description: 'Votre commande a été livrée avec succès',
     icon: 'ri-check-double-line',
     color: 'text-green-600',
     bgColor: 'bg-green-100'
@@ -190,12 +190,12 @@ export default function TrackOrderPage() {
 
   const handleSearch = async () => {
     if (!orderNumber.trim()) {
-      alert('يرجى إدخال رقم الطلب');
+      alert('Veuillez entrer le numéro de commande');
       return;
     }
 
     if (!currentUser) {
-      alert('يجب تسجيل الدخول أولاً');
+      alert('Veuillez vous connecter d\'abord');
       navigate('/auth');
       return;
     }
@@ -220,11 +220,11 @@ export default function TrackOrderPage() {
       setSearchedOrder(order || null);
       
       if (!order) {
-        alert('لم يتم العثور على الطلب. تأكد من رقم الطلب وأنه يخصك.');
+        alert('Commande introuvable. Vérifiez le numéro et assurez-vous qu\'il vous appartient.');
       }
     } catch (error) {
       console.error('خطأ في البحث:', error);
-      alert('حدث خطأ أثناء البحث. حاول مرة أخرى.');
+      alert('Erreur lors de la recherche. Veuillez réessayer.');
     } finally {
       setIsLoading(false);
     }
@@ -259,8 +259,8 @@ export default function TrackOrderPage() {
         <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="bg-white rounded-xl shadow-sm p-8 text-center">
             <i className="ri-loader-4-line text-6xl text-orange-500 mb-4 animate-spin"></i>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">جاري التحميل...</h2>
-            <p className="text-gray-600">يتم التحقق من بياناتك</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Chargement...</h2>
+            <p className="text-gray-600">Vérification de vos données</p>
           </div>
         </main>
 
@@ -278,13 +278,13 @@ export default function TrackOrderPage() {
         <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="bg-white rounded-xl shadow-sm p-8 text-center">
             <i className="ri-lock-line text-6xl text-orange-500 mb-4"></i>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">يجب تسجيل الدخول</h2>
-            <p className="text-gray-600 mb-6">يجب تسجيل الدخول لعرض طلباتك وتتبعها</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Connexion requise</h2>
+            <p className="text-gray-600 mb-6">Connectez-vous pour voir et suivre vos commandes</p>
             <button 
               onClick={() => navigate('/auth')}
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
             >
-              تسجيل الدخول
+              Se connecter
             </button>
           </div>
         </main>
@@ -304,16 +304,16 @@ export default function TrackOrderPage() {
           <div className="bg-orange-100 border border-orange-300 text-orange-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-3">
             <i className="ri-information-line text-xl"></i>
             <div>
-              <p className="font-medium">تم تفريغ السلة تلقائياً</p>
-              <p className="text-sm">تم تفريغ السلة لأن طلبك بدأ في التحضير</p>
+              <p className="font-medium">Panier vidé automatiquement</p>
+              <p className="text-sm">Le panier a été vidé car votre commande est en préparation</p>
             </div>
           </div>
         )}
 
         {/* عنوان الصفحة */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">تتبع طلبك</h1>
-          <p className="text-gray-600">أدخل رقم الطلب لتتبع حالة التوصيل</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Suivre votre commande</h1>
+          <p className="text-gray-600">Entrez le numéro de commande pour suivre la livraison</p>
         </div>
 
         {/* قسم البحث */}
@@ -325,7 +325,7 @@ export default function TrackOrderPage() {
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="أدخل رقم الطلب (مثال: ORD-2024-001)"
+                placeholder="Numéro de commande (ex: ORD-2024-001)"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                 disabled={isLoading}
               />
@@ -338,12 +338,12 @@ export default function TrackOrderPage() {
               {isLoading ? (
                 <>
                   <i className="ri-loader-4-line animate-spin"></i>
-                  جاري البحث...
+                  Recherche...
                 </>
               ) : (
                 <>
                   <i className="ri-search-line"></i>
-                  تتبع الطلب
+                  Suivre
                 </>
               )}
             </button>
@@ -355,14 +355,14 @@ export default function TrackOrderPage() {
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">الطلب رقم: {searchedOrder.id}</h2>
+                <h2 className="text-xl font-bold text-gray-800">Commande n° {searchedOrder.id}</h2>
                 <p className="text-gray-600">{searchedOrder.restaurant}</p>
-                <p className="text-sm text-gray-500 mt-1">تاريخ الطلب: {searchedOrder.orderTime}</p>
+                <p className="text-sm text-gray-500 mt-1">Date: {searchedOrder.orderTime}</p>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-gray-800">{formatCurrency(searchedOrder.total)}</div>
                 <div className={`text-xs px-3 py-1 rounded-full mt-2 ${statusInfo[searchedOrder.status as keyof typeof statusInfo]?.bgColor} ${statusInfo[searchedOrder.status as keyof typeof statusInfo]?.color}`}>
-                  {statusInfo[searchedOrder.status as keyof typeof statusInfo]?.title || 'غير محدد'}
+                  {statusInfo[searchedOrder.status as keyof typeof statusInfo]?.title || 'Non défini'}
                 </div>
               </div>
             </div>
@@ -370,8 +370,8 @@ export default function TrackOrderPage() {
             {/* شريط التقدم */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">حالة الطلب</span>
-                <span className="text-sm text-gray-500">الوقت المتوقع: {searchedOrder.estimatedTime}</span>
+                <span className="text-sm font-medium text-gray-700">Statut</span>
+                <span className="text-sm text-gray-500">Délai estimé: {searchedOrder.estimatedTime}</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div 
@@ -397,7 +397,7 @@ export default function TrackOrderPage() {
             {/* معلومات السائق */}
             {(searchedOrder.status === 'on_way' || searchedOrder.status === 'ready') && searchedOrder.driver && (
               <div className="border-t pt-6 mb-6">
-                <h3 className="font-semibold text-gray-800 mb-4">معلومات السائق</h3>
+                <h3 className="font-semibold text-gray-800 mb-4">Informations du livreur</h3>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
@@ -423,7 +423,7 @@ export default function TrackOrderPage() {
 
             {/* تفاصيل الطلب */}
             <div className="border-t pt-6">
-              <h3 className="font-semibold text-gray-800 mb-4">تفاصيل الطلب</h3>
+              <h3 className="font-semibold text-gray-800 mb-4">Détails de la commande</h3>
               <div className="space-y-3">
                 {searchedOrder.items.map((item, index) => (
                   <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
@@ -439,7 +439,7 @@ export default function TrackOrderPage() {
                   </div>
                 ))}
                 <div className="flex justify-between items-center pt-3 border-t border-gray-200">
-                  <span className="font-bold text-gray-800">المجموع:</span>
+                  <span className="font-bold text-gray-800">Total:</span>
                   <span className="font-bold text-gray-800 text-lg">{formatCurrency(searchedOrder.total)}</span>
                 </div>
               </div>
@@ -448,19 +448,19 @@ export default function TrackOrderPage() {
             {/* معلومات التوصيل */}
             {searchedOrder.deliveryInfo && (
               <div className="border-t pt-6 mt-6">
-                <h3 className="font-semibold text-gray-800 mb-4">معلومات التوصيل</h3>
+                <h3 className="font-semibold text-gray-800 mb-4">Informations de livraison</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <span className="text-gray-600 text-sm">الاسم:</span>
+                      <span className="text-gray-600 text-sm">Nom:</span>
                       <p className="font-medium text-gray-800">{searchedOrder.deliveryInfo.name}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600 text-sm">الهاتف:</span>
+                      <span className="text-gray-600 text-sm">Téléphone:</span>
                       <p className="font-medium text-gray-800">{searchedOrder.deliveryInfo.phone}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <span className="text-gray-600 text-sm">العنوان:</span>
+                      <span className="text-gray-600 text-sm">Adresse:</span>
                       <p className="font-medium text-gray-800">{searchedOrder.deliveryInfo.address}, {searchedOrder.deliveryInfo.city}</p>
                     </div>
                   </div>
@@ -474,20 +474,20 @@ export default function TrackOrderPage() {
         {searchedOrder === null && orderNumber && !isLoading && (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center mb-8">
             <i className="ri-search-line text-6xl text-gray-300 mb-4"></i>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">لم يتم العثور على الطلب</h3>
-            <p className="text-gray-500 mb-4">تحقق من رقم الطلب وتأكد أنه يخصك</p>
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">Commande introuvable</h3>
+            <p className="text-gray-500 mb-4">Vérifiez le numéro et assurez-vous qu'il vous appartient</p>
             <button 
               onClick={() => navigate('/restaurants')}
               className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
             >
-              تصفح المطاعم
+              Explorer les restaurants
             </button>
           </div>
         )}
 
         {/* الطلبات الأخيرة */}
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">طلباتي الأخيرة</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-6">Mes commandes récentes</h2>
           {recentOrders.length > 0 ? (
             <div className="space-y-4">
               {recentOrders.slice(0, 10).map((order) => (
@@ -501,20 +501,20 @@ export default function TrackOrderPage() {
                     <div className="text-right">
                       <div className="font-bold text-gray-800">{formatCurrency(order.total)}</div>
                       <div className={`text-xs px-2 py-1 rounded-full mt-1 ${statusInfo[order.status as keyof typeof statusInfo]?.bgColor} ${statusInfo[order.status as keyof typeof statusInfo]?.color}`}>
-                        {statusInfo[order.status as keyof typeof statusInfo]?.title || 'غير محدد'}
+                        {statusInfo[order.status as keyof typeof statusInfo]?.title || 'Non défini'}
                       </div>
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="text-sm text-gray-600">
-                      {order.items.length} منتج - {order.estimatedTime}
+                      {order.items.length} article(s) - {order.estimatedTime}
                     </div>
                     <button 
                       onClick={() => handleOrderClick(order)}
                       className="text-orange-500 hover:text-orange-600 text-sm font-medium cursor-pointer flex items-center gap-1"
                     >
                       <i className="ri-eye-line"></i>
-                      تتبع الطلب
+                      Suivre
                     </button>
                   </div>
                 </div>
@@ -523,13 +523,13 @@ export default function TrackOrderPage() {
           ) : (
             <div className="text-center py-8">
               <i className="ri-file-list-line text-6xl text-gray-300 mb-4"></i>
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">لا توجد طلبات</h3>
-              <p className="text-gray-500 mb-4">لم تقم بأي طلبات بعد</p>
+              <h3 className="text-lg font-semibold text-gray-600 mb-2">Aucune commande</h3>
+              <p className="text-gray-500 mb-4">Vous n'avez pas encore passé de commande</p>
               <button 
                 onClick={() => navigate('/restaurants')}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
               >
-                ابدأ الطلب الآن
+                Commander maintenant
               </button>
             </div>
           )}

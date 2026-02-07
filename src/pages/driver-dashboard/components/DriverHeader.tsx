@@ -21,7 +21,7 @@ export default function DriverHeader({ driver }: DriverHeaderProps) {
 
       if (error) {
         console.error('خطأ في تحديث الحالة:', error);
-        alert('حدث خطأ في تحديث حالة التوفر. تحقق من الاتصال أو من صلاحيات قاعدة البيانات.');
+        alert('Erreur lors de la mise à jour. Vérifiez la connexion ou les permissions de la base de données.');
         return;
       }
 
@@ -30,7 +30,7 @@ export default function DriverHeader({ driver }: DriverHeaderProps) {
       window.location.reload();
     } catch (error) {
       console.error('خطأ في تحديث الحالة:', error);
-      alert('حدث خطأ غير متوقع أثناء تحديث حالة التوفر.');
+        alert('Une erreur inattendue s\'est produite lors de la mise à jour.');
     }
   };
 
@@ -43,8 +43,8 @@ export default function DriverHeader({ driver }: DriverHeaderProps) {
               <i className="ri-truck-line text-xl text-white"></i>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">لوحة تحكم السائق</h1>
-              <p className="text-sm text-gray-600">مرحباً، {driver.name}</p>
+              <h1 className="text-xl font-bold text-gray-900">Tableau de bord livreur</h1>
+              <p className="text-sm text-gray-600">Bonjour, {driver.name}</p>
             </div>
           </div>
 
@@ -59,7 +59,7 @@ export default function DriverHeader({ driver }: DriverHeaderProps) {
               }`}
             >
               <div className={`w-3 h-3 rounded-full ${driver.is_available ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-              {driver.is_available ? 'متاح للتوصيل' : 'غير متاح'}
+              {driver.is_available ? 'Disponible' : 'Indisponible'}
             </button>
 
             {/* Rating */}
@@ -74,7 +74,7 @@ export default function DriverHeader({ driver }: DriverHeaderProps) {
               className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors cursor-pointer whitespace-nowrap"
             >
               <i className="ri-logout-box-line"></i>
-              <span>تسجيل الخروج</span>
+              <span>Déconnexion</span>
             </button>
           </div>
         </div>

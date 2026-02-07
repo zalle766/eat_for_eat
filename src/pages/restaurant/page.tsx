@@ -159,7 +159,7 @@ export default function RestaurantPage() {
       });
 
       if (!response.ok) {
-        throw new Error('فشل تحميل التقييمات');
+        throw new Error('Échec du chargement des avis');
       }
 
       const data = await response.json();
@@ -244,7 +244,7 @@ export default function RestaurantPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || 'حدث خطأ في إرسال التقييم';
+        const errorMessage = errorData.error || 'Erreur lors de l\'envoi de l\'avis';
         console.error('خطأ من الخادم:', errorMessage);
         throw new Error(errorMessage);
       }
@@ -261,17 +261,17 @@ export default function RestaurantPage() {
         setShowRatingModal(false);
         setRatingTarget(null);
         // عرض رسالة نجاح
-        alert('تم حفظ التقييم بنجاح!');
+        alert('Avis enregistré avec succès !');
       } else {
-        throw new Error(result.error || 'فشل إرسال التقييم');
+        throw new Error(result.error || 'Échec de l\'envoi de l\'avis');
       }
     } catch (error) {
       if ((error as Error).message === 'AUTH_REQUIRED') {
-        alert('يجب تسجيل الدخول لإضافة تقييم');
+        alert('Veuillez vous connecter pour ajouter un avis');
         setShowRatingModal(false);
         setRatingTarget(null);
       } else {
-        const errorMessage = (error as Error).message || 'حدث خطأ في إرسال التقييم';
+        const errorMessage = (error as Error).message || 'Erreur lors de l\'envoi de l\'avis';
         console.error('خطأ في إرسال التقييم:', error);
         alert(errorMessage);
         // لا نغلق المودال عند حدوث خطأ حتى يتمكن المستخدم من المحاولة مرة أخرى
@@ -307,7 +307,7 @@ export default function RestaurantPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <i className="ri-loader-4-line text-4xl text-orange-500 animate-spin mb-4"></i>
-            <p className="text-gray-600">جاري تحميل بيانات المطعم...</p>
+            <p className="text-gray-600">Chargement du restaurant...</p>
           </div>
         </div>
         <Footer />
@@ -322,7 +322,7 @@ export default function RestaurantPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <i className="ri-restaurant-line text-4xl text-gray-400 mb-4"></i>
-            <p className="text-gray-600">المطعم غير موجود</p>
+            <p className="text-gray-600">Restaurant introuvable</p>
           </div>
         </div>
         <Footer />
@@ -361,7 +361,7 @@ export default function RestaurantPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">{restaurant.name}</h1>
-                  <p className="text-gray-600 mb-4">{restaurant.description || 'مطعم رائع يقدم أشهى الأطباق'}</p>
+                  <p className="text-gray-600 mb-4">{restaurant.description || 'Un restaurant qui propose des plats délicieux'}</p>
                   
                   <div className="flex items-center gap-6 mb-4">
                     <div className="flex items-center gap-2">
@@ -374,11 +374,11 @@ export default function RestaurantPage() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <i className="ri-time-line w-4 h-4"></i>
-                      <span>{restaurant.delivery_time || '30-45 دقيقة'}</span>
+                      <span>{restaurant.delivery_time || '30-45 min'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <i className="ri-truck-line w-4 h-4"></i>
-                      <span>{restaurant.delivery_fee || 15} ر.س</span>
+                      <span>{restaurant.delivery_fee || 15} DH</span>
                     </div>
                   </div>
 
@@ -388,7 +388,7 @@ export default function RestaurantPage() {
                         ? 'bg-red-100 text-red-800' 
                         : 'bg-green-100 text-green-800'
                     }`}>
-                      {restaurant.status === 'closed' ? 'مغلق' : 'مفتوح'}
+                      {restaurant.status === 'closed' ? 'Fermé' : 'Ouvert'}
                     </span>
                   </div>
                 </div>
@@ -398,7 +398,7 @@ export default function RestaurantPage() {
                   className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   <i className="ri-star-line w-4 h-4 ml-2"></i>
-                  قيم المطعم
+                  Évaluer le restaurant
                 </button>
               </div>
             </div>
@@ -406,12 +406,12 @@ export default function RestaurantPage() {
 
           {/* Products */}
           <div className="max-w-7xl mx-auto px-4 py-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">المنتجات</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Produits</h2>
             
             {products.length === 0 ? (
               <div className="text-center py-12">
                 <i className="ri-restaurant-line text-4xl text-gray-400 mb-4"></i>
-                <p className="text-gray-600">لا توجد منتجات متاحة حالياً</p>
+                <p className="text-gray-600">Aucun produit disponible pour le moment</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -433,10 +433,10 @@ export default function RestaurantPage() {
                     
                     <div className="p-4">
                       <h3 className="font-bold text-gray-900 mb-2">{product.name}</h3>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description || 'منتج لذيذ ومميز'}</p>
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description || 'Délicieux produit'}</p>
                       
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xl font-bold text-orange-600">{product.price} ر.س</span>
+                        <span className="text-xl font-bold text-orange-600">{product.price} DH</span>
                         <div className="flex items-center gap-2">
                           {productRatings[product.id]?.count ? (
                             <RatingStars
@@ -447,7 +447,7 @@ export default function RestaurantPage() {
                               count={productRatings[product.id].count}
                             />
                           ) : (
-                            <span className="text-xs text-gray-400">لا يوجد تقييم</span>
+                            <span className="text-xs text-gray-400">Aucun avis</span>
                           )}
                           <button
                             onClick={() => handleRateClick('product', product.id, product.name)}
@@ -475,7 +475,7 @@ export default function RestaurantPage() {
                           onClick={() => addToCart(product)}
                           className="flex-1 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap cursor-pointer"
                         >
-                          {cart[product.id] > 0 ? 'إضافة المزيد' : 'إضافة للسلة'}
+                          {cart[product.id] > 0 ? 'Ajouter' : 'Ajouter au panier'}
                         </button>
                       </div>
                     </div>
@@ -488,7 +488,7 @@ export default function RestaurantPage() {
           {/* Reviews Section */}
           <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">التقييمات والمراجعات</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Avis et évaluations</h2>
               
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-between">
@@ -498,8 +498,8 @@ export default function RestaurantPage() {
                       <RatingStars rating={averageRating} readonly />
                     </div>
                     <div>
-                      <p className="text-gray-600">متوسط التقييم</p>
-                      <p className="text-sm text-gray-500">{totalReviews} تقييم</p>
+                      <p className="text-gray-600">Note moyenne</p>
+                      <p className="text-sm text-gray-500">{totalReviews} avis</p>
                     </div>
                   </div>
                 </div>
@@ -521,7 +521,7 @@ export default function RestaurantPage() {
           setRatingTarget(null);
         }}
         onSubmit={handleSubmitRating}
-        title={ratingTarget?.type === 'restaurant' ? 'تقييم المطعم' : 'تقييم المنتج'}
+        title={ratingTarget?.type === 'restaurant' ? 'Évaluer le restaurant' : 'Évaluer le produit'}
         itemName={ratingTarget?.name || ''}
       />
     </div>

@@ -138,15 +138,15 @@ export default function OrdersManagement() {
   const showNewOrderNotification = () => {
     // إشعار المتصفح
     if (Notification.permission === 'granted') {
-      new Notification('طلب جديد!', {
-        body: 'لديك طلب جديد في انتظار الموافقة',
+      new Notification('Nouvelle commande !', {
+        body: 'Vous avez une nouvelle commande en attente de confirmation',
         icon: '/favicon.ico'
       });
     } else if (Notification.permission !== 'denied') {
       Notification.requestPermission().then(permission => {
         if (permission === 'granted') {
-          new Notification('طلب جديد!', {
-            body: 'لديك طلب جديد في انتظار الموافقة',
+          new Notification('Nouvelle commande !', {
+            body: 'Vous avez une nouvelle commande en attente de confirmation',
             icon: '/favicon.ico'
           });
         }
@@ -212,13 +212,13 @@ export default function OrdersManagement() {
 
   const getStatusInfo = (status: string) => {
     const statusMap: any = {
-      pending: { text: 'في الانتظار', color: 'bg-yellow-100 text-yellow-800', icon: 'ri-time-line' },
-      confirmed: { text: 'مؤكد', color: 'bg-blue-100 text-blue-800', icon: 'ri-check-line' },
-      preparing: { text: 'قيد التحضير', color: 'bg-orange-100 text-orange-800', icon: 'ri-restaurant-line' },
-      ready: { text: 'جاهز للتوصيل', color: 'bg-green-100 text-green-800', icon: 'ri-check-circle-line' },
-      on_the_way: { text: 'في الطريق', color: 'bg-purple-100 text-purple-800', icon: 'ri-truck-line' },
-      delivered: { text: 'تم التوصيل', color: 'bg-gray-100 text-gray-800', icon: 'ri-check-double-line' },
-      cancelled: { text: 'ملغي', color: 'bg-red-100 text-red-800', icon: 'ri-close-line' }
+      pending: { text: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: 'ri-time-line' },
+      confirmed: { text: 'Confirmé', color: 'bg-blue-100 text-blue-800', icon: 'ri-check-line' },
+      preparing: { text: 'En préparation', color: 'bg-orange-100 text-orange-800', icon: 'ri-restaurant-line' },
+      ready: { text: 'Prêt à livrer', color: 'bg-green-100 text-green-800', icon: 'ri-check-circle-line' },
+      on_the_way: { text: 'En route', color: 'bg-purple-100 text-purple-800', icon: 'ri-truck-line' },
+      delivered: { text: 'Livré', color: 'bg-gray-100 text-gray-800', icon: 'ri-check-double-line' },
+      cancelled: { text: 'Annulé', color: 'bg-red-100 text-red-800', icon: 'ri-close-line' }
     };
     return statusMap[status] || statusMap.pending;
   };
@@ -288,7 +288,7 @@ export default function OrdersManagement() {
       setAvailableDrivers(driversWithDistance);
     } catch (error) {
       console.error('خطأ في جلب السائقين المتاحين:', error);
-      alert('حدث خطأ في تحميل قائمة الموصّلين المتاحين');
+      alert('Erreur lors du chargement des livreurs disponibles');
     } finally {
       setIsDriversLoading(false);
     }
@@ -310,7 +310,7 @@ export default function OrdersManagement() {
             delivery_address: order.deliveryInfo.address,
             delivery_city: order.deliveryInfo.city,
             pickup_address:
-              currentRestaurant.address || 'عنوان المطعم',
+              currentRestaurant.address || 'Adresse du restaurant',
             total_amount: order.total,
             delivery_fee: order.deliveryFee,
             driver_earnings: driverEarnings,
@@ -324,10 +324,10 @@ export default function OrdersManagement() {
 
       setDriverModalOrder(null);
       loadOrders();
-      alert('تم إسناد الطلب إلى الموصّل بنجاح');
+      alert('Commande assignée au livreur avec succès');
     } catch (error) {
       console.error('خطأ في إسناد الموصّل للطلب:', error);
-      alert('حدث خطأ أثناء إسناد الموصّل للطلب');
+      alert('Erreur lors de l\'assignation du livreur à la commande');
     }
   };
 
@@ -350,7 +350,7 @@ export default function OrdersManagement() {
       <div className="space-y-6">
         <div className="text-center py-16">
           <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">جاري تحميل الطلبات...</p>
+          <p className="text-gray-600">Chargement des commandes...</p>
         </div>
       </div>
     );
@@ -361,8 +361,8 @@ export default function OrdersManagement() {
       <div className="space-y-6">
         <div className="text-center py-16">
           <i className="ri-restaurant-line text-8xl text-gray-300 mb-6"></i>
-          <h2 className="text-2xl font-bold text-gray-600 mb-4">لم يتم العثور على مطعم</h2>
-          <p className="text-gray-500">يجب أن تكون مالك مطعم للوصول إلى هذه الصفحة</p>
+          <h2 className="text-2xl font-bold text-gray-600 mb-4">Restaurant introuvable</h2>
+          <p className="text-gray-500">Vous devez être propriétaire d'un restaurant pour accéder à cette page</p>
         </div>
       </div>
     );
@@ -372,8 +372,8 @@ export default function OrdersManagement() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">إدارة الطلبات</h2>
-        <p className="text-gray-600">تتبع وإدارة طلبات العملاء لمطعم {currentRestaurant.name}</p>
+        <h2 className="text-2xl font-bold text-gray-900">Gestion des commandes</h2>
+        <p className="text-gray-600">Suivez et gérez les commandes clients de {currentRestaurant.name}</p>
       </div>
 
       {/* Statistics */}
@@ -381,7 +381,7 @@ export default function OrdersManagement() {
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">إجمالي الطلبات</p>
+              <p className="text-sm text-gray-600">Total des commandes</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
             <i className="ri-shopping-bag-3-line text-2xl text-blue-500 w-8 h-8 flex items-center justify-center"></i>
@@ -391,7 +391,7 @@ export default function OrdersManagement() {
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">في الانتظار</p>
+              <p className="text-sm text-gray-600">En attente</p>
               <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
             </div>
             <i className="ri-time-line text-2xl text-yellow-500 w-8 h-8 flex items-center justify-center"></i>
@@ -401,7 +401,7 @@ export default function OrdersManagement() {
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">قيد التحضير</p>
+              <p className="text-sm text-gray-600">En préparation</p>
               <p className="text-2xl font-bold text-orange-600">{stats.preparing}</p>
             </div>
             <i className="ri-restaurant-line text-2xl text-orange-500 w-8 h-8 flex items-center justify-center"></i>
@@ -411,7 +411,7 @@ export default function OrdersManagement() {
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">جاهز</p>
+              <p className="text-sm text-gray-600">Prêt</p>
               <p className="text-2xl font-bold text-green-600">{stats.ready}</p>
             </div>
             <i className="ri-check-circle-line text-2xl text-green-500 w-8 h-8 flex items-center justify-center"></i>
@@ -421,7 +421,7 @@ export default function OrdersManagement() {
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">تم التوصيل</p>
+              <p className="text-sm text-gray-600">Livré</p>
               <p className="text-2xl font-bold text-gray-600">{stats.delivered}</p>
             </div>
             <i className="ri-truck-line text-2xl text-gray-500 w-8 h-8 flex items-center justify-center"></i>
@@ -431,7 +431,7 @@ export default function OrdersManagement() {
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">الإيرادات</p>
+              <p className="text-sm text-gray-600">Revenus</p>
               <p className="text-2xl font-bold text-green-600">{stats.revenue.toFixed(2)} DH</p>
             </div>
             <i className="ri-money-dollar-circle-line text-2xl text-green-500 w-8 h-8 flex items-center justify-center"></i>
@@ -443,11 +443,11 @@ export default function OrdersManagement() {
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">البحث</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
             <div className="relative">
               <input
                 type="text"
-                placeholder="ابحث برقم الطلب أو اسم العميل..."
+                placeholder="Rechercher par numéro ou nom du client..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm"
@@ -457,19 +457,19 @@ export default function OrdersManagement() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">حالة الطلب</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
             >
-              <option value="">جميع الحالات</option>
-              <option value="pending">في الانتظار</option>
-              <option value="confirmed">مؤكد</option>
-              <option value="preparing">قيد التحضير</option>
-              <option value="ready">جاهز للتوصيل</option>
-              <option value="delivered">تم التوصيل</option>
-              <option value="cancelled">ملغي</option>
+              <option value="">Tous les statuts</option>
+              <option value="pending">En attente</option>
+              <option value="confirmed">Confirmé</option>
+              <option value="preparing">En préparation</option>
+              <option value="ready">Prêt à livrer</option>
+              <option value="delivered">Livré</option>
+              <option value="cancelled">Annulé</option>
             </select>
           </div>
         </div>
@@ -479,7 +479,7 @@ export default function OrdersManagement() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">
-            الطلبات ({filteredOrders.length})
+            Commandes ({filteredOrders.length})
           </h3>
         </div>
 
@@ -487,11 +487,11 @@ export default function OrdersManagement() {
           {filteredOrders.length === 0 ? (
             <div className="text-center py-12">
               <i className="ri-shopping-bag-line text-8xl text-gray-300 mb-6"></i>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">لا توجد طلبات</h3>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">Aucune commande</h3>
               <p className="text-gray-500">
                 {orders.length === 0 
-                  ? 'لم يتم استلام أي طلبات بعد' 
-                  : 'لا توجد طلبات تطابق معايير البحث'
+                  ? "Aucune commande reçue pour le moment" 
+                  : "Aucune commande ne correspond à votre recherche"
                 }
               </p>
             </div>
@@ -506,7 +506,7 @@ export default function OrdersManagement() {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <h4 className="text-lg font-semibold text-gray-900">
-                            طلب #{order.id.split('-')[1]}
+                            Commande #{order.id.split('-')[1]}
                           </h4>
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color} flex items-center gap-1`}>
                             <i className={statusInfo.icon}></i>
@@ -517,14 +517,14 @@ export default function OrdersManagement() {
                         {/* Customer Info */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
                           <div>
-                            <p><strong>العميل:</strong> {order.deliveryInfo.name}</p>
-                            <p><strong>الهاتف:</strong> {order.deliveryInfo.phone}</p>
-                            <p><strong>العنوان:</strong> {order.deliveryInfo.address}, {order.deliveryInfo.city}</p>
+                            <p><strong>Client :</strong> {order.deliveryInfo.name}</p>
+                            <p><strong>Téléphone :</strong> {order.deliveryInfo.phone}</p>
+                            <p><strong>Adresse :</strong> {order.deliveryInfo.address}, {order.deliveryInfo.city}</p>
                           </div>
                           <div>
-                            <p><strong>وقت الطلب:</strong> {new Date(order.createdAt).toLocaleString('ar-SA')}</p>
-                            <p><strong>التوصيل المتوقع:</strong> {new Date(order.estimatedDelivery).toLocaleString('ar-SA')}</p>
-                            <p><strong>طريقة الدفع:</strong> {order.paymentMethod === 'cash' ? 'نقداً عند التوصيل' : 'بطاقة ائتمان'}</p>
+                            <p><strong>Heure de commande :</strong> {new Date(order.createdAt).toLocaleString('fr-FR')}</p>
+                            <p><strong>Livraison prévue :</strong> {new Date(order.estimatedDelivery).toLocaleString('fr-FR')}</p>
+                            <p><strong>Paiement :</strong> {order.paymentMethod === 'cash' ? 'Espèces à la livraison' : 'Carte bancaire'}</p>
                           </div>
                         </div>
 
@@ -532,7 +532,7 @@ export default function OrdersManagement() {
                         {order.deliveryInfo.notes && (
                           <div className="mt-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
                             <p className="text-sm text-yellow-800">
-                              <strong>ملاحظات:</strong> {order.deliveryInfo.notes}
+                              <strong>Notes :</strong> {order.deliveryInfo.notes}
                             </p>
                           </div>
                         )}
@@ -541,13 +541,13 @@ export default function OrdersManagement() {
                       {/* Total */}
                       <div className="text-left ml-6">
                         <p className="text-2xl font-bold text-gray-900">{order.total.toFixed(2)} DH</p>
-                        <p className="text-sm text-gray-500">المجموع النهائي</p>
+                        <p className="text-sm text-gray-500">Total</p>
                       </div>
                     </div>
 
                     {/* Order Items */}
                     <div className="border-t border-gray-200 pt-4">
-                      <h5 className="font-medium text-gray-900 mb-3">تفاصيل الطلب:</h5>
+                      <h5 className="font-medium text-gray-900 mb-3">Détails de la commande :</h5>
                       <div className="space-y-2">
                         {order.items.map((item, index) => (
                           <div key={index} className="flex items-center justify-between text-sm">
@@ -559,21 +559,21 @@ export default function OrdersManagement() {
                         {/* Price Breakdown */}
                         <div className="border-t border-gray-200 pt-2 mt-2">
                           <div className="flex items-center justify-between text-sm">
-                            <span>المجموع الفرعي:</span>
+                            <span>Sous-total :</span>
                             <span>{order.subtotal.toFixed(2)} DH</span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
-                            <span>رسوم التوصيل:</span>
+                            <span>Frais de livraison :</span>
                             <span>{order.deliveryFee.toFixed(2)} DH</span>
                           </div>
                           {order.discount && order.discount > 0 && (
                             <div className="flex items-center justify-between text-sm text-green-600">
-                              <span>الخصم:</span>
+                              <span>Réduction :</span>
                               <span>-{order.discount.toFixed(2)} DH</span>
                             </div>
                           )}
                           <div className="flex items-center justify-between font-semibold">
-                            <span>المجموع النهائي:</span>
+                            <span>Total :</span>
                             <span>{order.total.toFixed(2)} DH</span>
                           </div>
                         </div>
@@ -589,13 +589,13 @@ export default function OrdersManagement() {
                               onClick={() => updateOrderStatus(order.id, 'confirmed')}
                               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
                             >
-                              قبول الطلب
+                              Accepter
                             </button>
                             <button
                               onClick={() => updateOrderStatus(order.id, 'cancelled')}
                               className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
                             >
-                              رفض الطلب
+                              Refuser
                             </button>
                           </>
                         )}
@@ -605,7 +605,7 @@ export default function OrdersManagement() {
                             onClick={() => updateOrderStatus(order.id, 'preparing')}
                             className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
                           >
-                            بدء التحضير
+                            Commencer la préparation
                           </button>
                         )}
                         
@@ -614,7 +614,7 @@ export default function OrdersManagement() {
                             onClick={() => updateOrderStatus(order.id, 'ready')}
                             className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
                           >
-                            جاهز للتوصيل
+                            Prêt à livrer
                           </button>
                         )}
                         
@@ -624,7 +624,7 @@ export default function OrdersManagement() {
                               onClick={() => openDriverModal(order)}
                               className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
                             >
-                              اختيار الموصّل
+                              Choisir un livreur
                             </button>
                           </>
                         )}
@@ -634,7 +634,7 @@ export default function OrdersManagement() {
                             onClick={() => updateOrderStatus(order.id, 'delivered')}
                             className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
                           >
-                            تم التوصيل
+                            Marquer livré
                           </button>
                         )}
                       </div>
@@ -653,7 +653,7 @@ export default function OrdersManagement() {
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-bold text-gray-900">
-                اختيار الموصّل للطلب #{driverModalOrder.id.split('-')[1]}
+                Choisir un livreur pour la commande #{driverModalOrder.id.split('-')[1]}
               </h3>
               <button
                 onClick={() => setDriverModalOrder(null)}
@@ -672,10 +672,10 @@ export default function OrdersManagement() {
                 <div className="text-center py-8">
                   <i className="ri-roadster-line text-4xl text-gray-300 mb-3" />
                   <p className="text-gray-700 font-medium mb-1">
-                    لا يوجد موصّلون متاحون حالياً في منطقتك
+                    Aucun livreur disponible dans votre zone pour le moment
                   </p>
                   <p className="text-sm text-gray-500">
-                    حاول مرة أخرى بعد قليل أو تواصل مع الدعم.
+                    Réessayez plus tard ou contactez le support.
                   </p>
                 </div>
               ) : (
@@ -698,8 +698,8 @@ export default function OrdersManagement() {
                           </p>
                           {typeof driver.distance === 'number' && (
                             <p className="text-xs text-gray-500">
-                              يبعد تقريباً{' '}
-                              {driver.distance.toFixed(1)} كم عن المطعم
+                              À environ{' '}
+                              {driver.distance.toFixed(1)} km du restaurant
                             </p>
                           )}
                         </div>
@@ -710,7 +710,7 @@ export default function OrdersManagement() {
                         }
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
                       >
-                        إسناد هذا الموصّل
+                        Assigner ce livreur
                       </button>
                     </div>
                   ))}

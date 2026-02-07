@@ -65,7 +65,7 @@ export default function RatingModal({
         </div>
 
         <div className="mb-6">
-          <p className="text-gray-600 mb-4">كيف كانت تجربتك مع {itemName}؟</p>
+          <p className="text-gray-600 mb-4">Comment était votre expérience avec {itemName} ?</p>
           
           <div className="flex justify-center mb-6">
             <RatingStars
@@ -78,18 +78,18 @@ export default function RatingModal({
           <form onSubmit={handleSubmit}>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                تعليق (اختياري)
+                Commentaire (optionnel)
               </label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="شاركنا رأيك..."
+                placeholder="Partagez votre avis..."
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                 rows={4}
                 maxLength={500}
               />
               <p className="text-xs text-gray-500 mt-1">
-                {comment.length}/500 حرف
+                {comment.length}/500 caractères
               </p>
             </div>
 
@@ -99,14 +99,14 @@ export default function RatingModal({
                 onClick={onClose}
                 className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer"
               >
-                إلغاء
+                Annuler
               </button>
               <button
                 type="submit"
                 disabled={rating === 0 || isSubmitting}
                 className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors whitespace-nowrap cursor-pointer"
               >
-                {isSubmitting ? 'جاري الإرسال...' : 'إرسال التقييم'}
+                {isSubmitting ? 'Envoi en cours...' : 'Envoyer l\'avis'}
               </button>
             </div>
           </form>

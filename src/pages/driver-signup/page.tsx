@@ -32,7 +32,7 @@ export default function DriverSignupPage() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error('فشل إنشاء الحساب');
+      if (!authData.user) throw new Error('Échec de la création du compte');
 
       // إضافة بيانات السائق إلى قاعدة البيانات
       const { error: driverError } = await supabase
@@ -61,7 +61,7 @@ export default function DriverSignupPage() {
 
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء التسجيل');
+      setError(err.message || 'Une erreur s\'est produite lors de l\'inscription');
     } finally {
       setIsLoading(false);
     }
@@ -84,21 +84,21 @@ export default function DriverSignupPage() {
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i className="ri-check-line text-4xl text-green-600"></i>
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">تم التسجيل بنجاح!</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Inscription réussie !</h2>
               <p className="text-gray-600 mb-6">
-                شكراً لتسجيلك كسائق توصيل. سيتم مراجعة طلبك من قبل الإدارة وسنقوم بإشعارك عبر البريد الإلكتروني عند الموافقة على حسابك.
+                Merci pour votre inscription en tant que livreur. Votre demande sera examinée par l'équipe et vous serez notifié par e-mail lors de l'approbation de votre compte.
               </p>
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
                 <p className="text-orange-800 text-sm">
                   <i className="ri-information-line ml-2"></i>
-                  عادة ما تستغرق عملية المراجعة من 24 إلى 48 ساعة
+                  La vérification prend généralement entre 24 et 48 heures
                 </p>
               </div>
               <a
                 href="/"
                 className="inline-block bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
               >
-                العودة للرئيسية
+                Retour à l'accueil
               </a>
             </div>
           </div>
@@ -118,8 +118,8 @@ export default function DriverSignupPage() {
             <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <i className="ri-truck-line text-4xl text-orange-600"></i>
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">انضم كسائق توصيل</h1>
-            <p className="text-xl text-gray-600">احصل على دخل إضافي من خلال توصيل الطلبات</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Devenez livreur</h1>
+            <p className="text-xl text-gray-600">Gagnez un revenu supplémentaire en livrant des commandes</p>
           </div>
 
           {/* Benefits */}
@@ -128,30 +128,30 @@ export default function DriverSignupPage() {
               <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className="ri-money-dollar-circle-line text-2xl text-green-600"></i>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">دخل مرن</h3>
-              <p className="text-sm text-gray-600">اعمل في الأوقات التي تناسبك واحصل على دخل إضافي</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Revenu flexible</h3>
+              <p className="text-sm text-gray-600">Travaillez aux horaires qui vous conviennent et gagnez un revenu supplémentaire</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className="ri-time-line text-2xl text-blue-600"></i>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">مرونة في العمل</h3>
-              <p className="text-sm text-gray-600">اختر ساعات العمل التي تناسب جدولك</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Horaires flexibles</h3>
+              <p className="text-sm text-gray-600">Choisissez les heures qui s'adaptent à votre emploi du temps</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 text-center">
               <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className="ri-shield-check-line text-2xl text-purple-600"></i>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">دعم كامل</h3>
-              <p className="text-sm text-gray-600">فريق دعم متاح لمساعدتك في أي وقت</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Support complet</h3>
+              <p className="text-sm text-gray-600">Une équipe disponible pour vous aider à tout moment</p>
             </div>
           </div>
 
           {/* Form */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">معلومات التسجيل</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Informations d'inscription</h2>
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -165,11 +165,11 @@ export default function DriverSignupPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Personal Information */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">المعلومات الشخصية</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations personnelles</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      الاسم الكامل <span className="text-red-500">*</span>
+                      Nom complet <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -178,13 +178,13 @@ export default function DriverSignupPage() {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="أدخل اسمك الكامل"
+                      placeholder="Votre nom complet"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      رقم الهاتف <span className="text-red-500">*</span>
+                      Téléphone <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
@@ -199,7 +199,7 @@ export default function DriverSignupPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      البريد الإلكتروني <span className="text-red-500">*</span>
+                      Adresse e-mail <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
@@ -214,7 +214,7 @@ export default function DriverSignupPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      كلمة المرور <span className="text-red-500">*</span>
+                      Mot de passe <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="password"
@@ -230,7 +230,7 @@ export default function DriverSignupPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      رقم البطاقة الوطنية <span className="text-red-500">*</span>
+                      N° carte d'identité <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -245,7 +245,7 @@ export default function DriverSignupPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      المدينة <span className="text-red-500">*</span>
+                      Ville <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -254,7 +254,7 @@ export default function DriverSignupPage() {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="الدار البيضاء"
+                      placeholder="Casablanca"
                     />
                   </div>
                 </div>
@@ -262,11 +262,11 @@ export default function DriverSignupPage() {
 
               {/* Vehicle Information */}
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">معلومات المركبة</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations du véhicule</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      نوع المركبة <span className="text-red-500">*</span>
+                      Type de véhicule <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="vehicleType"
@@ -275,16 +275,16 @@ export default function DriverSignupPage() {
                       required
                       className="w-full px-4 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     >
-                      <option value="">اختر نوع المركبة</option>
-                      <option value="motorcycle">دراجة نارية</option>
-                      <option value="car">سيارة</option>
-                      <option value="bicycle">دراجة هوائية</option>
+                      <option value="">Choisissez le type de véhicule</option>
+                      <option value="motorcycle">Moto</option>
+                      <option value="car">Voiture</option>
+                      <option value="bicycle">Vélo</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      رقم اللوحة <span className="text-red-500">*</span>
+                      N° immatriculation <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -293,13 +293,13 @@ export default function DriverSignupPage() {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="12345-أ-67"
+                      placeholder="12345-A-67"
                     />
                   </div>
 
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      رقم رخصة القيادة <span className="text-red-500">*</span>
+                      N° permis de conduire <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -323,7 +323,7 @@ export default function DriverSignupPage() {
                     className="mt-1 w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
                   />
                   <span className="text-sm text-gray-700">
-                    أوافق على الشروط والأحكام وسياسة الخصوصية الخاصة بالمنصة
+                    J'accepte les conditions générales et la politique de confidentialité
                   </span>
                 </label>
               </div>
@@ -337,17 +337,17 @@ export default function DriverSignupPage() {
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <i className="ri-loader-4-line animate-spin"></i>
-                    جاري التسجيل...
+                    Inscription en cours...
                   </span>
                 ) : (
-                  'تسجيل كسائق'
+                  'Inscription livreur'
                 )}
               </button>
 
               <p className="text-center text-sm text-gray-600">
-                لديك حساب بالفعل؟{' '}
+                Vous avez déjà un compte ?{' '}
                 <a href="/driver-login" className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer">
-                  تسجيل الدخول
+                  Se connecter
                 </a>
               </p>
             </form>

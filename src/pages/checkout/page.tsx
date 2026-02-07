@@ -93,7 +93,7 @@ export default function CheckoutPage() {
       const items: CartItem[] = products.map(product => ({
         id: product.id,
         name: product.name,
-        restaurant: product.restaurants?.name || 'مطعم غير معروف',
+        restaurant: product.restaurants?.name || 'Restaurant inconnu',
         restaurant_id: product.restaurant_id,
         price: product.price,
         quantity: cart[product.id],
@@ -137,25 +137,25 @@ export default function CheckoutPage() {
     const newErrors: {[key: string]: string} = {};
 
     if (!deliveryInfo.name.trim()) {
-      newErrors.name = 'الاسم مطلوب';
+      newErrors.name = 'Le nom est requis';
     } else if (deliveryInfo.name.trim().length < 2) {
-      newErrors.name = 'الاسم يجب أن يكون أكثر من حرفين';
+      newErrors.name = 'Le nom doit contenir au moins 2 caractères';
     }
 
     if (!deliveryInfo.phone.trim()) {
-      newErrors.phone = 'رقم الهاتف مطلوب';
+      newErrors.phone = 'Le numéro de téléphone est requis';
     } else if (!/^[0-9+\-\s()]{10,15}$/.test(deliveryInfo.phone.trim())) {
-      newErrors.phone = 'رقم الهاتف غير صحيح';
+      newErrors.phone = 'Numéro de téléphone invalide';
     }
 
     if (!deliveryInfo.address.trim()) {
-      newErrors.address = 'العنوان مطلوب';
+      newErrors.address = 'L\'adresse est requise';
     } else if (deliveryInfo.address.trim().length < 10) {
-      newErrors.address = 'يرجى إدخال عنوان مفصل أكثر';
+      newErrors.address = 'Veuillez entrer une adresse plus détaillée';
     }
 
     if (!deliveryInfo.city) {
-      newErrors.city = 'المدينة مطلوبة';
+      newErrors.city = 'La ville est requise';
     }
 
     setErrors(newErrors);
@@ -199,12 +199,12 @@ export default function CheckoutPage() {
     }
 
     if (cartItems.length === 0) {
-      alert('السلة فارغة. لا يمكن إتمام الطلب.');
+      alert('Le panier est vide. Impossible de passer la commande.');
       return;
     }
 
     if (!currentUser) {
-      alert('يجب تسجيل الدخول لإتمام الطلب');
+      alert('Veuillez vous connecter pour passer la commande');
       navigate('/auth');
       return;
     }
@@ -235,7 +235,7 @@ export default function CheckoutPage() {
 
       if (createOrderError || !createdOrder) {
         console.error('خطأ في إنشاء الطلب في Supabase:', createOrderError);
-        throw new Error('تعذر إنشاء الطلب. يرجى المحاولة مرة أخرى.');
+        throw new Error('Impossible de créer la commande. Veuillez réessayer.');
       }
 
       const orderId = createdOrder.id as string;
@@ -256,7 +256,7 @@ export default function CheckoutPage() {
 
       if (orderItemsError) {
         console.error('خطأ في حفظ عناصر الطلب في Supabase:', orderItemsError);
-        throw new Error('تم إنشاء الطلب لكن حدث خطأ في حفظ تفاصيله.');
+        throw new Error('La commande a été créée mais une erreur s\'est produite lors de l\'enregistrement des détails.');
       }
 
       const orderTime = new Date().toLocaleString('ar-MA', {
@@ -270,7 +270,7 @@ export default function CheckoutPage() {
       const orderData = {
         id: orderId,
         user_id: currentUser.id, // إضافة معرف المستخدم
-        restaurant: cartItems[0]?.restaurant || 'مطاعم متنوعة',
+        restaurant: cartItems[0]?.restaurant || 'Plusieurs restaurants',
         items: cartItems.map(item => ({
           id: item.id,
           name: item.name,
@@ -280,7 +280,7 @@ export default function CheckoutPage() {
         })),
         total: total,
         status: 'confirmed',
-        estimatedTime: '30-45 دقيقة',
+        estimatedTime: '30-45 minutes',
         orderTime: orderTime,
         deliveryInfo,
         paymentMethod,
@@ -324,7 +324,7 @@ export default function CheckoutPage() {
       navigate('/track-order', { state: { orderId } });
     } catch (error) {
       console.error('خطأ في إرسال الطلب:', error);
-      alert('حدث خطأ في إرسال الطلب. يرجى المحاولة مرة أخرى.');
+      alert('Erreur lors de l\'envoi de la commande. Veuillez réessayer.');
     } finally {
       setIsSubmitting(false);
     }
@@ -338,7 +338,7 @@ export default function CheckoutPage() {
         <main className="max-w-4xl mx-auto px-4 py-8 pt-24">
           <div className="text-center py-16">
             <i className="ri-loader-4-line text-6xl text-orange-500 animate-spin mb-4"></i>
-            <p className="text-gray-600">جاري تحميل بيانات السلة...</p>
+            <p className="text-gray-600">Chargement du panier...</p>
           </div>
         </main>
         <Footer />
@@ -354,21 +354,21 @@ export default function CheckoutPage() {
         <main className="max-w-4xl mx-auto px-4 py-8 pt-24">
           <div className="text-center py-16">
             <i className="ri-shopping-cart-line text-8xl text-gray-300 mb-6"></i>
-            <h2 className="text-2xl font-bold text-gray-600 mb-4">السلة فارغة</h2>
-            <p className="text-gray-500 mb-8">لا يمكن إتمام الطلب بدون منتجات في السلة</p>
+            <h2 className="text-2xl font-bold text-gray-600 mb-4">Panier vide</h2>
+            <p className="text-gray-500 mb-8">Impossible de passer la commande sans articles dans le panier</p>
             <div className="space-y-4">
               <button 
                 onClick={() => navigate('/restaurants')}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
               >
-                تصفح المطاعم
+                Explorer les restaurants
               </button>
               <br />
               <button 
                 onClick={() => navigate('/cart')}
                 className="text-orange-500 hover:text-orange-600 text-sm cursor-pointer"
               >
-                العودة إلى السلة
+                Retour au panier
               </button>
             </div>
           </div>
@@ -390,7 +390,7 @@ export default function CheckoutPage() {
           >
             <i className="ri-arrow-right-line text-xl"></i>
           </button>
-          <h1 className="text-3xl font-bold text-gray-800">إتمام الطلب</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Finaliser la commande</h1>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -400,13 +400,13 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <i className="ri-user-line text-orange-500 w-5 h-5 flex items-center justify-center"></i>
-                معلومات التوصيل
+                Informations de livraison
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    الاسم الكامل *
+                    Nom complet *
                   </label>
                   <input
                     type="text"
@@ -416,7 +416,7 @@ export default function CheckoutPage() {
                     className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm ${
                       errors.name ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="أدخل اسمك الكامل"
+                    placeholder="Entrez votre nom complet"
                     required
                   />
                   {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -424,7 +424,7 @@ export default function CheckoutPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    رقم الهاتف *
+                    Téléphone *
                   </label>
                   <input
                     type="tel"
@@ -442,7 +442,7 @@ export default function CheckoutPage() {
                 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    العنوان التفصيلي *
+                    Adresse détaillée *
                   </label>
                   <input
                     type="text"
@@ -452,7 +452,7 @@ export default function CheckoutPage() {
                     className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm ${
                       errors.address ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="الشارع، الحي، رقم المنزل، نقاط مرجعية"
+                    placeholder="Rue, quartier, numéro, points de repère"
                     required
                   />
                   {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
@@ -460,7 +460,7 @@ export default function CheckoutPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    المدينة *
+                    Ville *
                   </label>
                   <select
                     name="city"
@@ -471,24 +471,24 @@ export default function CheckoutPage() {
                     }`}
                     required
                   >
-                    <option value="">اختر المدينة</option>
-                    <option value="الدار البيضاء">الدار البيضاء</option>
-                    <option value="الرباط">الرباط</option>
-                    <option value="فاس">فاس</option>
-                    <option value="مراكش">مراكش</option>
-                    <option value="طنجة">طنجة</option>
-                    <option value="أكادير">أكادير</option>
-                    <option value="مكناس">مكناس</option>
-                    <option value="وجدة">وجدة</option>
-                    <option value="القنيطرة">القنيطرة</option>
-                    <option value="تطوان">تطوان</option>
+                    <option value="">Choisir la ville</option>
+                    <option value="Casablanca">Casablanca</option>
+                    <option value="Rabat">Rabat</option>
+                    <option value="Fès">Fès</option>
+                    <option value="Marrakech">Marrakech</option>
+                    <option value="Tanger">Tanger</option>
+                    <option value="Agadir">Agadir</option>
+                    <option value="Meknès">Meknès</option>
+                    <option value="Oujda">Oujda</option>
+                    <option value="Kénitra">Kénitra</option>
+                    <option value="Tétouan">Tétouan</option>
                   </select>
                   {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
                 </div>
                 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ملاحظات إضافية
+                    Notes supplémentaires
                   </label>
                   <textarea
                     value={deliveryInfo.notes}
@@ -496,10 +496,10 @@ export default function CheckoutPage() {
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
                     rows={3}
                     maxLength={500}
-                    placeholder="أي ملاحظات خاصة للتوصيل (اختياري)..."
+                    placeholder="Notes pour la livraison (optionnel)..."
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {deliveryInfo.notes.length}/500 حرف
+                    {deliveryInfo.notes.length}/500 caractères
                   </p>
                 </div>
               </div>
@@ -509,7 +509,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <i className="ri-bank-card-line text-orange-500 w-5 h-5 flex items-center justify-center"></i>
-                طريقة الدفع
+                Mode de paiement
               </h2>
               
               <div className="space-y-4">
@@ -529,8 +529,8 @@ export default function CheckoutPage() {
                       <i className="ri-money-dollar-circle-line text-xl text-gray-600"></i>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800">الدفع نقداً عند التوصيل</h3>
-                      <p className="text-sm text-gray-600">ادفع للمندوب عند استلام الطلب</p>
+                      <h3 className="font-medium text-gray-800">Paiement à la livraison</h3>
+                      <p className="text-sm text-gray-600">Payez au livreur à la réception</p>
                     </div>
                   </div>
                 </div>
@@ -551,8 +551,8 @@ export default function CheckoutPage() {
                       <i className="ri-bank-card-line text-xl text-gray-600"></i>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-800">الدفع بالبطاقة البنكية</h3>
-                      <p className="text-sm text-gray-600">دفع آمن عبر الإنترنت</p>
+                      <h3 className="font-medium text-gray-800">Paiement par carte bancaire</h3>
+                      <p className="text-sm text-gray-600">Paiement sécurisé en ligne</p>
                     </div>
                   </div>
                 </div>
@@ -565,7 +565,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
               <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <i className="ri-file-list-line text-orange-500 w-5 h-5 flex items-center justify-center"></i>
-                ملخص الطلب
+                Récapitulatif de la commande
               </h2>
               
               {/* عناصر السلة */}
@@ -581,7 +581,7 @@ export default function CheckoutPage() {
                       <h3 className="font-medium text-gray-800 text-sm">{item.name}</h3>
                       <p className="text-xs text-gray-600">{item.restaurant}</p>
                       <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-gray-500">الكمية: {item.quantity}</span>
+                        <span className="text-xs text-gray-500">Qté: {item.quantity}</span>
                         <span className="font-medium text-sm text-orange-600">{item.price * item.quantity} DH</span>
                       </div>
                     </div>
@@ -592,22 +592,22 @@ export default function CheckoutPage() {
               {/* تفاصيل السعر */}
               <div className="space-y-3 mb-6 border-t pt-4">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">المجموع الفرعي</span>
+                  <span className="text-gray-600">Sous-total</span>
                   <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">رسوم التوصيل</span>
+                  <span className="text-gray-600">Frais de livraison</span>
                   <span className="font-medium">{deliveryFee.toFixed(2)} DH</span>
                 </div>
                 {appliedPromo && (
                   <div className="flex justify-between text-green-600">
-                    <span>الخصم ({appliedPromo.code})</span>
+                    <span>Réduction ({appliedPromo.code})</span>
                     <span>-{discount.toFixed(2)} DH</span>
                   </div>
                 )}
                 <div className="border-t pt-3">
                   <div className="flex justify-between text-lg font-bold">
-                    <span>المجموع الكلي</span>
+                    <span>Total</span>
                     <span className="text-orange-600">{total.toFixed(2)} DH</span>
                   </div>
                 </div>
@@ -622,12 +622,12 @@ export default function CheckoutPage() {
                 {isSubmitting ? (
                   <>
                     <i className="ri-loader-4-line animate-spin"></i>
-                    جاري إرسال الطلب...
+                    Envoi de la commande...
                   </>
                 ) : (
                   <>
                     <i className="ri-check-line w-5 h-5 flex items-center justify-center"></i>
-                    تأكيد الطلب ({total.toFixed(2)} DH)
+                    Confirmer la commande ({total.toFixed(2)} DH)
                   </>
                 )}
               </button>
@@ -637,7 +637,7 @@ export default function CheckoutPage() {
                   onClick={() => navigate('/cart')}
                   className="text-orange-500 hover:text-orange-600 text-sm cursor-pointer"
                 >
-                  العودة إلى السلة
+                  Retour au panier
                 </button>
               </div>
 
@@ -646,11 +646,11 @@ export default function CheckoutPage() {
                 <div className="text-xs text-gray-500 space-y-2">
                   <div className="flex items-center gap-2">
                     <i className="ri-time-line text-orange-500 w-4 h-4 flex items-center justify-center"></i>
-                    <span>وقت التوصيل المتوقع: 30-45 دقيقة</span>
+                    <span>Délai de livraison estimé: 30-45 min</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <i className="ri-shield-check-line text-green-500 w-4 h-4 flex items-center justify-center"></i>
-                    <span>دفع آمن ومضمون</span>
+                    <span>Paiement sécurisé</span>
                   </div>
                 </div>
               </div>

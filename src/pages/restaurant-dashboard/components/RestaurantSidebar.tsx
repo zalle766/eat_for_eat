@@ -8,32 +8,32 @@ export default function RestaurantSidebar({ activeTab, setActiveTab }: Restauran
   const menuItems = [
     {
       id: 'dashboard',
-      label: 'لوحة المعلومات',
+      label: 'Tableau de bord',
       icon: 'ri-dashboard-3-line'
     },
     {
       id: 'menu',
-      label: 'إدارة القائمة',
+      label: 'Gestion du menu',
       icon: 'ri-restaurant-line'
     },
     {
       id: 'orders',
-      label: 'إدارة الطلبات',
+      label: 'Commandes',
       icon: 'ri-shopping-bag-3-line'
     },
     {
       id: 'profile',
-      label: 'ملف المطعم',
+      label: 'Profil restaurant',
       icon: 'ri-store-2-line'
     },
     {
       id: 'analytics',
-      label: 'التحليلات',
+      label: 'Analytiques',
       icon: 'ri-line-chart-line'
     },
     {
       id: 'settings',
-      label: 'الإعدادات',
+      label: 'Paramètres',
       icon: 'ri-settings-3-line'
     }
   ];
@@ -46,8 +46,8 @@ export default function RestaurantSidebar({ activeTab, setActiveTab }: Restauran
             <i className="ri-restaurant-line text-white text-xl"></i>
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">لوحة المطعم</h2>
-            <p className="text-xs text-gray-500">إدارة مطعمك</p>
+            <h2 className="text-lg font-bold text-gray-900">Tableau de bord</h2>
+            <p className="text-xs text-gray-500">Gérez votre restaurant</p>
           </div>
         </div>
       </div>
@@ -77,11 +77,11 @@ export default function RestaurantSidebar({ activeTab, setActiveTab }: Restauran
         <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
           <div className="flex items-center gap-3 mb-2">
             <i className="ri-customer-service-2-line text-orange-600"></i>
-            <span className="text-sm font-semibold text-orange-800">تحتاج مساعدة؟</span>
+            <span className="text-sm font-semibold text-orange-800">Besoin d'aide ?</span>
           </div>
-          <p className="text-xs text-orange-700 mb-3">فريق الدعم متاح 24/7 لمساعدتك</p>
+          <p className="text-xs text-orange-700 mb-3">Équipe support disponible 24/7</p>
           <button className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm py-2 rounded-lg transition-colors cursor-pointer whitespace-nowrap">
-            تواصل معنا
+            Contactez-nous
           </button>
         </div>
       </div>

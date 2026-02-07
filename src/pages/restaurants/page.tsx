@@ -136,7 +136,7 @@ export default function RestaurantsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        alert('يجب تسجيل الدخول لإضافة تقييم');
+        alert('Veuillez vous connecter pour ajouter un avis');
         setShowRatingModal(false);
         setRatingTarget(null);
         return;
@@ -157,7 +157,7 @@ export default function RestaurantsPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || 'حدث خطأ في إرسال التقييم';
+        const errorMessage = errorData.error || 'Erreur lors de l\'envoi de l\'avis';
         console.error('خطأ من الخادم:', errorMessage);
         alert(errorMessage);
         throw new Error(errorMessage);
@@ -169,13 +169,13 @@ export default function RestaurantsPage() {
         await loadRestaurantRatings();
         setShowRatingModal(false);
         setRatingTarget(null);
-        alert('تم حفظ التقييم بنجاح!');
+        alert('Avis enregistré avec succès !');
       } else {
-        throw new Error(result.error || 'فشل إرسال التقييم');
+        throw new Error(result.error || 'Échec de l\'envoi de l\'avis');
       }
     } catch (error) {
       console.error('خطأ في إرسال التقييم:', error);
-      const errorMessage = (error as Error).message || 'حدث خطأ في إرسال التقييم';
+      const errorMessage = (error as Error).message || 'Erreur lors de l\'envoi de l\'évaluation';
       alert(errorMessage);
     }
   };
@@ -195,15 +195,15 @@ export default function RestaurantsPage() {
         <div className="relative h-64 bg-gradient-to-r from-orange-500 to-red-500">
           <img
             src="https://readdy.ai/api/search-image?query=Modern%20restaurant%20interior%20with%20warm%20lighting%2C%20elegant%20dining%20tables%2C%20contemporary%20design%2C%20professional%20food%20service%20atmosphere%2C%20clean%20and%20inviting%20space%20with%20orange%20and%20red%20color%20accents&width=1200&height=400&seq=restaurants-hero&orientation=landscape"
-            alt="المطاعم"
+            alt="Restaurants"
             className="w-full h-full object-cover object-top"
           />
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
           
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center text-white">
-              <h1 className="text-4xl font-bold mb-4">اكتشف أفضل المطاعم</h1>
-              <p className="text-xl">اختر من مجموعة واسعة من المطاعم المميزة</p>
+              <h1 className="text-4xl font-bold mb-4">Découvrez les meilleurs restaurants</h1>
+              <p className="text-xl">Choisissez parmi une large sélection de restaurants</p>
             </div>
           </div>
         </div>
@@ -229,7 +229,7 @@ export default function RestaurantsPage() {
           ) : restaurants.length === 0 ? (
             <div className="text-center py-12">
               <i className="ri-restaurant-line text-4xl text-gray-400 mb-4"></i>
-              <p className="text-gray-600">لا توجد مطاعم متاحة حالياً</p>
+              <p className="text-gray-600">Aucun restaurant disponible pour le moment</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -256,7 +256,7 @@ export default function RestaurantsPage() {
                             ? 'bg-red-100 text-red-800' 
                             : 'bg-green-100 text-green-800'
                         }`}>
-                          {restaurant.status === 'closed' ? 'مغلق' : 'مفتوح'}
+                          {restaurant.status === 'closed' ? 'Fermé' : 'Ouvert'}
                         </span>
                       </div>
                     </div>
@@ -272,7 +272,7 @@ export default function RestaurantsPage() {
                         </button>
                       </div>
                       
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{restaurant.description || 'مطعم رائع يقدم أشهى الأطباق'}</p>
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{restaurant.description || 'Un restaurant qui propose des plats délicieux'}</p>
                       
                       {rating && (
                         <div className="mb-3">
@@ -289,11 +289,11 @@ export default function RestaurantsPage() {
                       <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
                         <div className="flex items-center gap-1">
                           <i className="ri-time-line w-4 h-4"></i>
-                          <span>{restaurant.delivery_time || '30-45 دقيقة'}</span>
+                          <span>{restaurant.delivery_time || '30-45 min'}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <i className="ri-truck-line w-4 h-4"></i>
-                          <span>{restaurant.delivery_fee || 15} ر.س</span>
+                          <span>{restaurant.delivery_fee || 15} DH</span>
                         </div>
                       </div>
                       
@@ -301,7 +301,7 @@ export default function RestaurantsPage() {
                         onClick={() => window.REACT_APP_NAVIGATE(`/restaurant?id=${restaurant.id}`)}
                         className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap cursor-pointer"
                       >
-                        عرض المطعم
+                        Voir le restaurant
                       </button>
                     </div>
                   </div>
@@ -322,7 +322,7 @@ export default function RestaurantsPage() {
           setRatingTarget(null);
         }}
         onSubmit={handleSubmitRating}
-        title="تقييم المطعم"
+        title="Évaluer le restaurant"
         itemName={ratingTarget?.name || ''}
       />
     </div>

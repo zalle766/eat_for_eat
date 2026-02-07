@@ -88,18 +88,18 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
       }
 
       loadDeliveries();
-      alert('تم تحديث حالة التوصيل بنجاح');
+      alert('État de livraison mis à jour avec succès');
     } catch (error) {
       console.error('خطأ في تحديث الحالة:', error);
-      alert('حدث خطأ أثناء تحديث الحالة');
+      alert('Erreur lors de la mise à jour de l\'état');
     }
   };
 
   const getStatusBadge = (status: string) => {
     const statusConfig: any = {
-      assigned: { label: 'بانتظار قبولك', color: 'bg-blue-100 text-blue-700' },
-      picked_up: { label: 'تم الاستلام', color: 'bg-orange-100 text-orange-700' },
-      delivered: { label: 'تم التوصيل', color: 'bg-green-100 text-green-700' }
+      assigned: { label: 'En attente de votre acceptation', color: 'bg-blue-100 text-blue-700' },
+      picked_up: { label: 'Récupéré', color: 'bg-orange-100 text-orange-700' },
+      delivered: { label: 'Livré', color: 'bg-green-100 text-green-700' }
     };
     
     const config = statusConfig[status] || { label: status, color: 'bg-gray-100 text-gray-700' };
@@ -115,7 +115,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">جاري تحميل التوصيلات...</p>
+          <p className="text-gray-600">Chargement des livraisons...</p>
         </div>
       </div>
     );
@@ -124,8 +124,8 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">توصيلاتي</h2>
-        <p className="text-gray-600">إدارة ومتابعة توصيلاتك</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Mes livraisons</h2>
+        <p className="text-gray-600">Gérez et suivez vos livraisons</p>
       </div>
 
       {/* Filter Tabs */}
@@ -138,7 +138,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          التوصيلات النشطة
+          Livraisons actives
         </button>
         <button
           onClick={() => setFilter('completed')}
@@ -148,7 +148,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          التوصيلات المكتملة
+          Livraisons terminées
         </button>
         <button
           onClick={() => setFilter('all')}
@@ -158,7 +158,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
-          جميع التوصيلات
+          Toutes les livraisons
         </button>
       </div>
 
@@ -167,9 +167,9 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <i className="ri-truck-line text-4xl text-gray-400"></i>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">لا توجد توصيلات</h3>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune livraison</h3>
           <p className="text-gray-600">
-            {filter === 'active' ? 'ليس لديك توصيلات نشطة حالياً' : 'لم تقم بأي توصيلات بعد'}
+            {filter === 'active' ? 'Aucune livraison active pour le moment' : "Vous n'avez pas encore effectué de livraison"}
           </p>
         </div>
       ) : (
@@ -180,11 +180,11 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-200">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-gray-900">طلب #{delivery.order_id.slice(0, 8)}</h3>
+                    <h3 className="font-semibold text-gray-900">Commande #{delivery.order_id.slice(0, 8)}</h3>
                     {getStatusBadge(delivery.status)}
                   </div>
                   <p className="text-sm text-gray-600">
-                    {new Date(delivery.created_at).toLocaleDateString('ar-MA', {
+                    {new Date(delivery.created_at).toLocaleDateString('fr-FR', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -194,8 +194,8 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                   </p>
                 </div>
                 <div className="text-left">
-                  <p className="text-2xl font-bold text-gray-900">{delivery.total_amount.toFixed(2)} د.م</p>
-                  <p className="text-sm text-green-600 font-medium">أرباحك: {delivery.driver_earnings.toFixed(2)} د.م</p>
+                  <p className="text-2xl font-bold text-gray-900">{delivery.total_amount.toFixed(2)} DH</p>
+                  <p className="text-sm text-green-600 font-medium">Vos revenus : {delivery.driver_earnings.toFixed(2)} DH</p>
                 </div>
               </div>
 
@@ -204,7 +204,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                     <i className="ri-store-line text-orange-500"></i>
-                    الاستلام من
+                    Récupération à
                   </h4>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="font-medium text-gray-900 mb-1">{delivery.pickup_address}</p>
@@ -216,7 +216,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                     <i className="ri-map-pin-line text-orange-500"></i>
-                    التوصيل إلى
+                    Livraison à
                   </h4>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="font-medium text-gray-900 mb-1">{delivery.customer_name}</p>
@@ -230,7 +230,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                   <p className="text-sm text-yellow-800">
                     <i className="ri-information-line ml-2"></i>
-                    <strong>ملاحظات:</strong> {delivery.notes}
+                    <strong>Notes :</strong> {delivery.notes}
                   </p>
                 </div>
               )}
@@ -243,7 +243,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                     className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <i className="ri-checkbox-circle-line ml-2"></i>
-                    قبول هذا الطلب
+                    Accepter cette commande
                   </button>
                   <button
                     onClick={async () => {
@@ -256,15 +256,15 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                         if (error) throw error;
 
                         loadDeliveries();
-                        alert('تم رفض الطلب، سيتم إعلام المطعم.');
+                        alert('Commande refusée. Le restaurant sera notifié.');
                       } catch (error) {
                         console.error('خطأ في رفض الطلب:', error);
-                        alert('حدث خطأ أثناء رفض الطلب');
+                        alert('Erreur lors du refus de la commande');
                       }
                     }}
                     className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
                   >
-                    رفض الطلب
+                    Refuser
                   </button>
                 </div>
               )}
@@ -276,7 +276,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                     className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
                   >
                     <i className="ri-checkbox-circle-line ml-2"></i>
-                    تم توصيل الطلب
+                    Marquer comme livré
                   </button>
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${delivery.delivery_address}`}
@@ -292,9 +292,9 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               {delivery.status === 'delivered' && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                   <i className="ri-checkbox-circle-fill text-3xl text-green-600 mb-2"></i>
-                  <p className="text-green-700 font-medium">تم التوصيل بنجاح</p>
+                  <p className="text-green-700 font-medium">Livré avec succès</p>
                   <p className="text-sm text-green-600">
-                    {new Date(delivery.delivered_at).toLocaleDateString('ar-MA', {
+                    {new Date(delivery.delivered_at).toLocaleDateString('fr-FR', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',

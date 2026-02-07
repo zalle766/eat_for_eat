@@ -75,7 +75,7 @@ export default function CartPage() {
       const items: CartItem[] = products.map(product => ({
         id: product.id,
         name: product.name,
-        restaurant: product.restaurants?.name || 'مطعم غير معروف',
+        restaurant: product.restaurants?.name || 'Restaurant inconnu',
         restaurant_id: product.restaurant_id,
         price: product.price,
         quantity: cart[product.id],
@@ -138,7 +138,7 @@ export default function CartPage() {
     } else if (promoCode === 'FREE100') {
       setAppliedPromo({ code: 'FREE100', discount: 40, type: 'fixed' });
     } else if (promoCode.trim()) {
-      alert('كود الخصم غير صحيح');
+      alert('Code promo invalide');
     }
   };
 
@@ -149,7 +149,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      alert('السلة فارغة');
+      alert('Le panier est vide');
       return;
     }
 
@@ -176,7 +176,7 @@ export default function CartPage() {
         <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center py-16">
             <i className="ri-loader-4-line text-6xl text-orange-500 animate-spin mb-4"></i>
-            <p className="text-gray-600">جاري تحميل السلة...</p>
+            <p className="text-gray-600">Chargement du panier...</p>
           </div>
         </main>
         <Footer />
@@ -191,13 +191,13 @@ export default function CartPage() {
         <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="text-center py-16">
             <i className="ri-shopping-cart-line text-8xl text-gray-300 mb-6"></i>
-            <h2 className="text-2xl font-bold text-gray-600 mb-4">سلتك فارغة</h2>
-            <p className="text-gray-500 mb-8">ابدأ بإضافة أطباق لذيذة إلى سلتك</p>
+            <h2 className="text-2xl font-bold text-gray-600 mb-4">Votre panier est vide</h2>
+            <p className="text-gray-500 mb-8">Commencez par ajouter des plats délicieux à votre panier</p>
             <button 
               onClick={() => navigate('/restaurants')}
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
             >
-              تصفح المطاعم
+              Explorer les restaurants
             </button>
           </div>
         </main>
@@ -211,13 +211,13 @@ export default function CartPage() {
       <Header />
       
       <main className="max-w-6xl mx-auto px-4 py-8 pt-24">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">السلة</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Panier</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">طلباتك ({cartItems.length})</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-6">Vos articles ({cartItems.length})</h2>
               
               <div className="space-y-6">
                 {cartItems.map((item) => (
@@ -275,11 +275,11 @@ export default function CartPage() {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">ملخص الطلب</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-6">Récapitulatif</h2>
               
               {/* Promo Code */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">كود الخصم</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Code promo</label>
                 {appliedPromo ? (
                   <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
                     <div className="flex items-center gap-2">
@@ -299,7 +299,7 @@ export default function CartPage() {
                       type="text"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                      placeholder="أدخل كود الخصم"
+                      placeholder="Entrez le code promo"
                       className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
                       onKeyPress={(e) => e.key === 'Enter' && applyPromoCode()}
                     />
@@ -307,32 +307,32 @@ export default function CartPage() {
                       onClick={applyPromoCode}
                       className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
                     >
-                      تطبيق
+                      Appliquer
                     </button>
                   </div>
                 )}
-                <p className="text-xs text-gray-500 mt-2">جرب: FIRST50 أو FREE100</p>
+                <p className="text-xs text-gray-500 mt-2">Essayez: FIRST50 ou FREE100</p>
               </div>
 
               {/* Price Breakdown */}
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">المجموع الفرعي</span>
+                  <span className="text-gray-600">Sous-total</span>
                   <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">رسوم التوصيل</span>
+                  <span className="text-gray-600">Frais de livraison</span>
                   <span className="font-medium">{deliveryFee.toFixed(2)} DH</span>
                 </div>
                 {appliedPromo && (
                   <div className="flex justify-between text-green-600">
-                    <span>الخصم ({appliedPromo.code})</span>
+                    <span>Réduction ({appliedPromo.code})</span>
                     <span>-{discount.toFixed(2)} DH</span>
                   </div>
                 )}
                 <div className="border-t pt-3">
                   <div className="flex justify-between text-lg font-bold">
-                    <span>الإجمالي</span>
+                    <span>Total</span>
                     <span className="text-orange-600">{total.toFixed(2)} DH</span>
                   </div>
                 </div>
@@ -343,7 +343,7 @@ export default function CartPage() {
                 onClick={handleCheckout}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
               >
-                إتمام الطلب
+                Passer la commande
               </button>
               
               <div className="mt-4 text-center">
@@ -351,7 +351,7 @@ export default function CartPage() {
                   onClick={() => navigate('/restaurants')}
                   className="text-orange-500 hover:text-orange-600 text-sm cursor-pointer"
                 >
-                  إضافة المزيد من الأطباق
+                  Ajouter d'autres plats
                 </button>
               </div>
             </div>

@@ -42,24 +42,24 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
   });
 
   const tabs = [
-    { id: 'general', label: 'الإعدادات العامة', icon: 'ri-settings-3-line' },
-    { id: 'hours', label: 'ساعات العمل', icon: 'ri-time-line' },
-    { id: 'notifications', label: 'الإشعارات', icon: 'ri-notification-3-line' },
-    { id: 'payment', label: 'طرق الدفع', icon: 'ri-money-dollar-circle-line' }
+    { id: 'general', label: 'Paramètres généraux', icon: 'ri-settings-3-line' },
+    { id: 'hours', label: 'Horaires', icon: 'ri-time-line' },
+    { id: 'notifications', label: 'Notifications', icon: 'ri-notification-3-line' },
+    { id: 'payment', label: 'Paiement', icon: 'ri-money-dollar-circle-line' }
   ];
 
   const daysOfWeek = [
-    { key: 'monday', label: 'الاثنين' },
-    { key: 'tuesday', label: 'الثلاثاء' },
-    { key: 'wednesday', label: 'الأربعاء' },
-    { key: 'thursday', label: 'الخميس' },
-    { key: 'friday', label: 'الجمعة' },
-    { key: 'saturday', label: 'السبت' },
-    { key: 'sunday', label: 'الأحد' }
+    { key: 'monday', label: 'Lundi' },
+    { key: 'tuesday', label: 'Mardi' },
+    { key: 'wednesday', label: 'Mercredi' },
+    { key: 'thursday', label: 'Jeudi' },
+    { key: 'friday', label: 'Vendredi' },
+    { key: 'saturday', label: 'Samedi' },
+    { key: 'sunday', label: 'Dimanche' }
   ];
 
   const handleSaveSettings = () => {
-    alert('تم حفظ الإعدادات بنجاح!');
+    alert('Paramètres enregistrés avec succès !');
   };
 
   const toggleRestaurantStatus = () => {
@@ -89,11 +89,11 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
     <div className="space-y-6">
       {/* حالة المطعم */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">حالة المطعم</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Statut du restaurant</h3>
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <h4 className="font-medium text-gray-900">المطعم مفتوح</h4>
-            <p className="text-sm text-gray-600">تحكم في قبول الطلبات الجديدة</p>
+            <h4 className="font-medium text-gray-900">Restaurant ouvert</h4>
+            <p className="text-sm text-gray-600">Contrôler l'acceptation des nouvelles commandes</p>
           </div>
           <button
             onClick={toggleRestaurantStatus}
@@ -112,12 +112,12 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
       {/* إعدادات الطلبات */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">إعدادات الطلبات</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Paramètres des commandes</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div>
-              <h4 className="font-medium text-gray-900">قبول تلقائي للطلبات</h4>
-              <p className="text-sm text-gray-600">قبول الطلبات تلقائياً بدون تدخل يدوي</p>
+              <h4 className="font-medium text-gray-900">Acceptation automatique</h4>
+              <p className="text-sm text-gray-600">Accepter les commandes automatiquement sans intervention</p>
             </div>
             <button
               onClick={() => setSettings(prev => ({
@@ -138,7 +138,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              الحد الأقصى للطلبات في الساعة
+              Nombre max de commandes par heure
             </label>
             <input
               type="number"
@@ -155,7 +155,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              وقت التحضير الافتراضي (بالدقائق)
+              Temps de préparation par défaut (minutes)
             </label>
             <input
               type="number"
@@ -176,7 +176,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
   const renderHoursSettings = () => (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">ساعات العمل</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-6">Horaires d'ouverture</h3>
       <div className="space-y-4">
         {daysOfWeek.map((day) => (
           <div key={day.key} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
@@ -191,13 +191,13 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
                 onChange={(e) => updateHours(day.key, 'closed', !e.target.checked)}
                 className="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
               />
-              <span className="text-sm text-gray-600">مفتوح</span>
+              <span className="text-sm text-gray-600">Ouvert</span>
             </div>
 
             {!settings.hours[day.key as keyof typeof settings.hours].closed && (
               <>
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">من:</label>
+                  <label className="text-sm text-gray-600">De :</label>
                   <input
                     type="time"
                     value={settings.hours[day.key as keyof typeof settings.hours].open}
@@ -207,7 +207,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">إلى:</label>
+                  <label className="text-sm text-gray-600">À :</label>
                   <input
                     type="time"
                     value={settings.hours[day.key as keyof typeof settings.hours].close}
@@ -219,7 +219,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
             )}
 
             {settings.hours[day.key as keyof typeof settings.hours].closed && (
-              <span className="text-sm text-red-600 font-medium">مغلق</span>
+              <span className="text-sm text-red-600 font-medium">Fermé</span>
             )}
           </div>
         ))}
@@ -229,12 +229,12 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
   const renderNotificationsSettings = () => (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">إعدادات الإشعارات</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-6">Paramètres des notifications</h3>
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <h4 className="font-medium text-gray-900">طلب جديد</h4>
-            <p className="text-sm text-gray-600">إشعار عند استلام طلب جديد</p>
+            <h4 className="font-medium text-gray-900">Nouvelle commande</h4>
+            <p className="text-sm text-gray-600">Notification à la réception d'une nouvelle commande</p>
           </div>
           <button
             onClick={() => setSettings(prev => ({
@@ -255,8 +255,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <h4 className="font-medium text-gray-900">إلغاء طلب</h4>
-            <p className="text-sm text-gray-600">إشعار عند إلغاء طلب</p>
+            <h4 className="font-medium text-gray-900">Annulation de commande</h4>
+            <p className="text-sm text-gray-600">Notification lors de l'annulation d'une commande</p>
           </div>
           <button
             onClick={() => setSettings(prev => ({
@@ -277,8 +277,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <h4 className="font-medium text-gray-900">تقييم جديد</h4>
-            <p className="text-sm text-gray-600">إشعار عند استلام تقييم من عميل</p>
+            <h4 className="font-medium text-gray-900">Nouvel avis</h4>
+            <p className="text-sm text-gray-600">Notification à la réception d'un avis client</p>
           </div>
           <button
             onClick={() => setSettings(prev => ({
@@ -299,8 +299,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
-            <h4 className="font-medium text-gray-900">تقرير يومي</h4>
-            <p className="text-sm text-gray-600">تقرير يومي بالمبيعات والطلبات</p>
+            <h4 className="font-medium text-gray-900">Rapport quotidien</h4>
+            <p className="text-sm text-gray-600">Rapport quotidien des ventes et commandes</p>
           </div>
           <button
             onClick={() => setSettings(prev => ({
@@ -324,14 +324,14 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
 
   const renderPaymentSettings = () => (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-900 mb-6">طرق الدفع المقبولة</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-6">Moyens de paiement acceptés</h3>
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-3">
             <i className="ri-money-dollar-circle-line text-2xl text-green-600"></i>
             <div>
-              <h4 className="font-medium text-gray-900">الدفع نقداً عند التوصيل</h4>
-              <p className="text-sm text-gray-600">قبول الدفع النقدي عند التوصيل</p>
+              <h4 className="font-medium text-gray-900">Paiement à la livraison</h4>
+              <p className="text-sm text-gray-600">Accepter les paiements en espèces à la livraison</p>
             </div>
           </div>
           <button
@@ -355,8 +355,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
           <div className="flex items-center gap-3">
             <i className="ri-bank-card-line text-2xl text-blue-600"></i>
             <div>
-              <h4 className="font-medium text-gray-900">بطاقة ائتمان</h4>
-              <p className="text-sm text-gray-600">قبول الدفع بالبطاقات الائتمانية</p>
+              <h4 className="font-medium text-gray-900">Carte bancaire</h4>
+              <p className="text-sm text-gray-600">Accepter les paiements par carte</p>
             </div>
           </div>
           <button
@@ -380,8 +380,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
           <div className="flex items-center gap-3">
             <i className="ri-smartphone-line text-2xl text-purple-600"></i>
             <div>
-              <h4 className="font-medium text-gray-900">محفظة رقمية</h4>
-              <p className="text-sm text-gray-600">قبول الدفع عبر المحافظ الرقمية</p>
+              <h4 className="font-medium text-gray-900">Portefeuille numérique</h4>
+              <p className="text-sm text-gray-600">Accepter les paiements via portefeuilles numériques</p>
             </div>
           </div>
           <button
@@ -405,8 +405,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
           <div className="flex items-center gap-3">
             <i className="ri-bank-line text-2xl text-orange-600"></i>
             <div>
-              <h4 className="font-medium text-gray-900">تحويل بنكي</h4>
-              <p className="text-sm text-gray-600">قبول الدفع عبر التحويل البنكي</p>
+              <h4 className="font-medium text-gray-900">Virement bancaire</h4>
+              <p className="text-sm text-gray-600">Accepter les paiements par virement</p>
             </div>
           </div>
           <button
@@ -449,8 +449,8 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
       {/* رأس القسم */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">الإعدادات</h2>
-          <p className="text-gray-600">إدارة إعدادات مطعمك وتفضيلاتك</p>
+          <h2 className="text-2xl font-bold text-gray-900">Paramètres</h2>
+          <p className="text-gray-600">Gérez les paramètres et préférences de votre restaurant</p>
         </div>
         
         <button
@@ -458,7 +458,7 @@ export default function Settings({ restaurant, setRestaurant }: SettingsProps) {
           className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
         >
           <i className="ri-save-line"></i>
-          حفظ جميع الإعدادات
+          Enregistrer
         </button>
       </div>
 

@@ -146,7 +146,7 @@ export default function ProductPage() {
       });
 
       if (!response.ok) {
-        throw new Error('فشل تحميل التقييمات');
+        throw new Error('Échec du chargement des évaluations');
       }
 
       const data = await response.json();
@@ -186,8 +186,8 @@ export default function ProductPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error || 'حدث خطأ في إضافة التقييم';
-        console.error('خطأ من الخادم:', errorMessage);
+        const errorMessage = errorData.error || 'Erreur lors de l\'ajout de l\'avis';
+        console.error('Erreur du serveur:', errorMessage);
         throw new Error(errorMessage);
       }
 
@@ -196,17 +196,17 @@ export default function ProductPage() {
         // إعادة تحميل التقييمات بعد الحفظ
         await loadReviews(id);
         setShowRatingModal(false);
-        alert('تم حفظ التقييم بنجاح!');
+        alert('Avis enregistré avec succès !');
       } else {
-        throw new Error(result.error || 'فشل إضافة التقييم');
+        throw new Error(result.error || 'Échec de l\'ajout de l\'avis');
       }
     } catch (error) {
       if ((error as Error).message === 'AUTH_REQUIRED') {
-        alert('يجب تسجيل الدخول لإضافة تقييم');
+        alert('Veuillez vous connecter pour ajouter un avis');
         setShowRatingModal(false);
       } else {
-        const errorMessage = (error as Error).message || 'حدث خطأ في إضافة التقييم';
-        console.error('خطأ في إضافة التقييم:', error);
+        const errorMessage = (error as Error).message || 'Erreur lors de l\'ajout de l\'avis';
+        console.error('Erreur lors de l\'ajout de l\'avis:', error);
         alert(errorMessage);
         // لا نغلق المودال عند حدوث خطأ حتى يتمكن المستخدم من المحاولة مرة أخرى
         throw error;
@@ -239,7 +239,7 @@ export default function ProductPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <i className="ri-loader-4-line text-4xl text-orange-500 animate-spin mb-4"></i>
-            <p className="text-gray-600">جاري تحميل بيانات المنتج...</p>
+            <p className="text-gray-600">Chargement du produit...</p>
           </div>
         </div>
         <Footer />
@@ -254,7 +254,7 @@ export default function ProductPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <i className="ri-product-hunt-line text-4xl text-gray-400 mb-4"></i>
-            <p className="text-gray-600">المنتج غير موجود</p>
+            <p className="text-gray-600">Produit introuvable</p>
           </div>
         </div>
         <Footer />
@@ -311,12 +311,12 @@ export default function ProductPage() {
                     className="text-orange-500 hover:text-orange-600 transition-colors cursor-pointer"
                   >
                     <i className="ri-star-line w-4 h-4 ml-1"></i>
-                    قيم المنتج
+                    Évaluer le produit
                   </button>
                 </div>
 
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  {product.description || 'منتج لذيذ ومميز من مطعمنا الرائع'}
+                  {product.description || 'Délicieux produit de notre restaurant'}
                 </p>
 
                 <div className="text-3xl font-bold text-orange-600 mb-8">
@@ -325,7 +325,7 @@ export default function ProductPage() {
 
                 {/* Quantity Selector */}
                 <div className="flex items-center gap-4 mb-8">
-                  <span className="text-gray-700 font-medium">الكمية:</span>
+                  <span className="text-gray-700 font-medium">Quantité :</span>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => updateQuantity(quantity - 1)}
@@ -349,7 +349,7 @@ export default function ProductPage() {
                   className="w-full bg-orange-500 text-white py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   <i className="ri-shopping-cart-line w-5 h-5 ml-2"></i>
-                  إضافة للسلة ({quantity} × {product.price} = {quantity * product.price} DH)
+                  Ajouter au panier ({quantity} × {product.price} = {quantity * product.price} DH)
                 </button>
 
                 {/* Current Cart Count */}
@@ -357,7 +357,7 @@ export default function ProductPage() {
                   <div className="mt-4 p-3 bg-green-50 rounded-lg">
                     <p className="text-green-800 text-sm">
                       <i className="ri-check-line w-4 h-4 ml-1"></i>
-                      يوجد {cart[product.id]} من هذا المنتج في السلة
+                      {cart[product.id]} article(s) de ce produit dans le panier
                     </p>
                   </div>
                 )}
@@ -367,7 +367,7 @@ export default function ProductPage() {
 
           {/* Reviews Section */}
           <div className="mt-8 bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">التقييمات والمراجعات</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Avis et évaluations</h2>
             
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center justify-between">
@@ -377,8 +377,8 @@ export default function ProductPage() {
                     <RatingStars rating={averageRating} readonly />
                   </div>
                   <div>
-                    <p className="text-gray-600">متوسط التقييم</p>
-                    <p className="text-sm text-gray-500">{totalReviews} تقييم</p>
+                    <p className="text-gray-600">Note moyenne</p>
+                    <p className="text-sm text-gray-500">{totalReviews} avis</p>
                   </div>
                 </div>
               </div>
@@ -396,7 +396,7 @@ export default function ProductPage() {
         isOpen={showRatingModal}
         onClose={() => setShowRatingModal(false)}
         onSubmit={handleRatingSubmit}
-        title="تقييم المنتج"
+        title="Évaluer le produit"
         itemName={product?.name || ''}
       />
     </div>

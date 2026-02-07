@@ -22,15 +22,12 @@ export default function AuthPage() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // التحقق من وجود مستخدم مسجل دخول
     checkUser();
-    
-    // التحقق من معاملات URL
     const mode = searchParams.get('mode');
     if (mode === 'restaurant') {
       setIsRestaurantMode(true);
       setIsLogin(true);
-      setMessage('يرجى تسجيل الدخول للوصول إلى لوحة تحكم المطعم');
+      setMessage('Veuillez vous connecter pour accéder au tableau de bord du restaurant');
       setMessageType('success');
     }
   }, [searchParams]);
@@ -38,14 +35,12 @@ export default function AuthPage() {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      // التحقق من نوع المستخدم وتوجيهه للصفحة المناسبة
       await redirectUserBasedOnType(user);
     }
   };
 
   const redirectUserBasedOnType = async (user: any) => {
     try {
-      // التحقق من وجود مطعم مقبول لهذا المستخدم
       const { data: restaurant, error: restaurantError } = await supabase
         .from('restaurants')
         .select('*')
@@ -54,12 +49,10 @@ export default function AuthPage() {
         .single();
 
       if (restaurant && !restaurantError) {
-        // صاحب مطعم مقبول - توجيه للوحة التحكم
         navigate('/restaurant-dashboard');
         return;
       }
 
-      // التحقق من كونه مدير
       const { data: admin, error: adminError } = await supabase
         .from('admins')
         .select('*')
@@ -67,12 +60,10 @@ export default function AuthPage() {
         .single();
 
       if (admin && !adminError) {
-        // مدير - توجيه للوحة الإدارة
         navigate('/admin');
         return;
       }
 
-      // التحقق من وجود مطعم في الانتظار
       const { data: pendingRestaurant } = await supabase
         .from('restaurants')
         .select('*')
@@ -81,16 +72,13 @@ export default function AuthPage() {
         .single();
 
       if (pendingRestaurant) {
-        // صاحب مطعم في الانتظار - توجيه للصفحة الرئيسية
         navigate('/');
         return;
       }
 
-      // مستخدم عادي - توجيه للصفحة الرئيسية
       navigate('/');
     } catch (error) {
-      console.error('خطأ في تحديد نوع المستخدم:', error);
-      // في حالة الخطأ، توجيه للصفحة الرئيسية
+      console.error('Erreur lors de la vérification du type d\'utilisateur:', error);
       navigate('/');
     }
   };
@@ -105,28 +93,28 @@ export default function AuthPage() {
 
   const validateForm = () => {
     if (!formData.email.trim()) {
-      setMessage('يرجى إدخال البريد الإلكتروني');
+      setMessage('Veuillez entrer votre adresse email');
       setMessageType('error');
       return false;
     }
     if (!formData.email.includes('@')) {
-      setMessage('يرجى إدخال بريد إلكتروني صحيح');
+      setMessage('Veuillez entrer une adresse email valide');
       setMessageType('error');
       return false;
     }
     if (!formData.password.trim()) {
-      setMessage('يرجى إدخال كلمة المرور');
+      setMessage('Veuillez entrer votre mot de passe');
       setMessageType('error');
       return false;
     }
     if (!isLogin) {
       if (!formData.name.trim()) {
-        setMessage('يرجى إدخال الاسم');
+        setMessage('Veuillez entrer votre nom');
         setMessageType('error');
         return false;
       }
       if (formData.password.length < 6) {
-        setMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+        setMessage('Le mot de passe doit contenir au moins 6 caractères');
         setMessageType('error');
         return false;
       }
@@ -146,7 +134,6 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        // تسجيل الدخول
         const { data, error } = await supabase.auth.signInWithPassword({
           email: formData.email.trim(),
           password: formData.password
@@ -154,29 +141,26 @@ export default function AuthPage() {
 
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
-            setMessage('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+            setMessage('Email ou mot de passe incorrect');
           } else if (error.message.includes('Email not confirmed')) {
-            setMessage('يرجى تأكيد البريد الإلكتروني أولاً');
+            setMessage('Veuillez confirmer votre email d\'abord');
           } else if (error.message.includes('Too many requests')) {
-            setMessage('محاولات كثيرة جداً. يرجى المحاولة لاحقاً');
+            setMessage('Trop de tentatives. Veuillez réessayer plus tard');
           } else {
-            setMessage('خطأ في تسجيل الدخول: ' + error.message);
+            setMessage('Erreur de connexion: ' + error.message);
           }
           setMessageType('error');
           return;
         }
 
         if (data.user) {
-          setMessage('تم تسجيل الدخول بنجاح!');
+          setMessage('Connexion réussie !');
           setMessageType('success');
-          
-          // انتظار قصير قبل التوجيه
           setTimeout(async () => {
             await redirectUserBasedOnType(data.user);
           }, 1000);
         }
       } else {
-        // إنشاء حساب جديد
         const { data, error } = await supabase.auth.signUp({
           email: formData.email.trim(),
           password: formData.password,
@@ -191,35 +175,29 @@ export default function AuthPage() {
 
         if (error) {
           if (error.message.includes('already registered')) {
-            setMessage('هذا البريد الإلكتروني مسجل مسبقاً');
+            setMessage('Cet email est déjà enregistré');
           } else if (error.message.includes('Password should be at least')) {
-            setMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+            setMessage('Le mot de passe doit contenir au moins 6 caractères');
           } else {
-            setMessage('خطأ في إنشاء الحساب: ' + error.message);
+            setMessage('Erreur lors de la création du compte: ' + error.message);
           }
           setMessageType('error');
           return;
         }
 
         if (data.user) {
-          setMessage('تم إنشاء الحساب بنجاح! يرجى تأكيد البريد الإلكتروني');
+          setMessage('Compte créé avec succès !');
           setMessageType('success');
-          
-          // إعادة تعيين النموذج
-          setFormData({
-            email: '',
-            password: '',
-            name: '',
-            phone: ''
-          });
-          
-          // التبديل لوضع تسجيل الدخول
-          setIsLogin(true);
+          if (data.session) {
+            await redirectUserBasedOnType(data.user);
+          } else {
+            navigate('/?registered=1', { replace: true });
+          }
         }
       }
     } catch (error) {
-      console.error('خطأ غير متوقع:', error);
-      setMessage('حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.');
+      console.error('Erreur inattendue:', error);
+      setMessage('Une erreur inattendue s\'est produite. Veuillez réessayer.');
       setMessageType('error');
     } finally {
       setIsLoading(false);
@@ -232,27 +210,25 @@ export default function AuthPage() {
       
       <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <i className="ri-user-line text-2xl text-white"></i>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {isLogin 
-                ? (isRestaurantMode ? 'تسجيل الدخول لأصحاب المطاعم' : 'تسجيل الدخول')
-                : 'إنشاء حساب جديد'}
+                ? (isRestaurantMode ? 'Connexion pour les restaurants' : 'Connexion')
+                : 'Créer un compte'}
             </h1>
             <p className="text-gray-600">
               {isLogin 
                 ? (isRestaurantMode
-                  ? 'أدخل بريد المطعم وكلمة المرور للدخول إلى لوحة التحكم'
-                  : 'أدخل بياناتك للوصول إلى حسابك')
-                : 'أنشئ حساباً جديداً للاستمتاع بخدماتنا'
+                  ? 'Entrez l\'email et le mot de passe du restaurant pour accéder au tableau de bord'
+                  : 'Entrez vos identifiants pour accéder à votre compte')
+                : 'Créez un compte pour profiter de nos services'
               }
             </p>
           </div>
 
-          {/* Message */}
           {message && (
             <div className={`mb-6 p-4 rounded-xl border ${
               messageType === 'success' 
@@ -266,14 +242,12 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Form */}
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name field for signup (العملاء فقط) */}
               {!isLogin && !isRestaurantMode && (
                 <div>
                   <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                    الاسم الكامل *
+                    Nom complet *
                   </label>
                   <input
                     type="text"
@@ -283,15 +257,14 @@ export default function AuthPage() {
                     onChange={handleInputChange}
                     required={!isLogin}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                    placeholder="اسمك الكامل"
+                    placeholder="Votre nom complet"
                   />
                 </div>
               )}
 
-              {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  البريد الإلكتروني *
+                  Email *
                 </label>
                 <input
                   type="email"
@@ -301,15 +274,14 @@ export default function AuthPage() {
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  placeholder="your@email.com"
+                  placeholder="votre@email.com"
                 />
               </div>
 
-              {/* Phone field for signup (العملاء فقط) */}
               {!isLogin && !isRestaurantMode && (
                 <div>
                   <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                    رقم الهاتف
+                    Téléphone
                   </label>
                   <input
                     type="tel"
@@ -318,15 +290,14 @@ export default function AuthPage() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                    placeholder="+966 50 123 4567"
+                    placeholder="+33 6 12 34 56 78"
                   />
                 </div>
               )}
 
-              {/* Password */}
               <div>
                 <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                  كلمة المرور *
+                  Mot de passe *
                 </label>
                 <div className="relative">
                   <input
@@ -337,7 +308,7 @@ export default function AuthPage() {
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                    placeholder={isLogin ? "كلمة المرور" : "كلمة المرور (6 أحرف على الأقل)"}
+                    placeholder={isLogin ? "Mot de passe" : "Mot de passe (6 caractères minimum)"}
                   />
                   <button
                     type="button"
@@ -349,7 +320,6 @@ export default function AuthPage() {
                 </div>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -358,22 +328,21 @@ export default function AuthPage() {
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>{isLogin ? 'جاري تسجيل الدخول...' : 'جاري إنشاء الحساب...'}</span>
+                    <span>{isLogin ? 'Connexion en cours...' : 'Création du compte...'}</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <i className={`ri-${isLogin ? 'login-box' : 'user-add'}-line`}></i>
-                    <span>{isLogin ? 'تسجيل الدخول' : 'إنشاء الحساب'}</span>
+                    <span>{isLogin ? 'Se connecter' : 'Créer le compte'}</span>
                   </div>
                 )}
               </button>
             </form>
 
-            {/* Toggle Mode (مخفي في وضع أصحاب المطاعم) */}
             {!isRestaurantMode && (
               <div className="mt-6 text-center">
                 <p className="text-gray-600">
-                  {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
+                  {isLogin ? 'Pas encore de compte ?' : 'Déjà un compte ?'}
                   <button
                     type="button"
                     onClick={() => {
@@ -388,17 +357,16 @@ export default function AuthPage() {
                     }}
                     className="mr-2 text-orange-600 hover:text-orange-700 font-semibold cursor-pointer"
                   >
-                    {isLogin ? 'إنشاء حساب جديد' : 'تسجيل الدخول'}
+                    {isLogin ? 'Créer un compte' : 'Se connecter'}
                   </button>
                 </p>
               </div>
             )}
 
-            {/* Restaurant Registration Link (مخفي في وضع أصحاب المطاعم) */}
             {!isRestaurantMode && (
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="text-center">
-                  <p className="text-gray-600 mb-3">هل تريد تسجيل مطعمك معنا؟</p>
+                  <p className="text-gray-600 mb-3">Vous souhaitez enregistrer votre restaurant ?</p>
                   <button
                     type="button"
                     onClick={() => navigate('/restaurant-signup')}
@@ -406,7 +374,7 @@ export default function AuthPage() {
                   >
                     <div className="flex items-center justify-center gap-2">
                       <i className="ri-restaurant-line"></i>
-                      <span>سجل مطعمك الآن</span>
+                      <span>Enregistrer votre restaurant</span>
                     </div>
                   </button>
                 </div>
@@ -414,17 +382,16 @@ export default function AuthPage() {
             )}
           </div>
 
-          {/* Additional Info */}
           <div className="mt-8 text-center">
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <div className="flex items-center justify-center gap-2 text-blue-700 mb-2">
                 <i className="ri-information-line"></i>
-                <span className="font-semibold">معلومات مهمة</span>
+                <span className="font-semibold">Informations importantes</span>
               </div>
               <ul className="text-sm text-blue-600 space-y-1">
-                <li>• أصحاب المطاعم المقبولة يحصلون على لوحة تحكم خاصة</li>
-                <li>• يمكن إدارة المطعم والمنتجات والطلبات بسهولة</li>
-                <li>• تتبع الإحصائيات والتقارير المفصلة</li>
+                <li>• Les restaurants approuvés bénéficient d'un tableau de bord dédié</li>
+                <li>• Gérez facilement le menu, les produits et les commandes</li>
+                <li>• Suivez les statistiques et rapports détaillés</li>
               </ul>
             </div>
           </div>

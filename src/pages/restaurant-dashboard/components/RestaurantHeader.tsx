@@ -24,8 +24,8 @@ export default function RestaurantHeader({ restaurant }: RestaurantHeaderProps) 
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">لوحة تحكم المطعم</h1>
-          <p className="text-sm text-gray-600">إدارة شاملة لمطعمك</p>
+          <h1 className="text-2xl font-bold text-gray-900">Tableau de bord restaurant</h1>
+          <p className="text-sm text-gray-600">Gestion complète de votre restaurant</p>
         </div>
 
         <div className="flex items-center gap-4">
@@ -66,14 +66,14 @@ export default function RestaurantHeader({ restaurant }: RestaurantHeaderProps) 
                   className="w-full text-right px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
                 >
                   <i className="ri-home-line"></i>
-                  العودة للموقع
+                  Retour au site
                 </button>
                 <button
                   onClick={handleLogout}
                   className="w-full text-right px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
                 >
                   <i className="ri-logout-circle-line"></i>
-                  تسجيل الخروج
+                  Déconnexion
                 </button>
               </div>
             )}

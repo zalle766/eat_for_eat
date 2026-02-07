@@ -26,9 +26,9 @@ export default function RestaurantsManagement() {
       const restaurantsWithStatus = (data || []).map(restaurant => ({
         ...restaurant,
         status: restaurant.status || 'approved',
-        owner_name: restaurant.owner_name || 'غير محدد',
-        owner_email: restaurant.owner_email || 'غير محدد',
-        owner_phone: restaurant.owner_phone || restaurant.phone || 'غير محدد'
+        owner_name: restaurant.owner_name || 'Non défini',
+        owner_email: restaurant.owner_email || 'Non défini',
+        owner_phone: restaurant.owner_phone || restaurant.phone || 'Non défini'
       }));
       
       setRestaurants(restaurantsWithStatus);
@@ -52,15 +52,15 @@ export default function RestaurantsManagement() {
       await fetchRestaurants();
 
       const statusText = {
-        approved: 'تمت الموافقة على المطعم',
-        rejected: 'تم رفض المطعم',
-        suspended: 'تم تعليق المطعم'
+        approved: 'Restaurant approuvé',
+        rejected: 'Restaurant refusé',
+        suspended: 'Restaurant suspendu'
       };
 
-      alert(statusText[newStatus as keyof typeof statusText] || 'تم تحديث حالة المطعم');
+      alert(statusText[newStatus as keyof typeof statusText] || 'Statut du restaurant mis à jour');
     } catch (error) {
       console.error('خطأ في تحديث حالة المطعم:', error);
-      alert('حدث خطأ في تحديث حالة المطعم');
+      alert('Erreur lors de la mise à jour du statut du restaurant');
     }
   };
 
@@ -80,16 +80,16 @@ export default function RestaurantsManagement() {
       await fetchRestaurants();
 
       // إرسال إشعار للمطعم (يمكن إضافة إشعار بريد إلكتروني هنا)
-      alert('تم قبول المطعم بنجاح! سيتمكن المالك الآن من الوصول للوحة التحكم.');
+      alert('Restaurant approuvé avec succès ! Le propriétaire peut maintenant accéder au tableau de bord.');
 
     } catch (error) {
       console.error('خطأ في قبول المطعم:', error);
-      alert('حدث خطأ أثناء قبول المطعم');
+      alert('Erreur lors de l\'approbation du restaurant');
     }
   };
 
   const deleteRestaurant = async (restaurantId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا المطعم؟ هذا الإجراء لا يمكن التراجع عنه.')) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce restaurant ? Cette action est irréversible.')) return;
 
     try {
       const { error } = await supabase
@@ -100,10 +100,10 @@ export default function RestaurantsManagement() {
       if (error) throw error;
       
       setRestaurants(prev => prev.filter((restaurant: any) => restaurant.id !== restaurantId));
-      alert('تم حذف المطعم بنجاح');
+      alert('Restaurant supprimé avec succès');
     } catch (error) {
       console.error('خطأ في حذف المطعم:', error);
-      alert('حدث خطأ في حذف المطعم');
+      alert('Erreur lors de la suppression du restaurant');
     }
   };
 
@@ -117,10 +117,10 @@ export default function RestaurantsManagement() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      pending: { label: 'في الانتظار', class: 'bg-yellow-100 text-yellow-800', icon: 'ri-time-line' },
-      approved: { label: 'مفعل', class: 'bg-green-100 text-green-800', icon: 'ri-check-line' },
-      rejected: { label: 'مرفوض', class: 'bg-red-100 text-red-800', icon: 'ri-close-line' },
-      suspended: { label: 'معلق', class: 'bg-gray-100 text-gray-800', icon: 'ri-pause-line' }
+      pending: { label: 'En attente', class: 'bg-yellow-100 text-yellow-800', icon: 'ri-time-line' },
+      approved: { label: 'Approuvé', class: 'bg-green-100 text-green-800', icon: 'ri-check-line' },
+      rejected: { label: 'Refusé', class: 'bg-red-100 text-red-800', icon: 'ri-close-line' },
+      suspended: { label: 'Suspendu', class: 'bg-gray-100 text-gray-800', icon: 'ri-pause-line' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.approved;

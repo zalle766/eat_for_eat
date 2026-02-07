@@ -40,7 +40,7 @@ export default function FavoritesPage() {
       setUser(user);
       loadFavorites();
     } catch (error) {
-      console.error('خطأ في التحقق من المستخدم:', error);
+      console.error('Erreur lors de la vérification de l\'utilisateur:', error);
       navigate('/auth');
     }
   };
@@ -53,7 +53,7 @@ export default function FavoritesPage() {
         setFavorites(parsedFavorites);
       }
     } catch (error) {
-      console.error('خطأ في تحميل المفضلة:', error);
+      console.error('Erreur lors du chargement des favoris:', error);
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +79,7 @@ export default function FavoritesPage() {
         <main className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center py-16">
             <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">جاري تحميل المفضلة...</p>
+            <p className="text-gray-600">Chargement des favoris...</p>
           </div>
         </main>
         <Footer />
@@ -93,8 +93,8 @@ export default function FavoritesPage() {
       
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">المفضلة</h1>
-          <p className="text-gray-600">المطاعم والمنتجات المفضلة لديك</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Favoris</h1>
+          <p className="text-gray-600">Vos restaurants et produits favoris</p>
         </div>
 
         {/* التبويبات */}
@@ -107,7 +107,7 @@ export default function FavoritesPage() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            الكل ({favorites.length})
+            Tous ({favorites.length})
           </button>
           <button
             onClick={() => setActiveTab('restaurants')}
@@ -117,7 +117,7 @@ export default function FavoritesPage() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            المطاعم ({favorites.filter(f => f.type === 'restaurant').length})
+            Restaurants ({favorites.filter(f => f.type === 'restaurant').length})
           </button>
           <button
             onClick={() => setActiveTab('products')}
@@ -127,7 +127,7 @@ export default function FavoritesPage() {
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            المنتجات ({favorites.filter(f => f.type === 'product').length})
+            Produits ({favorites.filter(f => f.type === 'product').length})
           </button>
         </div>
 
@@ -137,17 +137,17 @@ export default function FavoritesPage() {
             <div className="w-24 h-24 flex items-center justify-center mx-auto mb-6">
               <i className="ri-heart-line text-8xl text-gray-300"></i>
             </div>
-            <h2 className="text-2xl font-bold text-gray-600 mb-4">لا توجد مفضلة</h2>
+            <h2 className="text-2xl font-bold text-gray-600 mb-4">Aucun favori</h2>
             <p className="text-gray-500 mb-8">
-              {activeTab === 'all' && 'لم تقم بإضافة أي عناصر للمفضلة بعد'}
-              {activeTab === 'restaurants' && 'لا توجد مطاعم في المفضلة'}
-              {activeTab === 'products' && 'لا توجد منتجات في المفضلة'}
+              {activeTab === 'all' && "Vous n'avez pas encore ajouté d'éléments aux favoris"}
+              {activeTab === 'restaurants' && 'Aucun restaurant dans les favoris'}
+              {activeTab === 'products' && 'Aucun produit dans les favoris'}
             </p>
             <button
               onClick={() => navigate('/restaurants')}
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
             >
-              تصفح المطاعم
+              Parcourir les restaurants
             </button>
           </div>
         ) : (
@@ -184,7 +184,7 @@ export default function FavoritesPage() {
                         ? 'bg-blue-100 text-blue-700' 
                         : 'bg-green-100 text-green-700'
                     }`}>
-                      {item.type === 'restaurant' ? 'مطعم' : 'منتج'}
+                      {item.type === 'restaurant' ? 'Restaurant' : 'Produit'}
                     </span>
                   </div>
 
@@ -199,7 +199,7 @@ export default function FavoritesPage() {
                         </div>
                         <div className="flex items-center gap-1 text-sm text-gray-600">
                           <i className="ri-e-bike-line text-orange-500"></i>
-                          <span>{item.deliveryFee === 0 ? 'مجاني' : `${item.deliveryFee} DH`}</span>
+                          <span>{item.deliveryFee === 0 ? 'Gratuit' : `${item.deliveryFee} DH`}</span>
                         </div>
                       </>
                     ) : (
@@ -224,14 +224,14 @@ export default function FavoritesPage() {
                     className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
                   >
                     <i className={item.type === 'restaurant' ? 'ri-restaurant-line' : 'ri-shopping-cart-line'}></i>
-                    <span>{item.type === 'restaurant' ? 'زيارة المطعم' : 'إضافة للسلة'}</span>
+                    <span>{item.type === 'restaurant' ? 'Visiter le restaurant' : 'Ajouter au panier'}</span>
                   </button>
                 </div>
 
                 <div className="px-4 pb-4 pt-2 border-t border-gray-100">
                   <p className="text-xs text-gray-500">
                     <i className="ri-calendar-line ml-1"></i>
-                    أضيف في {new Date(item.addedAt).toLocaleDateString('ar-SA')}
+                    Ajouté le {new Date(item.addedAt).toLocaleDateString('fr-FR')}
                   </p>
                 </div>
               </div>

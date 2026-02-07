@@ -82,7 +82,7 @@ export default function ProfilePage() {
 
       if (error) {
         console.error('خطأ في تحميل الملف الشخصي:', error);
-        setMessage('حدث خطأ في تحميل البيانات');
+        setMessage('Erreur lors du chargement des données');
         setMessageType('error');
       } else if (data) {
         setProfile(data);
@@ -93,7 +93,7 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('خطأ غير متوقع:', error);
-      setMessage('حدث خطأ غير متوقع');
+      setMessage('Une erreur inattendue s\'est produite');
       setMessageType('error');
     } finally {
       setIsLoading(false);
@@ -105,7 +105,7 @@ export default function ProfilePage() {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        throw new Error('لا توجد جلسة نشطة');
+        throw new Error('Aucune session active');
       }
 
       const authUser = session.user;
@@ -113,21 +113,21 @@ export default function ProfilePage() {
       const { data, error } = await supabase.functions.invoke('create-user', {
         body: {
           auth_id: userId,
-          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'مستخدم جديد',
+          name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Nouvel utilisateur',
           email: authUser.email,
           phone: authUser.user_metadata?.phone || ''
         }
       });
 
       if (error || !data?.success) {
-        throw new Error(data?.error || 'فشل في إنشاء الملف الشخصي');
+        throw new Error(data?.error || 'Échec de la création du profil');
       }
 
       // إعادة تحميل الملف الشخصي
       await loadProfile(userId);
     } catch (error) {
       console.error('خطأ في إنشاء الملف الشخصي:', error);
-      setMessage('حدث خطأ في إنشاء الملف الشخصي');
+        setMessage('Erreur lors de la création du profil');
       setMessageType('error');
       setIsLoading(false);
     }
@@ -143,7 +143,7 @@ export default function ProfilePage() {
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setMessage('يرجى إدخال الاسم');
+      setMessage('Veuillez entrer votre nom');
       setMessageType('error');
       return false;
     }
@@ -171,19 +171,19 @@ export default function ProfilePage() {
 
       if (error) {
         console.error('خطأ في تحديث الملف الشخصي:', error);
-        setMessage('حدث خطأ في تحديث البيانات');
+        setMessage('Erreur lors de la mise à jour des données');
         setMessageType('error');
         return;
       }
 
-      setMessage('تم تحديث الملف الشخصي بنجاح!');
+      setMessage('Profil mis à jour avec succès !');
       setMessageType('success');
       
       // إعادة تحميل البيانات
       await loadProfile(user.id);
     } catch (error) {
       console.error('خطأ غير متوقع:', error);
-      setMessage('حدث خطأ غير متوقع');
+      setMessage('Une erreur inattendue s\'est produite');
       setMessageType('error');
     } finally {
       setIsUpdating(false);
@@ -207,7 +207,7 @@ export default function ProfilePage() {
           <div className="max-w-md mx-auto">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">جاري التحميل...</p>
+              <p className="text-gray-600">Chargement...</p>
             </div>
           </div>
         </main>
@@ -227,8 +227,8 @@ export default function ProfilePage() {
             <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <i className="ri-user-line text-2xl text-white"></i>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">الملف الشخصي</h1>
-            <p className="text-gray-600">إدارة بياناتك الشخصية</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Mon profil</h1>
+            <p className="text-gray-600">Gérez vos données personnelles</p>
           </div>
 
           {/* Message */}
@@ -251,7 +251,7 @@ export default function ProfilePage() {
               {/* Email (Read Only) */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  البريد الإلكتروني
+                  Email
                 </label>
                 <input
                   type="email"
@@ -264,7 +264,7 @@ export default function ProfilePage() {
               {/* Name */}
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                  الاسم الكامل *
+                  Nom complet *
                 </label>
                 <input
                   type="text"
@@ -274,14 +274,14 @@ export default function ProfilePage() {
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  placeholder="اسمك الكامل"
+                  placeholder="Votre nom complet"
                 />
               </div>
 
               {/* Phone */}
               <div>
                 <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  رقم الهاتف
+                  Téléphone
                 </label>
                 <input
                   type="tel"
@@ -303,12 +303,12 @@ export default function ProfilePage() {
                 {isUpdating ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>جاري التحديث...</span>
+                    <span>Mise à jour...</span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <i className="ri-save-line"></i>
-                    <span>حفظ التغييرات</span>
+                    <span>Enregistrer les modifications</span>
                   </div>
                 )}
               </button>
@@ -323,7 +323,7 @@ export default function ProfilePage() {
               >
                 <div className="flex items-center justify-center gap-2">
                   <i className="ri-logout-box-line"></i>
-                  <span>تسجيل الخروج</span>
+                  <span>Déconnexion</span>
                 </div>
               </button>
             </div>
@@ -334,10 +334,10 @@ export default function ProfilePage() {
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <div className="flex items-center justify-center gap-2 text-blue-700 mb-2">
                 <i className="ri-information-line"></i>
-                <span className="font-semibold">معلومات الحساب</span>
+                <span className="font-semibold">Informations du compte</span>
               </div>
               <p className="text-sm text-blue-600">
-                يمكنك تحديث بياناتك الشخصية في أي وقت. البريد الإلكتروني لا يمكن تغييره.
+                Vous pouvez mettre à jour vos informations personnelles à tout moment. L'email ne peut pas être modifié.
               </p>
             </div>
           </div>

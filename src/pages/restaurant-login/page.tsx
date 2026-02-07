@@ -34,24 +34,24 @@ export default function RestaurantLoginPage() {
 
         if (restaurantError || !restaurant) {
           await supabase.auth.signOut();
-          throw new Error('هذا الحساب ليس حساب صاحب مطعم');
+          throw new Error('Ce compte n\'est pas un compte restaurant');
         }
 
         if (restaurant.status === 'pending') {
           await supabase.auth.signOut();
-          throw new Error('مطعمك قيد المراجعة. سيتم إشعارك عند الموافقة عليه');
+          throw new Error('Votre restaurant est en cours d\'examen. Vous serez notifié lors de l\'approbation.');
         }
 
         if (restaurant.status === 'rejected') {
           await supabase.auth.signOut();
-          throw new Error('تم رفض طلب تسجيل المطعم الخاص بك');
+          throw new Error('Votre demande d\'inscription du restaurant a été refusée');
         }
 
         // الانتقال إلى لوحة تحكم المطعم
         navigate('/restaurant-dashboard', { replace: true });
       }
     } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء تسجيل الدخول');
+      setError(err.message || 'Une erreur s\'est produite lors de la connexion');
     } finally {
       setIsLoading(false);
     }
@@ -68,8 +68,8 @@ export default function RestaurantLoginPage() {
               <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i className="ri-restaurant-2-line text-4xl text-orange-600"></i>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">تسجيل دخول صاحب المطعم</h1>
-              <p className="text-gray-600">ادخل إلى حسابك لإدارة مطعمك</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Connexion propriétaire</h1>
+              <p className="text-gray-600">Connectez-vous pour gérer votre restaurant</p>
             </div>
 
             {error && (
@@ -84,7 +84,7 @@ export default function RestaurantLoginPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  البريد الإلكتروني
+                  Adresse e-mail
                 </label>
                 <input
                   type="email"
@@ -98,7 +98,7 @@ export default function RestaurantLoginPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  كلمة المرور
+                  Mot de passe
                 </label>
                 <input
                   type="password"
@@ -118,21 +118,21 @@ export default function RestaurantLoginPage() {
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <i className="ri-loader-4-line animate-spin"></i>
-                    جاري تسجيل الدخول...
+                    Connexion en cours...
                   </span>
                 ) : (
-                  'تسجيل الدخول'
+                  'Se connecter'
                 )}
               </button>
 
               <div className="text-center">
                 <p className="text-sm text-gray-600">
-                  ليس لديك حساب مطعم؟{' '}
+                  Pas encore de compte ?{' '}
                   <a
                     href="/restaurant-signup"
                     className="text-orange-500 hover:text-orange-600 font-medium cursor-pointer"
                   >
-                    سجّل مطعمك الآن
+                    Inscrivez votre restaurant
                   </a>
                 </p>
               </div>

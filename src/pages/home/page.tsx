@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import Hero from './components/Hero';
@@ -10,6 +11,20 @@ import NearbyRestaurants from './components/NearbyRestaurants';
 export default function Home() {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [isLocationLoading, setIsLocationLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showRegisteredMessage = searchParams.get('registered') === '1';
+
+  // إزالة معلمة registered من URL بعد عرض الرسالة
+  useEffect(() => {
+    if (searchParams.get('registered') === '1') {
+      const timer = setTimeout(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('registered');
+        setSearchParams(params, { replace: true });
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     // Demander la géolocalisation de l'utilisateur avec haute précision
@@ -64,6 +79,16 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header />
+      
+      {/* رسالة نجاح التسجيل */}
+      {showRegisteredMessage && (
+        <div className="bg-green-50 border-b border-green-200 px-4 py-3">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-green-700">
+            <i className="ri-check-circle-line text-xl"></i>
+            <span className="font-medium">Compte créé avec succès ! Veuillez confirmer votre email via le lien envoyé.</span>
+          </div>
+        </div>
+      )}
       
       {/* Hero Section */}
       <Hero />
