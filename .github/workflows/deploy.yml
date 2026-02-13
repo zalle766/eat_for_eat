@@ -23,6 +23,7 @@ jobs:
             git pull origin main
             npm install
             npm run build
+            # Msa7 l-process l-9dim o starti jdid b 'serve'
             pm2 delete eat-for-eat || true
             pm2 start serve --name "eat-for-eat" -- -s out -l 3001
             pm2 save
