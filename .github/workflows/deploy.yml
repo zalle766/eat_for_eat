@@ -1,0 +1,27 @@
+name: Deploy Eat For Eat
+
+on:
+  push:
+    branches:
+      - main  # Awla s-smiya dial l-branch dyalk
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /var/www/eat_for_eat
+            git pull origin main
+            npm install
+            npm run build
+            # Restart l-app b PM2
+            pm2 restart eat-for-eat
