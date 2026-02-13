@@ -22,6 +22,8 @@ jobs:
             cd /var/www/eat_for_eat
             git pull origin main
             npm install
-            npm run build
-            # Restart l-app b PM2
-            pm2 restart eat-for-eat
+            npm run build  # Hadi hiya li k-t-cree folder 'out' jdid
+            # Restart l-app o goul lih i-chouf f folder 'out'
+            pm2 delete eat-for-eat || true
+            pm2 start serve --name "eat-for-eat" -- -s out -l 3001
+            pm2 save
