@@ -20,10 +20,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }} # Sta3mel KEY f blast PASSWORD
           script: |
             cd /var/www/eat_for_eat
-            git pull origin main
+            git fetch --all
+            git reset --hard origin/main
             npm install
             npm run build
-            # Msa7 l-process l-9dim o starti jdid b 'serve'
+            # Msa7 l-process o t-akked men l-folder 'out'
             pm2 delete eat-for-eat || true
             pm2 start serve --name "eat-for-eat" -- -s out -l 3001
             pm2 save
