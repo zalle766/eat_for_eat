@@ -233,7 +233,7 @@ export default function Header() {
               className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/track-order') ? 'text-orange-500' : ''
                 }`}
             >
-              Suivre commande karim
+              Suivre commande
             </button>
           </nav>
 
