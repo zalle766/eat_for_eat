@@ -24,7 +24,7 @@ jobs:
             git reset --hard origin/main
             npm install
             npm run build
-            # Msa7 l-process o t-akked men l-folder 'out'
+            # T-akked blli hna 'dist' mashi 'out'
             pm2 delete eat-for-eat || true
-            pm2 start serve --name "eat-for-eat" -- -s out -l 3001
+            pm2 start serve --name "eat-for-eat" -- -s dist -l 3001
             pm2 save
