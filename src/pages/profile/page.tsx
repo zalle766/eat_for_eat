@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const checkUser = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         navigate('/auth');
         return;
@@ -107,7 +107,7 @@ export default function ProfilePage() {
   const createUserProfile = async (userId: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         throw new Error('Aucune session active');
       }
@@ -131,7 +131,7 @@ export default function ProfilePage() {
       await loadProfile(userId);
     } catch (error) {
       console.error('خطأ في إنشاء الملف الشخصي:', error);
-        setMessage('Erreur lors de la création du profil');
+      setMessage('Erreur lors de la création du profil');
       setMessageType('error');
       setIsLoading(false);
     }
@@ -156,7 +156,7 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -184,7 +184,7 @@ export default function ProfilePage() {
 
       setMessage('Profil mis à jour avec succès !');
       setMessageType('success');
-      
+
       // إعادة تحميل البيانات
       await loadProfile(user.id);
     } catch (error) {
@@ -225,7 +225,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
       <Header />
-      
+
       <main className="pt-20 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
           {/* Header */}
@@ -239,11 +239,10 @@ export default function ProfilePage() {
 
           {/* Message */}
           {message && (
-            <div className={`mb-6 p-4 rounded-xl border ${
-              messageType === 'success' 
-                ? 'bg-green-50 border-green-200 text-green-700' 
-                : 'bg-red-50 border-red-200 text-red-700'
-            }`}>
+            <div className={`mb-6 p-4 rounded-xl border ${messageType === 'success'
+              ? 'bg-green-50 border-green-200 text-green-700'
+              : 'bg-red-50 border-red-200 text-red-700'
+              }`}>
               <div className="flex items-center gap-2">
                 <i className={`ri-${messageType === 'success' ? 'check-circle' : 'error-warning'}-line`}></i>
                 <span>{message}</span>

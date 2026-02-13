@@ -20,14 +20,14 @@ export default function Header() {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          
+
           // استخدام Nominatim API للحصول على اسم المدينة
           try {
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=fr`
             );
             const data = await response.json();
-            
+
             const city = data.address?.city || data.address?.town || data.address?.village || 'Localisation inconnue';
             setUserLocation(city);
             localStorage.setItem('userLocation', city);
@@ -193,13 +193,13 @@ export default function Header() {
         <div className="flex justify-between items-center h-16 min-w-0">
           {/* Logo */}
           <div className="flex items-center min-w-0 flex-shrink">
-            <button 
+            <button
               onClick={() => navigate('/')}
               className="flex items-center cursor-pointer min-w-0"
             >
-              <img 
-                src="/logo%20(2).png" 
-                alt="Eat for Eat" 
+              <img
+                src="/logo%20(2).png"
+                alt="Eat for Eat"
                 className="h-[70px] w-auto object-contain"
               />
             </button>
@@ -207,35 +207,31 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <button 
+            <button
               onClick={() => navigate('/')}
-              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                isActive('/') ? 'text-orange-500' : ''
-              }`}
+              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/') ? 'text-orange-500' : ''
+                }`}
             >
               Accueil
             </button>
-            <button 
+            <button
               onClick={() => navigate('/restaurants')}
-              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                isActive('/restaurants') ? 'text-orange-500' : ''
-              }`}
+              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/restaurants') ? 'text-orange-500' : ''
+                }`}
             >
               Restaurants
             </button>
-            <button 
+            <button
               onClick={() => navigate('/offers')}
-              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                isActive('/offers') ? 'text-orange-500' : ''
-              }`}
+              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/offers') ? 'text-orange-500' : ''
+                }`}
             >
               Offres
             </button>
-            <button 
+            <button
               onClick={() => navigate('/track-order')}
-              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                isActive('/track-order') ? 'text-orange-500' : ''
-              }`}
+              className={`text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/track-order') ? 'text-orange-500' : ''
+                }`}
             >
               Suivre commande
             </button>
@@ -244,7 +240,7 @@ export default function Header() {
           {/* Right Side Actions */}
           <div className="flex items-center gap-4">
             {/* Location Button */}
-            <button 
+            <button
               onClick={getUserLocation}
               disabled={isLocationLoading}
               className="hidden md:flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
@@ -257,7 +253,7 @@ export default function Header() {
             </button>
 
             {/* Cart */}
-            <button 
+            <button
               onClick={() => navigate('/cart')}
               className="relative p-2 text-gray-700 hover:text-orange-500 cursor-pointer"
             >
@@ -272,7 +268,7 @@ export default function Header() {
             {/* User Menu */}
             {user ? (
               <div className="relative" ref={profileMenuRef}>
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setIsProfileMenuOpen(!isProfileMenuOpen);
@@ -286,14 +282,14 @@ export default function Header() {
 
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[100]">
-                    <button 
+                    <button
                       onClick={handleProfileNavigation}
                       className="w-full text-right px-4 py-2 text-gray-700 hover:bg-gray-50 flex items-center gap-3 cursor-pointer"
                     >
                       <i className="ri-user-line text-lg"></i>
                       Profil
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         navigate('/orders');
                         setIsProfileMenuOpen(false);
@@ -303,7 +299,7 @@ export default function Header() {
                       <i className="ri-file-list-line text-lg"></i>
                       Mes commandes
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         navigate('/favorites');
                         setIsProfileMenuOpen(false);
@@ -314,7 +310,7 @@ export default function Header() {
                       Favoris
                     </button>
                     <hr className="my-2" />
-                    <button 
+                    <button
                       onClick={handleLogout}
                       className="w-full text-right px-4 py-2 text-red-600 hover:bg-red-50 flex items-center gap-3 cursor-pointer"
                     >
@@ -325,7 +321,7 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <button 
+              <button
                 onClick={() => navigate('/auth')}
                 className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
               >
@@ -334,7 +330,7 @@ export default function Header() {
             )}
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 text-gray-700 hover:text-orange-500 cursor-pointer"
             >
@@ -348,7 +344,7 @@ export default function Header() {
           <div className="md:hidden border-t border-gray-200 py-4">
             <div className="flex flex-col space-y-4">
               {/* Mobile Location Button */}
-              <button 
+              <button
                 onClick={() => {
                   getUserLocation();
                   setIsMenuOpen(false);
@@ -362,55 +358,51 @@ export default function Header() {
                 </span>
               </button>
 
-              <button 
+              <button
                 onClick={() => {
                   navigate('/');
                   setIsMenuOpen(false);
                 }}
-                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                  isActive('/') ? 'text-orange-500' : ''
-                }`}
+                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/') ? 'text-orange-500' : ''
+                  }`}
               >
                 Accueil
               </button>
-              <button 
+              <button
                 onClick={() => {
                   navigate('/restaurants');
                   setIsMenuOpen(false);
                 }}
-                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                  isActive('/restaurants') ? 'text-orange-500' : ''
-                }`}
+                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/restaurants') ? 'text-orange-500' : ''
+                  }`}
               >
                 Restaurants
               </button>
-              <button 
+              <button
                 onClick={() => {
                   navigate('/offers');
                   setIsMenuOpen(false);
                 }}
-                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                  isActive('/offers') ? 'text-orange-500' : ''
-                }`}
+                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/offers') ? 'text-orange-500' : ''
+                  }`}
               >
                 Offres
               </button>
-              <button 
+              <button
                 onClick={() => {
                   navigate('/track-order');
                   setIsMenuOpen(false);
                 }}
-                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${
-                  isActive('/track-order') ? 'text-orange-500' : ''
-                }`}
+                className={`text-right text-gray-700 hover:text-orange-500 font-medium cursor-pointer ${isActive('/track-order') ? 'text-orange-500' : ''
+                  }`}
               >
                 Suivre commande
               </button>
-              
+
               {user && (
                 <>
                   <hr className="border-gray-200" />
-                  <button 
+                  <button
                     onClick={() => {
                       handleProfileNavigation();
                       setIsMenuOpen(false);
@@ -420,7 +412,7 @@ export default function Header() {
                     <i className="ri-user-line text-lg"></i>
                     Profil
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       navigate('/orders');
                       setIsMenuOpen(false);
@@ -430,7 +422,7 @@ export default function Header() {
                     <i className="ri-file-list-line text-lg"></i>
                     Mes commandes
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       navigate('/favorites');
                       setIsMenuOpen(false);
@@ -440,7 +432,7 @@ export default function Header() {
                     <i className="ri-heart-line text-lg"></i>
                     Favoris
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       handleLogout();
                       setIsMenuOpen(false);
