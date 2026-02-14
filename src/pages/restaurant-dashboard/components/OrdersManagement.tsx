@@ -34,6 +34,7 @@ interface Order {
   estimatedDelivery: string;
   driverId?: string;
   driverName?: string;
+  driver?: { name: string; phone: string; rating: number };
 }
 
 export default function OrdersManagement() {
@@ -219,7 +220,9 @@ export default function OrdersManagement() {
       confirmed: { text: 'Confirmé', color: 'bg-blue-100 text-blue-800', icon: 'ri-check-line' },
       preparing: { text: 'En préparation', color: 'bg-orange-100 text-orange-800', icon: 'ri-restaurant-line' },
       ready: { text: 'Prêt à livrer', color: 'bg-green-100 text-green-800', icon: 'ri-check-circle-line' },
+      assigned: { text: 'Assignée au livreur', color: 'bg-purple-100 text-purple-800', icon: 'ri-user-follow-line' },
       on_the_way: { text: 'En route', color: 'bg-purple-100 text-purple-800', icon: 'ri-truck-line' },
+      on_way: { text: 'En route', color: 'bg-purple-100 text-purple-800', icon: 'ri-truck-line' },
       delivered: { text: 'Livré', color: 'bg-gray-100 text-gray-800', icon: 'ri-check-double-line' },
       cancelled: { text: 'Annulé', color: 'bg-red-100 text-red-800', icon: 'ri-close-line' }
     };
@@ -325,6 +328,28 @@ export default function OrdersManagement() {
 
       if (deliveryError) throw deliveryError;
 
+      // تحديث الطلب في localStorage (الحالة + معلومات الموصّل حتى يظهر للزبون ويستطيع التواصل)
+      const savedOrders = localStorage.getItem('orders');
+      if (savedOrders) {
+        const allOrders = JSON.parse(savedOrders);
+        const index = allOrders.findIndex((o: Order) => o.id === order.id);
+        if (index !== -1) {
+          const driverName = driver.name || driver.full_name || 'Livreur';
+          allOrders[index] = {
+            ...allOrders[index],
+            status: 'assigned',
+            driverId: driver.id,
+            driverName,
+            driver: {
+              name: driverName,
+              phone: driver.phone || '',
+              rating: driver.rating ?? 0,
+            },
+          };
+          localStorage.setItem('orders', JSON.stringify(allOrders));
+        }
+      }
+
       setDriverModalOrder(null);
       loadOrders();
       toast.success('Commande assignée au livreur avec succès');
@@ -340,6 +365,7 @@ export default function OrdersManagement() {
       pending: orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length,
       preparing: orders.filter(o => o.status === 'preparing').length,
       ready: orders.filter(o => o.status === 'ready').length,
+      assigned: orders.filter(o => o.status === 'assigned' || o.status === 'on_the_way' || o.status === 'on_way').length,
       delivered: orders.filter(o => o.status === 'delivered').length,
       revenue: orders.reduce((sum, order) => sum + order.total, 0)
     };
@@ -622,17 +648,21 @@ export default function OrdersManagement() {
                         )}
                         
                         {order.status === 'ready' && (
-                          <>
-                            <button
-                              onClick={() => openDriverModal(order)}
-                              className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
-                            >
-                              Choisir un livreur
-                            </button>
-                          </>
+                          <button
+                            onClick={() => openDriverModal(order)}
+                            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"
+                          >
+                            Choisir un livreur
+                          </button>
+                        )}
+
+                        {(order.status === 'assigned' || order.status === 'on_the_way' || order.status === 'on_way') && (
+                          <span className="text-sm text-gray-600">
+                            {order.driverName ? `Livreur : ${order.driverName}` : 'En route'}
+                          </span>
                         )}
                         
-                        {order.status === 'on_the_way' && (
+                        {(order.status === 'on_the_way' || order.status === 'on_way') && (
                           <button
                             onClick={() => updateOrderStatus(order.id, 'delivered')}
                             className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer whitespace-nowrap"

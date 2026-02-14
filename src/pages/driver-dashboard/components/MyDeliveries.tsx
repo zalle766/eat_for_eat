@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../context/ToastContext';
 
+const DRIVER_LOCATION_INTERVAL_MS = 15000; // 15 secondes
+
 interface MyDeliveriesProps {
   driver: any;
 }
@@ -18,11 +20,42 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
     return () => clearInterval(interval);
   }, [driver, filter]);
 
+  // إرسال موقع السائق كل 15 ثانية للطلبات ذات الحالة "في الطريق" (picked_up)
+  useEffect(() => {
+    const activeDeliveries = deliveries.filter((d) => d.status === 'picked_up');
+    if (activeDeliveries.length === 0) return;
+
+    const sendLocation = (lat: number, lng: number) => {
+      activeDeliveries.forEach(async (delivery) => {
+        const { error } = await supabase
+          .from('orders')
+          .update({ driver_lat: lat, driver_lng: lng })
+          .eq('id', delivery.order_id);
+        if (error) console.warn('Update driver location failed:', error);
+      });
+    };
+
+    const scheduleNext = () => {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          sendLocation(pos.coords.latitude, pos.coords.longitude);
+        },
+        () => {},
+        { enableHighAccuracy: true, maximumAge: 10000 }
+      );
+    };
+
+    scheduleNext();
+    const intervalId = setInterval(scheduleNext, DRIVER_LOCATION_INTERVAL_MS);
+    return () => clearInterval(intervalId);
+  }, [deliveries]);
+
   const loadDeliveries = async () => {
     try {
       let query = supabase
         .from('deliveries')
-        .select('*')
+        .select('*, orders(delivery_latitude, delivery_longitude)')
         .eq('driver_id', driver.id)
         .order('created_at', { ascending: false });
 
@@ -72,16 +105,27 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
 
       if (error) throw error;
 
-      // تحديث حالة الطلب في localStorage
       const delivery = deliveries.find(d => d.id === deliveryId);
       if (delivery) {
+        // تحديث حالة الطلب في Supabase (للتتبع على الخريطة)
+        const orderStatus = newStatus === 'picked_up' ? 'on_way' : newStatus === 'delivered' ? 'delivered' : null;
+        if (orderStatus) {
+          const orderUpdate: { status: string; driver_lat?: null; driver_lng?: null } = { status: orderStatus };
+          if (newStatus === 'delivered') {
+            orderUpdate.driver_lat = null;
+            orderUpdate.driver_lng = null;
+          }
+          await supabase.from('orders').update(orderUpdate).eq('id', delivery.order_id);
+        }
+
+        // تحديث حالة الطلب في localStorage
         const allOrders = JSON.parse(localStorage.getItem('orders') || '[]');
         const updatedOrders = allOrders.map((o: any) => {
           if (o.id === delivery.order_id) {
-            let orderStatus = o.status;
-            if (newStatus === 'picked_up') orderStatus = 'out_for_delivery';
-            if (newStatus === 'delivered') orderStatus = 'delivered';
-            return { ...o, status: orderStatus };
+            let status = o.status;
+            if (newStatus === 'picked_up') status = 'on_way';
+            if (newStatus === 'delivered') status = 'delivered';
+            return { ...o, status };
           }
           return o;
         });
@@ -213,7 +257,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                   </div>
                 </div>
 
-                {/* Delivery Info */}
+                {/* Delivery Info - إحداثيات الموقع لتسهيل الوصول */}
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                     <i className="ri-map-pin-line text-orange-500"></i>
@@ -222,7 +266,19 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="font-medium text-gray-900 mb-1">{delivery.customer_name}</p>
                     <p className="text-sm text-gray-600 mb-1">{delivery.customer_phone}</p>
-                    <p className="text-sm text-gray-600">{delivery.delivery_address}</p>
+                    {(() => {
+                      const order = delivery.orders ?? delivery.order;
+                      const lat = order?.delivery_latitude ?? (Array.isArray(order) ? order?.[0]?.delivery_latitude : null);
+                      const lng = order?.delivery_longitude ?? (Array.isArray(order) ? order?.[0]?.delivery_longitude : null);
+                      const coords = lat != null && lng != null ? `${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}` : null;
+                      return coords ? (
+                        <p className="text-sm font-mono font-semibold text-green-700 bg-green-50 px-2 py-1.5 rounded border border-green-200">
+                          {coords}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-600">{delivery.delivery_address}</p>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -280,7 +336,15 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                     Marquer comme livré
                   </button>
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${delivery.delivery_address}`}
+                    href={(() => {
+                      const order = delivery.orders ?? delivery.order;
+                      const lat = order?.delivery_latitude ?? (Array.isArray(order) ? order?.[0]?.delivery_latitude : null);
+                      const lng = order?.delivery_longitude ?? (Array.isArray(order) ? order?.[0]?.delivery_longitude : null);
+                      if (lat != null && lng != null) {
+                        return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                      }
+                      return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(delivery.delivery_address || '')}`;
+                    })()}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"

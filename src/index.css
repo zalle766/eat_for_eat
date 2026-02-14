@@ -1,3 +1,6 @@
+/* Leaflet map (track order) - must be before @tailwind for PostCSS */
+@import 'leaflet/dist/leaflet.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -157,4 +160,66 @@ body {
 
 .status-busy {
   @apply bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+/* Track Order Map - أيقونات مخصصة على الخريطة */
+.track-order-map-container .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  overflow: hidden;
+}
+.track-order-map-container .leaflet-popup-content {
+  margin: 12px 14px;
+  min-width: 160px;
+}
+.track-map-popup p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+.track-map-custom-marker {
+  background: none !important;
+  border: none !important;
+}
+.track-marker-inner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+}
+.track-marker-inner i {
+  transform: rotate(45deg);
+  display: block;
+}
+.track-marker-label {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #374151;
+  margin-top: 2px;
+  text-shadow: 0 0 2px white, 0 1px 2px white;
+  white-space: nowrap;
+}
+
+/* تحريك الخط على المسار (حركة متصلة) */
+.track-order-map-container .track-route-line-animated path {
+  stroke-dasharray: 20 12;
+  animation: track-route-flow 0.8s linear infinite;
+}
+@keyframes track-route-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+/* تمييز أيقونة Livraison (عنوان التوصيل) لتبقى واضحة */
+.track-order-map-container .track-marker-livraison .track-marker-inner {
+  border: 3px solid white;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.45);
 }

@@ -4,6 +4,7 @@ import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
+import { geocodeAddress } from '../../lib/geocode';
 
 interface CartItem {
   id: string;
@@ -267,7 +268,7 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     
     try {
-      const orderId = crypto.randomUUID?.() || `order-${Date.now()}`;
+      let orderId = crypto.randomUUID?.() || `order-${Date.now()}`;
       const orderTime = new Date().toLocaleString('fr-FR', {
         year: 'numeric',
         month: 'long',
@@ -275,6 +276,47 @@ export default function CheckoutPage() {
         hour: '2-digit',
         minute: '2-digit'
       });
+
+      // جيو-كود عنوان التوصيل لحفظ الإحداثيات (يعرضها السائق كـ 31.xxx, -8.xxx)
+      let deliveryLat: number | null = null;
+      let deliveryLng: number | null = null;
+      try {
+        const geo = await geocodeAddress(deliveryInfo.address, deliveryInfo.city);
+        deliveryLat = geo.lat;
+        deliveryLng = geo.lng;
+      } catch (_) {
+        /* استمر بدون إحداثيات */
+      }
+
+      // محاولة حفظ الطلب في Supabase أولاً للحصول على id موحد (للتتبع والموقع)
+      let createdOrder: { id: string } | null = null;
+      try {
+        const res = await supabase
+          .from('orders')
+          .insert({
+            customer_id: currentUser.id,
+            restaurant_id: cartItems[0]?.restaurant_id || null,
+            status: 'pending',
+            subtotal,
+            delivery_fee: deliveryFee,
+            total,
+            customer_name: deliveryInfo.name,
+            customer_phone: deliveryInfo.phone,
+            delivery_address: deliveryInfo.address,
+            delivery_city: deliveryInfo.city,
+            delivery_latitude: deliveryLat,
+            delivery_longitude: deliveryLng,
+            notes: deliveryInfo.notes || null,
+          })
+          .select('id')
+          .single();
+        if (!res.error && res.data) {
+          createdOrder = res.data;
+          orderId = res.data.id;
+        }
+      } catch (_) {
+        /* use fallback orderId */
+      }
 
       const orderData = {
         id: orderId,
@@ -301,31 +343,10 @@ export default function CheckoutPage() {
         estimatedDelivery: new Date(Date.now() + 45 * 60 * 1000).toISOString()
       };
 
-      // محاولة حفظ الطلب في Supabase (اختياري - لو فشل نكمل مع localStorage)
-      try {
-        const { data: createdOrder, error: createOrderError } = await supabase
-          .from('orders')
-          .insert({
-            customer_id: currentUser.id,
-            restaurant_id: cartItems[0]?.restaurant_id || null,
-            status: 'pending',
-            subtotal,
-            delivery_fee: deliveryFee,
-            total,
-            customer_name: deliveryInfo.name,
-            customer_phone: deliveryInfo.phone,
-            delivery_address: deliveryInfo.address,
-            delivery_city: deliveryInfo.city,
-            delivery_latitude: null,
-            delivery_longitude: null,
-            notes: deliveryInfo.notes || null,
-          })
-          .select('id')
-          .single();
-
-        if (!createOrderError && createdOrder) {
+      if (createdOrder) {
+        try {
           const orderItemsPayload = cartItems.map((item) => ({
-            order_id: createdOrder.id,
+            order_id: createdOrder!.id,
             product_id: item.id,
             name: item.name,
             quantity: item.quantity,
@@ -333,11 +354,11 @@ export default function CheckoutPage() {
             total_price: item.price * item.quantity,
           }));
           await supabase.from('order_items').insert(orderItemsPayload);
+        } catch (itemsErr) {
+          console.warn('Order items insert failed:', itemsErr);
         }
-      } catch (supabaseErr) {
-        console.warn('Supabase order save failed (localStorage used):', supabaseErr);
       }
-      
+
       // حفظ الطلب في localStorage (يعمل دائماً - لوحة المطعم تقرأ منه)
       const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
       existingOrders.push(orderData);

@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
+import TrackOrderMap from '../../components/feature/TrackOrderMap';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/currency';
 import { useToast } from '../../context/ToastContext';
+import { geocodeAddress, simulateDriverPosition } from '../../lib/geocode';
 
 interface OrderItem {
   id: string;
@@ -34,6 +36,12 @@ interface Order {
     phone: string;
     rating: number;
   };
+  /** Coordinates (optional, can be set at checkout or by geocoding). */
+  delivery_lat?: number;
+  delivery_lng?: number;
+  /** Live driver position (optional, updated by driver app). */
+  driver_lat?: number;
+  driver_lng?: number;
   user_id?: string;
 }
 
@@ -84,6 +92,20 @@ export default function TrackOrderPage() {
   const [cartCleared, setCartCleared] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isCheckingUser, setIsCheckingUser] = useState(true);
+  const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [driverCoords, setDriverCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [restaurantCoords, setRestaurantCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapLoading, setMapLoading] = useState(false);
+  /** بيانات حية من Supabase (موقع السائق + الحالة) للتحديث المباشر */
+  const [liveOrderFromSupabase, setLiveOrderFromSupabase] = useState<{
+    driver_lat: number | null;
+    driver_lng: number | null;
+    status?: string;
+    delivery_latitude?: number | null;
+    delivery_longitude?: number | null;
+  } | null>(null);
+  /** معلومات الموصّل من Supabase (للزبون عندما يُعيَّن موصّل من لوحة المطعم) */
+  const [driverFromSupabase, setDriverFromSupabase] = useState<{ name: string; phone: string; rating: number } | null>(null);
   const navigate = useNavigate();
 
   // التحقق من المستخدم المسجل
@@ -142,6 +164,163 @@ export default function TrackOrderPage() {
       return () => clearInterval(interval);
     }
   }, [currentUser]);
+
+  // دمج بيانات الطلب مع البيانات الحية من Supabase (للعرض والتحديث المباشر)
+  const effectiveOrder: Order | null = searchedOrder
+    ? {
+        ...searchedOrder,
+        status: liveOrderFromSupabase?.status ?? searchedOrder.status,
+        driver_lat: liveOrderFromSupabase?.driver_lat ?? searchedOrder.driver_lat,
+        driver_lng: liveOrderFromSupabase?.driver_lng ?? searchedOrder.driver_lng,
+        delivery_lat: liveOrderFromSupabase?.delivery_latitude ?? searchedOrder.delivery_lat,
+        delivery_lng: liveOrderFromSupabase?.delivery_longitude ?? searchedOrder.delivery_lng,
+      }
+    : null;
+
+  /** الموصّل المعروض للزبون (من Supabase إن وُجد، وإلا من الطلب المحلي) */
+  const displayDriver = driverFromSupabase ?? searchedOrder?.driver;
+
+  // جلب الطلب من Supabase + معلومات الموصّل (من جدول التوصيلات) والاشتراك في Realtime
+  useEffect(() => {
+    if (!searchedOrder?.id) {
+      setLiveOrderFromSupabase(null);
+      setDriverFromSupabase(null);
+      return;
+    }
+    const orderId = searchedOrder.id;
+
+    const fetchOrder = async () => {
+      const { data } = await supabase
+        .from('orders')
+        .select('driver_lat, driver_lng, status, delivery_latitude, delivery_longitude')
+        .eq('id', orderId)
+        .single();
+      if (data) {
+        setLiveOrderFromSupabase({
+          driver_lat: data.driver_lat ?? null,
+          driver_lng: data.driver_lng ?? null,
+          status: data.status ?? undefined,
+          delivery_latitude: data.delivery_latitude ?? null,
+          delivery_longitude: data.delivery_longitude ?? null,
+        });
+      }
+
+      const { data: deliveryData } = await supabase
+        .from('deliveries')
+        .select('*, drivers(name, phone)')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const raw = deliveryData as Record<string, unknown> | null;
+      const dr = raw?.drivers ?? raw?.driver;
+      const driverObj = Array.isArray(dr) ? dr[0] : dr;
+      if (driverObj && typeof driverObj === 'object' && ((driverObj as any).name || (driverObj as any).phone)) {
+        setDriverFromSupabase({
+          name: (driverObj as any).name || 'Livreur',
+          phone: (driverObj as any).phone || '',
+          rating: (driverObj as any).rating ?? 0,
+        });
+      } else {
+        setDriverFromSupabase(null);
+      }
+    };
+    fetchOrder();
+
+    const channel = supabase
+      .channel(`order:${orderId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${orderId}` },
+        (payload) => {
+          const n = payload.new as Record<string, unknown>;
+          setLiveOrderFromSupabase({
+            driver_lat: (n.driver_lat as number) ?? null,
+            driver_lng: (n.driver_lng as number) ?? null,
+            status: n.status as string | undefined,
+            delivery_latitude: (n.delivery_latitude as number) ?? null,
+            delivery_longitude: (n.delivery_longitude as number) ?? null,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+      setLiveOrderFromSupabase(null);
+      setDriverFromSupabase(null);
+    };
+  }, [searchedOrder?.id]);
+
+  // Geocode delivery address and set driver position when order is selected (uses effectiveOrder)
+  useEffect(() => {
+    const order = effectiveOrder;
+    if (!order?.deliveryInfo) {
+      setDeliveryCoords(null);
+      setDriverCoords(null);
+      setRestaurantCoords(null);
+      return;
+    }
+    const info = order.deliveryInfo;
+    const orderStatus = order.status;
+    const showMap = ['ready', 'on_way', 'delivered'].includes(orderStatus);
+
+    if (!showMap) {
+      setDeliveryCoords(null);
+      setDriverCoords(null);
+      setRestaurantCoords(null);
+      return;
+    }
+
+    const run = async () => {
+      setMapLoading(true);
+      try {
+        let lat = order.delivery_lat;
+        let lng = order.delivery_lng;
+        if (lat == null || lng == null) {
+          const geo = await geocodeAddress(info.address, info.city);
+          lat = geo.lat;
+          lng = geo.lng;
+        }
+        setDeliveryCoords({ lat, lng });
+        if (order.driver_lat != null && order.driver_lng != null) {
+          setDriverCoords({ lat: order.driver_lat, lng: order.driver_lng });
+        } else if (orderStatus === 'on_way') {
+          setDriverCoords(simulateDriverPosition(lat, lng));
+        } else {
+          setDriverCoords(null);
+        }
+        // جيو-كود المطعم لعرضه على الخريطة (اسم المطعم + مراكش)
+        if (order.restaurant) {
+          try {
+            const geoResto = await geocodeAddress(order.restaurant, 'Marrakech');
+            setRestaurantCoords({ lat: geoResto.lat, lng: geoResto.lng });
+          } catch {
+            setRestaurantCoords(null);
+          }
+        } else {
+          setRestaurantCoords(null);
+        }
+      } catch (e) {
+        console.warn('Map setup failed:', e);
+        setDeliveryCoords(null);
+        setDriverCoords(null);
+        setRestaurantCoords(null);
+      } finally {
+        setMapLoading(false);
+      }
+    };
+    run();
+  }, [
+    effectiveOrder?.id,
+    effectiveOrder?.status,
+    effectiveOrder?.delivery_lat,
+    effectiveOrder?.delivery_lng,
+    effectiveOrder?.driver_lat,
+    effectiveOrder?.driver_lng,
+    effectiveOrder?.deliveryInfo,
+    effectiveOrder?.restaurant,
+  ]);
 
   const checkAndClearCart = () => {
     if (!currentUser) return;
@@ -353,7 +532,9 @@ export default function TrackOrderPage() {
         </div>
 
         {/* نتائج البحث */}
-        {searchedOrder && (
+        {searchedOrder && (() => {
+          const order = effectiveOrder ?? searchedOrder;
+          return (
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -363,8 +544,8 @@ export default function TrackOrderPage() {
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-gray-800">{formatCurrency(searchedOrder.total)}</div>
-                <div className={`text-xs px-3 py-1 rounded-full mt-2 ${statusInfo[searchedOrder.status as keyof typeof statusInfo]?.bgColor} ${statusInfo[searchedOrder.status as keyof typeof statusInfo]?.color}`}>
-                  {statusInfo[searchedOrder.status as keyof typeof statusInfo]?.title || 'Non défini'}
+                <div className={`text-xs px-3 py-1 rounded-full mt-2 ${statusInfo[order.status as keyof typeof statusInfo]?.bgColor} ${statusInfo[order.status as keyof typeof statusInfo]?.color}`}>
+                  {statusInfo[order.status as keyof typeof statusInfo]?.title || 'Non défini'}
                 </div>
               </div>
             </div>
@@ -378,47 +559,111 @@ export default function TrackOrderPage() {
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div 
                   className="bg-orange-500 h-3 rounded-full transition-all duration-500"
-                  style={{ width: `${getProgressPercentage(searchedOrder.status)}%` }}
+                  style={{ width: `${getProgressPercentage(order.status)}%` }}
                 ></div>
               </div>
             </div>
 
             {/* الحالة الحالية */}
-            {statusInfo[searchedOrder.status as keyof typeof statusInfo] && (
+            {statusInfo[order.status as keyof typeof statusInfo] && (
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg mb-6">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${statusInfo[searchedOrder.status as keyof typeof statusInfo].bgColor}`}>
-                  <i className={`${statusInfo[searchedOrder.status as keyof typeof statusInfo].icon} text-xl ${statusInfo[searchedOrder.status as keyof typeof statusInfo].color}`}></i>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${statusInfo[order.status as keyof typeof statusInfo].bgColor}`}>
+                  <i className={`${statusInfo[order.status as keyof typeof statusInfo].icon} text-xl ${statusInfo[order.status as keyof typeof statusInfo].color}`}></i>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-800">{statusInfo[searchedOrder.status as keyof typeof statusInfo].title}</h3>
-                  <p className="text-gray-600 text-sm">{statusInfo[searchedOrder.status as keyof typeof statusInfo].description}</p>
+                  <h3 className="font-semibold text-gray-800">{statusInfo[order.status as keyof typeof statusInfo].title}</h3>
+                  <p className="text-gray-600 text-sm">{statusInfo[order.status as keyof typeof statusInfo].description}</p>
                 </div>
               </div>
             )}
 
-            {/* معلومات السائق */}
-            {(searchedOrder.status === 'on_way' || searchedOrder.status === 'ready') && searchedOrder.driver && (
+            {/* خريطة التتبع - عند الجاهزية أو في الطريق أو تم التوصيل */}
+            {['ready', 'on_way', 'delivered'].includes(order.status) && searchedOrder.deliveryInfo && (
+              <div className="mb-6">
+                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <i className="ri-map-pin-line text-orange-500"></i>
+                  Suivi sur la carte
+                </h3>
+                {mapLoading ? (
+                  <div className="rounded-2xl bg-gray-100 flex items-center justify-center h-[320px]">
+                    <span className="text-gray-500 flex items-center gap-2">
+                      <i className="ri-loader-4-line animate-spin text-xl"></i>
+                      Chargement de la carte...
+                    </span>
+                  </div>
+                ) : deliveryCoords ? (
+                  <TrackOrderMap
+                    deliveryLat={deliveryCoords.lat}
+                    deliveryLng={deliveryCoords.lng}
+                    driverLat={driverCoords?.lat ?? undefined}
+                    driverLng={driverCoords?.lng ?? undefined}
+                    restaurantLat={restaurantCoords?.lat ?? undefined}
+                    restaurantLng={restaurantCoords?.lng ?? undefined}
+                    deliveryAddress={`${searchedOrder.deliveryInfo.address}, ${searchedOrder.deliveryInfo.city}`}
+                    driverName={searchedOrder.driver?.name}
+                    restaurantName={searchedOrder.restaurant}
+                    status={order.status}
+                  />
+                ) : null}
+              </div>
+            )}
+
+            {/* معلومات السائق - تظهر عند تعيين الموصّل أو عندما يكون في الطريق (للتواصل والدردشة) */}
+            {(order.status === 'assigned' || order.status === 'on_way' || order.status === 'ready') && displayDriver && (
               <div className="border-t pt-6 mb-6">
-                <h3 className="font-semibold text-gray-800 mb-4">Informations du livreur</h3>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <i className="ri-user-line text-xl text-gray-600"></i>
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-800">{searchedOrder.driver.name}</div>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <i className="ri-star-fill text-yellow-400"></i>
-                        <span>{searchedOrder.driver.rating}</span>
+                <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  <i className="ri-user-line text-orange-500"></i>
+                  Informations du livreur
+                </h3>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center">
+                        <i className="ri-user-line text-2xl text-orange-500"></i>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-800">{displayDriver.name}</div>
+                        {displayDriver.rating > 0 && (
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <i className="ri-star-fill text-yellow-400"></i>
+                            <span>{displayDriver.rating}</span>
+                          </div>
+                        )}
+                        {displayDriver.phone && (
+                          <p className="text-sm text-gray-500 mt-0.5">{displayDriver.phone}</p>
+                        )}
                       </div>
                     </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {displayDriver.phone && (
+                        <>
+                          <a
+                            href={(() => {
+                              const raw = displayDriver.phone.replace(/\D/g, '').replace(/^0/, '');
+                              const num = raw.startsWith('212') ? raw : `212${raw}`;
+                              return `https://wa.me/${num}`;
+                            })()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors"
+                          >
+                            <i className="ri-whatsapp-line text-xl"></i>
+                            Contacter par WhatsApp
+                          </a>
+                          <a
+                            href={`tel:${displayDriver.phone}`}
+                            className="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2.5 rounded-lg font-medium transition-colors"
+                          >
+                            <i className="ri-phone-line text-lg"></i>
+                            Appeler
+                          </a>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <a 
-                    href={`tel:${searchedOrder.driver.phone}`}
-                    className="bg-green-500 hover:bg-green-600 text-white p-3 rounded-full transition-colors cursor-pointer"
-                  >
-                    <i className="ri-phone-line text-lg"></i>
-                  </a>
+                  <p className="text-sm text-gray-500 mt-3">
+                    Vous pouvez contacter le livreur par WhatsApp ou par téléphone pour suivre votre livraison.
+                  </p>
                 </div>
               </div>
             )}
@@ -470,7 +715,8 @@ export default function TrackOrderPage() {
               </div>
             )}
           </div>
-        )}
+          );
+        })()}
 
         {/* رسالة عدم العثور على الطلب */}
         {searchedOrder === null && orderNumber && !isLoading && (

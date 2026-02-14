@@ -311,6 +311,63 @@ DROP POLICY IF EXISTS "offers_delete_restaurant_owner" ON public.offers;
 CREATE POLICY "offers_delete_restaurant_owner" ON public.offers FOR DELETE TO authenticated
   USING (restaurant_id IN (SELECT id FROM public.restaurants WHERE owner_id = auth.uid()));
 
+-- 7. جدول الطلبات (orders) - إضافة موقع السائق والتوصيل
+-- ============================================================
+-- إذا كان جدول orders موجوداً مسبقاً، نضيف الأعمدة فقط
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS driver_lat DOUBLE PRECISION;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS driver_lng DOUBLE PRECISION;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_latitude DOUBLE PRECISION;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_longitude DOUBLE PRECISION;
+
+-- السماح للسائقين بتحديث driver_lat و driver_lng فقط (عبر RLS أو من الخدمة)
+-- سياسة: تحديث الطلب (حالة + موقع السائق) - للمصادقين
+DROP POLICY IF EXISTS "orders_update_driver_location" ON public.orders;
+CREATE POLICY "orders_update_driver_location" ON public.orders
+  FOR UPDATE TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- تفعيل Realtime للجدول orders (للتتبع المباشر لموقع السائق)
+-- إذا ظهر خطأ أن الجدول مضاف مسبقاً، يمكن تجاهله أو تشغيله من لوحة Supabase: Database → Replication
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+EXCEPTION WHEN duplicate_object THEN
+  NULL;
+END $$;
+
+-- 8. جدول رسائل الدردشة بين الزبون والموصّل
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.order_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL,
+  sender_type TEXT NOT NULL CHECK (sender_type IN ('customer', 'driver')),
+  sender_id TEXT NOT NULL,
+  sender_name TEXT,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_messages_order_id ON public.order_messages(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_messages_created_at ON public.order_messages(created_at);
+
+ALTER TABLE public.order_messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "order_messages_select_own" ON public.order_messages;
+CREATE POLICY "order_messages_select_own" ON public.order_messages
+  FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "order_messages_insert_authenticated" ON public.order_messages;
+CREATE POLICY "order_messages_insert_authenticated" ON public.order_messages
+  FOR INSERT TO authenticated WITH CHECK (true);
+
+-- Realtime للدردشة
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.order_messages;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 -- ============================================================
 -- تم! تأكد من إنشاء bucket باسم restaurant-images في Storage
 -- ============================================================
