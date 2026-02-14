@@ -350,7 +350,11 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onSa
   );
 };
 
-export default function MenuManagement() {
+interface MenuManagementProps {
+  restaurant: { id: string; name?: string };
+}
+
+export default function MenuManagement({ restaurant }: MenuManagementProps) {
   const toast = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -359,142 +363,123 @@ export default function MenuManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tous');
 
-  // جلب المنتجات من Edge Function
+  // جلب المنتجات مباشرة من Supabase (نفس مصدر صفحة المطعم العامة)
   const fetchProducts = async () => {
+    if (!restaurant?.id) return;
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('restaurant_id', restaurant.id)
+        .order('created_at', { ascending: false });
 
-      const response = await fetch(`${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/manage-products`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const result = await response.json();
-      
-      if (response.ok) {
-        setProducts(result.products || []);
+      if (error) {
+        console.error('خطأ في جلب المنتجات:', error);
+        toast.error(error.message || 'Erreur lors du chargement des produits');
+        setProducts([]);
       } else {
-        console.error('خطأ في جلب المنتجات:', result.error);
+        setProducts((data as Product[]) || []);
       }
     } catch (error) {
       console.error('خطأ في جلب المنتجات:', error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchProducts();
-  }, []);
+  }, [restaurant?.id]);
 
-  // إضافة أو تحديث منتج
+  // إضافة أو تحديث منتج مباشرة في Supabase
   const handleSaveProduct = async (productData: Omit<Product, 'id' | 'restaurant_id' | 'created_at'>) => {
+    if (!restaurant?.id) return;
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (editingProduct) {
+        const { data, error } = await supabase
+          .from('products')
+          .update({
+            name: productData.name,
+            price: productData.price,
+            category: productData.category,
+            description: productData.description || '',
+            image_url: productData.image_url || '',
+            is_available: productData.is_available,
+          })
+          .eq('id', editingProduct.id)
+          .eq('restaurant_id', restaurant.id)
+          .select()
+          .single();
 
-      const action = editingProduct ? 'update' : 'add';
-      const body = editingProduct 
-        ? { ...productData, id: editingProduct.id }
-        : productData;
-
-      const response = await fetch(`${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/manage-products?action=${action}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      const result = await response.json();
-      
-      if (response.ok) {
-        if (editingProduct) {
-          // تحديث المنتج في القائمة
-          setProducts(products.map(p => p.id === editingProduct.id ? result.product : p));
-        } else {
-          // إضافة المنتج الجديد
-          setProducts([result.product, ...products]);
-        }
-        setShowAddModal(false);
-        setEditingProduct(null);
+        if (error) throw error;
+        setProducts(products.map(p => p.id === editingProduct.id ? (data as Product) : p));
+        toast.success('Produit mis à jour');
       } else {
-        console.error('خطأ في حفظ المنتج:', result.error);
-        toast.error('Erreur lors de l\'enregistrement du produit');
+        const { data, error } = await supabase
+          .from('products')
+          .insert({
+            name: productData.name,
+            price: productData.price,
+            category: productData.category,
+            description: productData.description || '',
+            image_url: productData.image_url || '',
+            is_available: productData.is_available ?? true,
+            restaurant_id: restaurant.id,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        setProducts([data as Product, ...products]);
+        toast.success('Produit ajouté');
       }
-    } catch (error) {
+      setShowAddModal(false);
+      setEditingProduct(null);
+    } catch (error: any) {
       console.error('خطأ في حفظ المنتج:', error);
-      toast.error('حدث خطأ أثناء حفظ المنتج');
+      toast.error(error?.message || 'Erreur lors de l\'enregistrement du produit');
     }
   };
 
   // حذف منتج
   const handleDeleteProduct = async (productId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) return;
-
+    if (!restaurant?.id) return;
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
+        .eq('restaurant_id', restaurant.id);
 
-      const response = await fetch(`${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/manage-products?action=delete`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: productId }),
-      });
-
-      const result = await response.json();
-      
-      if (response.ok) {
-        setProducts(products.filter(p => p.id !== productId));
-      } else {
-        console.error('خطأ في حذف المنتج:', result.error);
-        toast.error('Erreur lors de la suppression du produit');
-      }
-    } catch (error) {
+      if (error) throw error;
+      setProducts(products.filter(p => p.id !== productId));
+      toast.success('Produit supprimé');
+    } catch (error: any) {
       console.error('خطأ في حذف المنتج:', error);
-      toast.error('حدث خطأ أثناء حذف المنتج');
+      toast.error(error?.message || 'Erreur lors de la suppression');
     }
   };
 
   // تبديل حالة التوفر
   const handleToggleAvailability = async (productId: string, currentStatus: boolean) => {
+    if (!restaurant?.id) return;
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const { error } = await supabase
+        .from('products')
+        .update({ is_available: !currentStatus })
+        .eq('id', productId)
+        .eq('restaurant_id', restaurant.id);
 
-      const response = await fetch(`${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/manage-products?action=toggle-availability`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          id: productId, 
-          is_available: !currentStatus 
-        }),
-      });
-
-      const result = await response.json();
-      
-      if (response.ok) {
-        setProducts(products.map(p => 
-          p.id === productId ? { ...p, is_available: !currentStatus } : p
-        ));
-      } else {
-        console.error('خطأ في تحديث حالة المنتج:', result.error);
-        toast.error('Erreur lors de la mise à jour du statut du produit');
-      }
-    } catch (error) {
-      console.error('خطأ في تحديث حالة المنتج:', error);
-      toast.error('حدث خطأ أثناء تحديث حالة المنتج');
+      if (error) throw error;
+      setProducts(products.map(p =>
+        p.id === productId ? { ...p, is_available: !currentStatus } : p
+      ));
+    } catch (error: any) {
+      console.error('خطأ في تحديث état:', error);
+      toast.error(error?.message || 'Erreur lors de la mise à jour');
     }
   };
 

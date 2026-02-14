@@ -125,7 +125,10 @@ export default function AvailableOrders({ driver }: AvailableOrdersProps) {
             <i className="ri-shopping-bag-line text-4xl text-gray-400"></i>
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune commande disponible pour le moment</h3>
-          <p className="text-gray-600">Vous serez notifié lorsqu'il y aura de nouvelles commandes dans votre zone</p>
+          <p className="text-gray-600 mb-3">Vous serez notifié lorsqu'il y aura de nouvelles commandes dans votre zone</p>
+          <p className="text-sm text-orange-600 font-medium">
+            Les commandes que le restaurant vous assigne apparaissent dans <strong>« Mes livraisons »</strong>.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

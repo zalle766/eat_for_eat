@@ -98,40 +98,85 @@ export default function OrdersManagement() {
     }
   };
 
-  const loadOrders = () => {
+  const loadOrders = async () => {
+    if (!currentRestaurant?.id) return;
     try {
-      const savedOrders = localStorage.getItem('orders');
-      if (!savedOrders) {
+      // تحميل الطلبات من Supabase (مصدر واحد لجميع الأجهزة)
+      const { data: ordersRows, error: ordersError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('restaurant_id', currentRestaurant.id)
+        .order('created_at', { ascending: false });
+
+      if (ordersError) {
+        console.error('خطأ في تحميل الطلبات:', ordersError);
         setOrders([]);
         return;
       }
 
-      const allOrders = JSON.parse(savedOrders);
-      
-      // تصفية الطلبات لعرض طلبات هذا المطعم فقط
-      const restaurantOrders = allOrders.filter((order: Order) => {
-        // التحقق من أن الطلب يحتوي على منتجات من هذا المطعم
-        return order.items.some(item => 
-          item.restaurant_id === currentRestaurant?.id ||
-          order.restaurant === currentRestaurant?.name
-        );
-      });
+      const orderIds = (ordersRows || []).map((o: any) => o.id).filter(Boolean);
+      let deliveriesByOrder: Record<string, any> = {};
+      let driversById: Record<string, any> = {};
 
-      // ترتيب الطلبات حسب التاريخ (الأحدث أولاً)
-      restaurantOrders.sort((a: Order, b: Order) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-      // التحقق من وجود طلبات جديدة
-      const previousOrdersCount = orders.length;
-      const newOrdersCount = restaurantOrders.length;
-      
-      if (newOrdersCount > previousOrdersCount && previousOrdersCount > 0) {
-        // إشعار بطلب جديد
-        showNewOrderNotification();
+      if (orderIds.length > 0) {
+        const { data: deliveries } = await supabase
+          .from('deliveries')
+          .select('order_id, driver_id')
+          .in('order_id', orderIds);
+        if (deliveries?.length) {
+          deliveries.forEach((d: any) => { deliveriesByOrder[d.order_id] = d; });
+          const driverIds = [...new Set(deliveries.map((d: any) => d.driver_id).filter(Boolean))];
+          if (driverIds.length > 0) {
+            const { data: drivers } = await supabase
+              .from('drivers')
+              .select('id, name, full_name, phone, rating')
+              .in('id', driverIds);
+            (drivers || []).forEach((dr: any) => { driversById[dr.id] = dr; });
+          }
+        }
       }
 
-      setOrders(restaurantOrders);
+      const mapped: Order[] = (ordersRows || []).map((row: any) => {
+        const delivery = deliveriesByOrder[row.id];
+        const driver = delivery && driversById[delivery.driver_id] ? driversById[delivery.driver_id] : null;
+        const driverName = driver?.name || driver?.full_name || '';
+        return {
+          id: row.id,
+          user_id: row.customer_id || '',
+          restaurant: currentRestaurant.name || '',
+          items: (row.order_items || []).map((oi: any) => ({
+            id: oi.product_id || oi.id,
+            name: oi.name,
+            price: oi.unit_price,
+            quantity: oi.quantity,
+            image: '',
+            restaurant_id: currentRestaurant.id,
+          })),
+          total: row.total ?? 0,
+          status: row.status || 'pending',
+          estimatedTime: '30-45 min',
+          orderTime: row.created_at ? new Date(row.created_at).toLocaleString() : '',
+          deliveryInfo: {
+            name: row.customer_name || '',
+            phone: row.customer_phone || '',
+            address: row.delivery_address || '',
+            city: row.delivery_city || '',
+            notes: row.notes || '',
+          },
+          paymentMethod: 'Non spécifié',
+          subtotal: row.subtotal ?? 0,
+          deliveryFee: row.delivery_fee ?? 0,
+          createdAt: row.created_at || new Date().toISOString(),
+          estimatedDelivery: row.created_at ? new Date(new Date(row.created_at).getTime() + 45 * 60 * 1000).toISOString() : '',
+          driverId: delivery?.driver_id,
+          driverName,
+          driver: driver ? { name: driverName, phone: driver.phone || '', rating: driver.rating ?? 0 } : undefined,
+        };
+      });
+
+      const previousCount = orders.length;
+      if (mapped.length > previousCount && previousCount > 0) showNewOrderNotification();
+      setOrders(mapped);
     } catch (error) {
       console.error('خطأ في تحميل الطلبات:', error);
       setOrders([]);
@@ -183,34 +228,20 @@ export default function OrdersManagement() {
     setFilteredOrders(filtered);
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const savedOrders = localStorage.getItem('orders');
-      if (!savedOrders) return;
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId)
+        .eq('restaurant_id', currentRestaurant?.id);
 
-      const allOrders = JSON.parse(savedOrders);
-      const orderIndex = allOrders.findIndex((order: Order) => order.id === orderId);
-      
-      if (orderIndex !== -1) {
-        allOrders[orderIndex].status = newStatus;
-        localStorage.setItem('orders', JSON.stringify(allOrders));
-        window.dispatchEvent(new CustomEvent('ordersUpdated'));
-        
-        // تحديث الطلب الحالي إذا كان موجوداً
-        const currentOrder = localStorage.getItem('currentOrder');
-        if (currentOrder) {
-          const parsedCurrentOrder = JSON.parse(currentOrder);
-          if (parsedCurrentOrder.id === orderId) {
-            parsedCurrentOrder.status = newStatus;
-            localStorage.setItem('currentOrder', JSON.stringify(parsedCurrentOrder));
-          }
-        }
-        
-        // إعادة تحميل الطلبات
-        loadOrders();
-      }
-    } catch (error) {
+      if (error) throw error;
+      setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+      toast.success('Statut mis à jour');
+    } catch (error: any) {
       console.error('خطأ في تحديث حالة الطلب:', error);
+      toast.error(error?.message || 'Erreur lors de la mise à jour du statut');
     }
   };
 
@@ -328,30 +359,14 @@ export default function OrdersManagement() {
 
       if (deliveryError) throw deliveryError;
 
-      // تحديث الطلب في localStorage (الحالة + معلومات الموصّل حتى يظهر للزبون ويستطيع التواصل)
-      const savedOrders = localStorage.getItem('orders');
-      if (savedOrders) {
-        const allOrders = JSON.parse(savedOrders);
-        const index = allOrders.findIndex((o: Order) => o.id === order.id);
-        if (index !== -1) {
-          const driverName = driver.name || driver.full_name || 'Livreur';
-          allOrders[index] = {
-            ...allOrders[index],
-            status: 'assigned',
-            driverId: driver.id,
-            driverName,
-            driver: {
-              name: driverName,
-              phone: driver.phone || '',
-              rating: driver.rating ?? 0,
-            },
-          };
-          localStorage.setItem('orders', JSON.stringify(allOrders));
-        }
-      }
+      await supabase
+        .from('orders')
+        .update({ status: 'assigned' })
+        .eq('id', order.id)
+        .eq('restaurant_id', currentRestaurant.id);
 
       setDriverModalOrder(null);
-      loadOrders();
+      await loadOrders();
       toast.success('Commande assignée au livreur avec succès');
     } catch (error) {
       console.error('خطأ في إسناد الموصّل للطلب:', error);
