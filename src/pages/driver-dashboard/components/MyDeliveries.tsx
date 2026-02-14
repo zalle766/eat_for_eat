@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../context/ToastContext';
+import OrderChat from '../../../components/feature/OrderChat';
 
 const DRIVER_LOCATION_INTERVAL_MS = 15000; // 15 secondes
 
@@ -8,17 +9,79 @@ interface MyDeliveriesProps {
   driver: any;
 }
 
+interface IncomingCall {
+  id: string;
+  order_id: string;
+  customer_name: string;
+  customer_phone: string;
+  created_at: string;
+}
+
 export default function MyDeliveries({ driver }: MyDeliveriesProps) {
   const toast = useToast();
   const [deliveries, setDeliveries] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('active');
+  const [chatDelivery, setChatDelivery] = useState<{ order_id: string; customer_name: string } | null>(null);
+  const [incomingCall, setIncomingCall] = useState<IncomingCall | null>(null);
+  const [unreadByOrder, setUnreadByOrder] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadDeliveries();
     const interval = setInterval(loadDeliveries, 10000);
     return () => clearInterval(interval);
   }, [driver, filter]);
+
+  // إشعار المكالمة الواردة عندما يكون الموصّل متصلًا
+  useEffect(() => {
+    if (!driver?.id) return;
+    const channel = supabase
+      .channel(`call_requests:${driver.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'call_requests', filter: `driver_id=eq.${driver.id}` },
+        (payload) => {
+          const n = payload.new as IncomingCall;
+          setIncomingCall({
+            id: n.id,
+            order_id: n.order_id,
+            customer_name: n.customer_name || 'Client',
+            customer_phone: n.customer_phone || '',
+            created_at: n.created_at,
+          });
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [driver?.id]);
+
+  // إشعار بالرسائل الجديدة من الزبون (للموصّل)
+  useEffect(() => {
+    if (!driver?.id || deliveries.length === 0) return;
+    const orderIds = deliveries.map((d) => d.order_id).filter(Boolean);
+    if (orderIds.length === 0) return;
+    const channel = supabase
+      .channel('driver_new_messages')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'order_messages' },
+        (payload) => {
+          const msg = payload.new as { order_id: string; sender_type: string };
+          if (msg.sender_type !== 'customer') return;
+          if (!orderIds.includes(msg.order_id)) return;
+          const delivery = deliveries.find((d) => d.order_id === msg.order_id);
+          const name = delivery?.customer_name || 'Client';
+          toast.info(`Nouveau message de ${name}`);
+          setUnreadByOrder((prev) => ({ ...prev, [msg.order_id]: (prev[msg.order_id] || 0) + 1 }));
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [driver?.id, deliveries]);
 
   // إرسال موقع السائق كل 15 ثانية للطلبات ذات الحالة "في الطريق" (picked_up)
   useEffect(() => {
@@ -293,6 +356,36 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               )}
 
               {/* Action Buttons */}
+              {(delivery.status === 'assigned' || delivery.status === 'picked_up') && (
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  {delivery.customer_phone && (
+                    <a
+                      href={`tel:${delivery.customer_phone}`}
+                      className="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      <i className="ri-phone-line"></i>
+                      Appel direct client
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChatDelivery({ order_id: delivery.order_id, customer_name: delivery.customer_name || 'Client' });
+                      setUnreadByOrder((prev) => ({ ...prev, [delivery.order_id]: 0 }));
+                    }}
+                    className="relative inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    <i className="ri-chat-3-line"></i>
+                    Messages directs
+                    {unreadByOrder[delivery.order_id] > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                        {unreadByOrder[delivery.order_id]}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              )}
+
               {delivery.status === 'assigned' && (
                 <div className="flex gap-3">
                   <button
@@ -371,6 +464,62 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* نافذة الدردشة المباشرة مع الزبون */}
+      {chatDelivery && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <h3 className="font-semibold text-gray-900">Messages avec le client</h3>
+              <button
+                type="button"
+                onClick={() => setChatDelivery(null)}
+                className="text-gray-500 hover:text-gray-700 p-1"
+              >
+                <i className="ri-close-line text-xl"></i>
+              </button>
+            </div>
+            <div className="flex-1 min-h-0 p-3">
+              <OrderChat
+                orderId={chatDelivery.order_id}
+                senderType="driver"
+                senderId={driver.id}
+                senderName={driver.name || driver.full_name || 'Livreur'}
+                otherPartyName={chatDelivery.customer_name}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* إشعار مكالمة واردة - يظهر للموصّل عندما يطلب الزبون الاتصال وهو متصل */}
+      {incomingCall && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <i className="ri-phone-line text-3xl text-green-600"></i>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Appel entrant</h3>
+            <p className="text-gray-600 mb-4">{incomingCall.customer_name} souhaite vous appeler</p>
+            <div className="flex flex-col gap-2">
+              <a
+                href={`tel:${incomingCall.customer_phone}`}
+                className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold"
+              >
+                <i className="ri-phone-line text-xl"></i>
+                Rappeler le client
+              </a>
+              <button
+                type="button"
+                onClick={() => setIncomingCall(null)}
+                className="w-full py-3 rounded-xl font-medium text-gray-600 hover:bg-gray-100"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import TrackOrderMap from '../../components/feature/TrackOrderMap';
+import OrderChat from '../../components/feature/OrderChat';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency } from '../../lib/currency';
 import { useToast } from '../../context/ToastContext';
@@ -106,6 +107,9 @@ export default function TrackOrderPage() {
   } | null>(null);
   /** معلومات الموصّل من Supabase (للزبون عندما يُعيَّن موصّل من لوحة المطعم) */
   const [driverFromSupabase, setDriverFromSupabase] = useState<{ name: string; phone: string; rating: number } | null>(null);
+  const [driverIdFromSupabase, setDriverIdFromSupabase] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [showDriverContact, setShowDriverContact] = useState(false);
   const navigate = useNavigate();
 
   // التحقق من المستخدم المسجل
@@ -207,12 +211,14 @@ export default function TrackOrderPage() {
 
       const { data: deliveryData } = await supabase
         .from('deliveries')
-        .select('*, drivers(name, phone)')
+        .select('driver_id, *, drivers(name, phone)')
         .eq('order_id', orderId)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
       const raw = deliveryData as Record<string, unknown> | null;
+      if (raw?.driver_id) setDriverIdFromSupabase(String(raw.driver_id));
+      else setDriverIdFromSupabase(null);
       const dr = raw?.drivers ?? raw?.driver;
       const driverObj = Array.isArray(dr) ? dr[0] : dr;
       if (driverObj && typeof driverObj === 'object' && ((driverObj as any).name || (driverObj as any).phone)) {
@@ -249,6 +255,7 @@ export default function TrackOrderPage() {
       supabase.removeChannel(channel);
       setLiveOrderFromSupabase(null);
       setDriverFromSupabase(null);
+      setDriverIdFromSupabase(null);
     };
   }, [searchedOrder?.id]);
 
@@ -263,7 +270,7 @@ export default function TrackOrderPage() {
     }
     const info = order.deliveryInfo;
     const orderStatus = order.status;
-    const showMap = ['ready', 'on_way', 'delivered'].includes(orderStatus);
+    const showMap = ['ready', 'on_way'].includes(orderStatus);
 
     if (!showMap) {
       setDeliveryCoords(null);
@@ -577,94 +584,141 @@ export default function TrackOrderPage() {
               </div>
             )}
 
-            {/* خريطة التتبع - عند الجاهزية أو في الطريق أو تم التوصيل */}
-            {['ready', 'on_way', 'delivered'].includes(order.status) && searchedOrder.deliveryInfo && (
+            {/* خريطة التتبع - تظهر فقط عند النقر */}
+            {['ready', 'on_way'].includes(order.status) && searchedOrder.deliveryInfo && (
               <div className="mb-6">
-                <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <i className="ri-map-pin-line text-orange-500"></i>
-                  Suivi sur la carte
-                </h3>
-                {mapLoading ? (
-                  <div className="rounded-2xl bg-gray-100 flex items-center justify-center h-[320px]">
-                    <span className="text-gray-500 flex items-center gap-2">
-                      <i className="ri-loader-4-line animate-spin text-xl"></i>
-                      Chargement de la carte...
+                {!showMap ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowMap(true)}
+                    className="w-full flex items-center justify-between gap-4 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-orange-300 hover:bg-orange-50/50 transition-all text-left"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                        <i className="ri-map-pin-line text-2xl text-orange-500"></i>
+                      </span>
+                      <div>
+                        <p className="font-semibold text-gray-800">Voir la carte de suivi</p>
+                        <p className="text-sm text-gray-500">Localisez le livreur et l&apos;itinéraire sur la carte</p>
+                      </div>
                     </span>
+                    <i className="ri-arrow-right-s-line text-2xl text-gray-400"></i>
+                  </button>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <i className="ri-map-pin-line text-orange-500"></i>
+                        Suivi sur la carte
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowMap(false)}
+                        className="text-gray-500 hover:text-gray-700 text-sm flex items-center gap-1"
+                      >
+                        <i className="ri-arrow-left-s-line"></i> Masquer
+                      </button>
+                    </div>
+                    {mapLoading ? (
+                      <div className="rounded-2xl bg-gray-100 flex items-center justify-center h-[320px]">
+                        <span className="text-gray-500 flex items-center gap-2">
+                          <i className="ri-loader-4-line animate-spin text-xl"></i>
+                          Chargement de la carte...
+                        </span>
+                      </div>
+                    ) : deliveryCoords ? (
+                      <TrackOrderMap
+                        deliveryLat={deliveryCoords.lat}
+                        deliveryLng={deliveryCoords.lng}
+                        driverLat={driverCoords?.lat ?? undefined}
+                        driverLng={driverCoords?.lng ?? undefined}
+                        restaurantLat={restaurantCoords?.lat ?? undefined}
+                        restaurantLng={restaurantCoords?.lng ?? undefined}
+                        deliveryAddress={`${searchedOrder.deliveryInfo.address}, ${searchedOrder.deliveryInfo.city}`}
+                        driverName={searchedOrder.driver?.name}
+                        restaurantName={searchedOrder.restaurant}
+                        status={order.status}
+                      />
+                    ) : null}
                   </div>
-                ) : deliveryCoords ? (
-                  <TrackOrderMap
-                    deliveryLat={deliveryCoords.lat}
-                    deliveryLng={deliveryCoords.lng}
-                    driverLat={driverCoords?.lat ?? undefined}
-                    driverLng={driverCoords?.lng ?? undefined}
-                    restaurantLat={restaurantCoords?.lat ?? undefined}
-                    restaurantLng={restaurantCoords?.lng ?? undefined}
-                    deliveryAddress={`${searchedOrder.deliveryInfo.address}, ${searchedOrder.deliveryInfo.city}`}
-                    driverName={searchedOrder.driver?.name}
-                    restaurantName={searchedOrder.restaurant}
-                    status={order.status}
-                  />
-                ) : null}
+                )}
               </div>
             )}
 
-            {/* معلومات السائق - تظهر عند تعيين الموصّل أو عندما يكون في الطريق (للتواصل والدردشة) */}
+            {/* التواصل مع السائق - يظهر عند النقر */}
             {(order.status === 'assigned' || order.status === 'on_way' || order.status === 'ready') && displayDriver && (
               <div className="border-t pt-6 mb-6">
-                <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <i className="ri-user-line text-orange-500"></i>
-                  Informations du livreur
-                </h3>
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center">
-                        <i className="ri-user-line text-2xl text-orange-500"></i>
-                      </div>
+                {!showDriverContact ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowDriverContact(true)}
+                    className="w-full flex items-center justify-between gap-4 p-4 rounded-xl border-2 border-dashed border-gray-200 hover:border-orange-300 hover:bg-orange-50/50 transition-all text-left"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                        <i className="ri-chat-3-line text-2xl text-orange-500"></i>
+                      </span>
                       <div>
-                        <div className="font-semibold text-gray-800">{displayDriver.name}</div>
-                        {displayDriver.rating > 0 && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <i className="ri-star-fill text-yellow-400"></i>
-                            <span>{displayDriver.rating}</span>
-                          </div>
-                        )}
-                        {displayDriver.phone && (
-                          <p className="text-sm text-gray-500 mt-0.5">{displayDriver.phone}</p>
-                        )}
+                        <p className="font-semibold text-gray-800">Contacter le livreur</p>
+                        <p className="text-sm text-gray-500">Appel direct ou messagerie avec {displayDriver.name}</p>
                       </div>
+                    </span>
+                    <i className="ri-arrow-right-s-line text-2xl text-gray-400"></i>
+                  </button>
+                ) : (
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <i className="ri-user-line text-orange-500"></i>
+                        Contacter le livreur
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowDriverContact(false)}
+                        className="text-gray-500 hover:text-gray-700 text-sm flex items-center gap-1"
+                      >
+                        <i className="ri-arrow-left-s-line"></i> Réduire
+                      </button>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
+                      <span className="font-medium text-gray-800">{displayDriver.name}</span>
+                      {displayDriver.rating > 0 && (
+                        <span className="flex items-center gap-1 text-sm text-gray-600">
+                          <i className="ri-star-fill text-yellow-400"></i>
+                          {displayDriver.rating}
+                        </span>
+                      )}
                       {displayDriver.phone && (
-                        <>
-                          <a
-                            href={(() => {
-                              const raw = displayDriver.phone.replace(/\D/g, '').replace(/^0/, '');
-                              const num = raw.startsWith('212') ? raw : `212${raw}`;
-                              return `https://wa.me/${num}`;
-                            })()}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors"
-                          >
-                            <i className="ri-whatsapp-line text-xl"></i>
-                            Contacter par WhatsApp
-                          </a>
-                          <a
-                            href={`tel:${displayDriver.phone}`}
-                            className="inline-flex items-center gap-2 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2.5 rounded-lg font-medium transition-colors"
-                          >
-                            <i className="ri-phone-line text-lg"></i>
-                            Appeler
-                          </a>
-                        </>
+                        <a
+                          href={`tel:${displayDriver.phone}`}
+                          onClick={() => {
+                            if (driverIdFromSupabase && searchedOrder.deliveryInfo) {
+                              supabase.from('call_requests').insert({
+                                order_id: searchedOrder.id,
+                                driver_id: driverIdFromSupabase,
+                                customer_name: searchedOrder.deliveryInfo.name,
+                                customer_phone: searchedOrder.deliveryInfo.phone,
+                              }).then(() => {});
+                            }
+                          }}
+                          className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors"
+                        >
+                          <i className="ri-phone-line text-lg"></i>
+                          Appel direct
+                        </a>
                       )}
                     </div>
+                    {currentUser && (
+                      <OrderChat
+                        orderId={searchedOrder.id}
+                        senderType="customer"
+                        senderId={currentUser.id}
+                        senderName={searchedOrder.deliveryInfo?.name || currentUser.email?.split('@')[0] || 'Client'}
+                        otherPartyName={displayDriver.name}
+                      />
+                    )}
                   </div>
-                  <p className="text-sm text-gray-500 mt-3">
-                    Vous pouvez contacter le livreur par WhatsApp ou par téléphone pour suivre votre livraison.
-                  </p>
-                </div>
+                )}
               </div>
             )}
 

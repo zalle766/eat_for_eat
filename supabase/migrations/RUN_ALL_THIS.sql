@@ -368,6 +368,35 @@ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+-- 9. إشعارات المكالمات الواردة (الزبون يطلب الاتصال → الموصّل يرى الإشعار عند كونه متصلًا)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.call_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL,
+  driver_id UUID NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_call_requests_driver_id ON public.call_requests(driver_id);
+
+ALTER TABLE public.call_requests ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "call_requests_insert_authenticated" ON public.call_requests;
+CREATE POLICY "call_requests_insert_authenticated" ON public.call_requests
+  FOR INSERT TO authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "call_requests_select_driver" ON public.call_requests;
+CREATE POLICY "call_requests_select_driver" ON public.call_requests
+  FOR SELECT TO authenticated USING (true);
+
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.call_requests;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 -- ============================================================
 -- تم! تأكد من إنشاء bucket باسم restaurant-images في Storage
 -- ============================================================
