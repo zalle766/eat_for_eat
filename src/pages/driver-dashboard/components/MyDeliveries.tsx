@@ -32,6 +32,25 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
     return () => clearInterval(interval);
   }, [driver, filter]);
 
+  // Realtime: عند تعيين توصيلة جديدة من المطعم، تظهر فوراً في « Mes livraisons »
+  useEffect(() => {
+    if (!driver?.id) return;
+    const channel = supabase
+      .channel(`deliveries_driver_${driver.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'deliveries', filter: `driver_id=eq.${driver.id}` },
+        () => {
+          loadDeliveries();
+          toast.info('Nouvelle livraison assignée ! Consultez « Mes livraisons ».');
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [driver?.id]);
+
   // إشعار المكالمة الواردة عندما يكون الموصّل متصلًا
   useEffect(() => {
     if (!driver?.id) return;
@@ -116,9 +135,10 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
 
   const loadDeliveries = async () => {
     try {
+      // جلب التوصيلات من جدول deliveries فقط (بدون join على orders لتجنب مشاكل RLS)
       let query = supabase
         .from('deliveries')
-        .select('*, orders(delivery_latitude, delivery_longitude)')
+        .select('*')
         .eq('driver_id', driver.id)
         .order('created_at', { ascending: false });
 
@@ -131,7 +151,23 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setDeliveries(data || []);
+
+      const list = data || [];
+      const orderIds = list.map((d: any) => d.order_id).filter(Boolean);
+      let ordersById: Record<string, { delivery_latitude?: number; delivery_longitude?: number }> = {};
+      if (orderIds.length > 0) {
+        const { data: orderRows } = await supabase
+          .from('orders')
+          .select('id, delivery_latitude, delivery_longitude')
+          .in('id', orderIds);
+        (orderRows || []).forEach((o: any) => { ordersById[o.id] = o; });
+      }
+      const withCoords = list.map((d: any) => ({
+        ...d,
+        order: ordersById[d.order_id] || null,
+        orders: ordersById[d.order_id] ? [ordersById[d.order_id]] : null,
+      }));
+      setDeliveries(withCoords);
       setIsLoading(false);
     } catch (error) {
       console.error('Erreur lors du chargement des livraisons:', error);
