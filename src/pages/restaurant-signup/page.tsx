@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
+import PhoneInput from '../../components/ui/PhoneInput';
 
 export default function RestaurantSignupPage() {
   const [formData, setFormData] = useState({
@@ -446,21 +447,14 @@ export default function RestaurantSignupPage() {
                 />
               </div>
               
-              <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Numéro de téléphone *
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  placeholder="+966 50 123 4567"
-                />
-              </div>
+              <PhoneInput
+                label="Numéro de téléphone"
+                name="phone"
+                value={formData.phone}
+                onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
+                required
+                placeholder="50 123 4567"
+              />
             </div>
 
             {/* كلمة المرور */}
@@ -573,6 +567,7 @@ export default function RestaurantSignupPage() {
                 <option value="Libanais">Libanais</option>
                 <option value="Fast-food">Fast-food</option>
                 <option value="Végétarien">Végétarien</option>
+                <option value="Shabi">Populaire</option>
                 <option value="Autre">Autre</option>
               </select>
             </div>

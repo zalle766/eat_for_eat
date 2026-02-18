@@ -194,9 +194,11 @@ export default function CheckoutPage() {
       newErrors.name = 'Le nom doit contenir au moins 2 caractères';
     }
 
-    if (!deliveryInfo.phone.trim()) {
+    const phoneTrim = deliveryInfo.phone.trim();
+    const digitCount = (phoneTrim.match(/\d/g) || []).length;
+    if (!phoneTrim) {
       newErrors.phone = 'Le numéro de téléphone est requis';
-    } else if (!/^[0-9+\-\s()]{10,15}$/.test(deliveryInfo.phone.trim())) {
+    } else if (!/^[0-9+\-\s()]+$/.test(phoneTrim) || digitCount < 10) {
       newErrors.phone = 'Numéro de téléphone invalide';
     }
 

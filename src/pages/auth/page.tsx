@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import Footer from '../../components/feature/Footer';
+import PhoneInput from '../../components/ui/PhoneInput';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +11,7 @@ export default function AuthPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     name: '',
     phone: ''
   });
@@ -17,6 +19,7 @@ export default function AuthPage() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -121,6 +124,11 @@ export default function AuthPage() {
       }
       if (formData.password.length < 6) {
         setMessage('Le mot de passe doit contenir au moins 6 caractères');
+        setMessageType('error');
+        return false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        setMessage('Le mot de passe et la confirmation ne correspondent pas');
         setMessageType('error');
         return false;
       }
@@ -347,20 +355,15 @@ export default function AuthPage() {
               </div>
 
               {!isLogin && !isRestaurantMode && (
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Téléphone *
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                    placeholder="06 12 34 56 78"
-                  />
-                </div>
+                <PhoneInput
+                  label="Téléphone"
+                  name="phone"
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
+                  required
+                  placeholder="6 12 34 56 78"
+                />
               )}
 
               <div>
@@ -387,6 +390,33 @@ export default function AuthPage() {
                   </button>
                 </div>
               </div>
+
+              {!isLogin && (
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
+                    Confirmer le mot de passe *
+                  </label>
+                  <div className="flex border border-gray-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      required={!isLogin}
+                      className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
+                      placeholder="Confirmez votre mot de passe"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                    >
+                      <i className={showConfirmPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -419,6 +449,7 @@ export default function AuthPage() {
                       setFormData({
                         email: '',
                         password: '',
+                        confirmPassword: '',
                         name: '',
                         phone: ''
                       });
@@ -432,7 +463,7 @@ export default function AuthPage() {
             )}
 
             {!isRestaurantMode && (
-              <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
                 <div className="text-center">
                   <p className="text-gray-600 mb-3">Vous souhaitez enregistrer votre restaurant ?</p>
                   <button
@@ -443,6 +474,19 @@ export default function AuthPage() {
                     <div className="flex items-center justify-center gap-2">
                       <i className="ri-restaurant-line"></i>
                       <span>Enregistrer votre restaurant</span>
+                    </div>
+                  </button>
+                </div>
+                <div className="text-center">
+                  <p className="text-gray-600 mb-3">Vous souhaitez devenir livreur (motard) ?</p>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/driver-signup')}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <i className="ri-motorbike-line"></i>
+                      <span>S'inscrire comme livreur</span>
                     </div>
                   </button>
                 </div>

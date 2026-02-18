@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '../../../context/ToastContext';
+import PhoneInput from '../../../components/ui/PhoneInput';
 
 interface RestaurantProfileProps {
   restaurant: any;
@@ -34,8 +35,13 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
     'Libanais',
     'Fast-food',
     'Végétarien',
+    'Shabi',
     'Autre'
   ];
+
+  const cuisineDisplayNames: { [key: string]: string } = {
+    Shabi: 'Populaire'
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -143,26 +149,28 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
                 className="w-full px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 {cuisineTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>{cuisineDisplayNames[type] || type}</option>
                 ))}
               </select>
             ) : (
-              <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">{restaurant.cuisine_type}</p>
+              <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">{cuisineDisplayNames[restaurant.cuisine_type] || restaurant.cuisine_type}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
             {isEditing ? (
-              <input
-                type="tel"
+              <PhoneInput
+                label="Téléphone"
                 name="phone"
                 value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
+                inputClassName="py-2"
               />
             ) : (
-              <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">{restaurant.phone}</p>
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">{restaurant.phone}</p>
+              </>
             )}
           </div>
 
@@ -300,17 +308,19 @@ export default function RestaurantProfile({ restaurant, setRestaurant }: Restaur
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone du propriétaire</label>
             {isEditing ? (
-              <input
-                type="tel"
+              <PhoneInput
+                label="Téléphone du propriétaire"
                 name="owner_phone"
                 value={formData.owner_phone}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                onChange={(v) => setFormData(prev => ({ ...prev, owner_phone: v }))}
+                inputClassName="py-2"
               />
             ) : (
-              <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">{restaurant.owner_phone}</p>
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone du propriétaire</label>
+                <p className="text-gray-900 bg-gray-50 px-4 py-2 rounded-lg">{restaurant.owner_phone}</p>
+              </>
             )}
           </div>
 

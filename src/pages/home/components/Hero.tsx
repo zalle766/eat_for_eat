@@ -19,7 +19,7 @@ export default function Hero() {
             Découvrez les meilleurs restaurants de votre ville et faites-vous livrer vos plats préférés en quelques minutes
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 flex-wrap">
             <button 
               onClick={() => navigate('/restaurants')}
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
@@ -31,6 +31,12 @@ export default function Hero() {
               className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-full text-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
             >
               Rejoindre comme restaurant
+            </button>
+            <button 
+              onClick={() => navigate('/driver-signup')}
+              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-900 px-8 py-4 rounded-full text-lg font-semibold transition-colors whitespace-nowrap cursor-pointer"
+            >
+              Rejoindre comme livreur
             </button>
           </div>
 

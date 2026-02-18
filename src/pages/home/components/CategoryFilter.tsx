@@ -42,7 +42,8 @@ export default function CategoryFilter({ selectedCategory, onCategoryChange }: C
       'Pizza': 'ri-cake-2-line',
       'Fruits de mer': 'ri-fish-line',
       'Végétarien': 'ri-leaf-line',
-      'Traditionnel': 'ri-home-heart-line'
+      'Traditionnel': 'ri-home-heart-line',
+      'Shabi': 'ri-restaurant-line'
     };
     return icons[category] || 'ri-restaurant-line';
   };

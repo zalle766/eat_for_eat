@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../context/ToastContext';
+import PhoneInput from '../../../components/ui/PhoneInput';
 
 interface DriverProfileProps {
   driver: any;
@@ -138,16 +139,13 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Numéro de téléphone
-                  </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
+                    label="Numéro de téléphone"
                     name="phone"
                     value={formData.phone}
-                    onChange={handleChange}
+                    onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
                     disabled={!isEditing}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:bg-gray-50 disabled:text-gray-600"
+                    inputClassName="py-3 disabled:bg-gray-50 disabled:text-gray-600"
                   />
                 </div>
 

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import Footer from '../../components/feature/Footer';
+import PhoneInput from '../../components/ui/PhoneInput';
 
 export default function DriverSignupPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
     vehicleType: '',
     licensePlate: '',
@@ -16,11 +18,20 @@ export default function DriverSignupPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setError('Le mot de passe et la confirmation ne correspondent pas');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
     setIsLoading(true);
     setError('');
 
@@ -180,20 +191,14 @@ export default function DriverSignupPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Téléphone <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="0612345678"
-                    />
-                  </div>
+                  <PhoneInput
+                    label="Téléphone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
+                    required
+                    placeholder="612345678"
+                  />
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -223,7 +228,7 @@ export default function DriverSignupPage() {
                         required
                         minLength={6}
                         className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
-                        placeholder="••••••••"
+                        placeholder="Mot de passe (6 caractères minimum)"
                       />
                       <button
                         type="button"
@@ -231,6 +236,31 @@ export default function DriverSignupPage() {
                         className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
                       >
                         <i className={showPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirmer le mot de passe <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        required
+                        minLength={6}
+                        className="flex-1 px-4 py-3 border-0 focus:ring-0 focus:outline-none"
+                        placeholder="Confirmez votre mot de passe"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="px-4 py-3 border-l border-gray-300 bg-gray-50 text-gray-500 hover:text-gray-700 hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <i className={showConfirmPassword ? 'ri-eye-off-line text-xl' : 'ri-eye-line text-xl'}></i>
                       </button>
                     </div>
                   </div>

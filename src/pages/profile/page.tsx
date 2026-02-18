@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
+import PhoneInput from '../../components/ui/PhoneInput';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -284,20 +285,13 @@ export default function ProfilePage() {
               </div>
 
               {/* Phone */}
-              <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Téléphone
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  placeholder="+33 6 12 34 56 78"
-                />
-              </div>
+              <PhoneInput
+                label="Téléphone"
+                name="phone"
+                value={formData.phone}
+                onChange={(v) => setFormData(prev => ({ ...prev, phone: v }))}
+                placeholder="6 12 34 56 78"
+              />
 
               {/* Address */}
               <div>
