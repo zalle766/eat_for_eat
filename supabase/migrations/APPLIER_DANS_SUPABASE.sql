@@ -90,3 +90,14 @@ BEGIN
       USING (restaurant_id IN (SELECT id FROM public.restaurants WHERE owner_id = auth.uid()));
   END IF;
 END $$;
+
+-- 5) جدول drivers — السماح لصاحب المطعم برؤية السائقين لتعيينهم للطلبات
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'drivers') THEN
+    ALTER TABLE public.drivers ENABLE ROW LEVEL SECURITY;
+    DROP POLICY IF EXISTS "drivers_select_authenticated" ON public.drivers;
+    CREATE POLICY "drivers_select_authenticated" ON public.drivers
+      FOR SELECT TO authenticated USING (true);
+  END IF;
+END $$;

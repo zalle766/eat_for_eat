@@ -287,35 +287,41 @@ export default function OrdersManagement() {
     setAvailableDrivers([]);
 
     try {
+      // جلب كل السائقين المعتمدين والمتاحين (بدون تصفية المدينة في الاستعلام لتجنب RLS أو اختلاف كتابة المدينة)
       const { data, error } = await supabase
         .from('drivers')
         .select('*')
         .eq('status', 'approved')
-        .eq('is_available', true)
-        .eq('city', currentRestaurant.city || order.deliveryInfo.city);
+        .eq('is_available', true);
 
       if (error) throw error;
 
-      const driversWithDistance =
-        (data || []).map((driver) => {
-          let distance: number | null = null;
-          if (
-            typeof driver.current_latitude === 'number' &&
-            typeof driver.current_longitude === 'number' &&
-            typeof currentRestaurant.latitude === 'number' &&
-            typeof currentRestaurant.longitude === 'number'
-          ) {
-            distance = calculateDistanceKm(
-              currentRestaurant.latitude,
-              currentRestaurant.longitude,
-              driver.current_latitude,
-              driver.current_longitude
-            );
-          }
-          return { ...driver, distance };
-        }) || [];
+      const cityResto = (currentRestaurant.city || '').trim().toLowerCase();
+      const cityOrder = (order.deliveryInfo?.city || '').trim().toLowerCase();
 
+      const driversWithDistance = (data || []).map((driver) => {
+        let distance: number | null = null;
+        if (
+          typeof driver.current_latitude === 'number' &&
+          typeof driver.current_longitude === 'number' &&
+          typeof currentRestaurant.latitude === 'number' &&
+          typeof currentRestaurant.longitude === 'number'
+        ) {
+          distance = calculateDistanceKm(
+            currentRestaurant.latitude,
+            currentRestaurant.longitude,
+            driver.current_latitude,
+            driver.current_longitude
+          );
+        }
+        const driverCity = (driver.city || '').trim().toLowerCase();
+        const sameCity = (cityResto && driverCity === cityResto) || (cityOrder && driverCity === cityOrder);
+        return { ...driver, distance, sameCity };
+      });
+
+      // ترتيب: نفس المدينة أولاً، ثم الأقرب مسافة
       driversWithDistance.sort((a: any, b: any) => {
+        if (a.sameCity !== b.sameCity) return a.sameCity ? -1 : 1;
         if (a.distance == null && b.distance == null) return 0;
         if (a.distance == null) return 1;
         if (b.distance == null) return -1;
