@@ -16,7 +16,7 @@ export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     checkAdminAccess();

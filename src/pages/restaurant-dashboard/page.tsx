@@ -16,6 +16,7 @@ export default function RestaurantDashboardPage() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [restaurant, setRestaurant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -107,13 +108,21 @@ export default function RestaurantDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <RestaurantSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      
-      <div className="flex-1 flex flex-col overflow-visible">
-        <RestaurantHeader restaurant={restaurant} />
-        
-        <main className="flex-1 p-6">
+    <div className="min-h-screen bg-gray-50 flex min-w-0 w-full">
+      <RestaurantSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 ml-0 lg:ml-64 transition-all duration-300">
+        <RestaurantHeader
+          restaurant={restaurant}
+          onToggleSidebar={() => setIsSidebarOpen((o) => !o)}
+        />
+
+        <main className="flex-1 p-4 sm:p-6 w-full max-w-full overflow-x-hidden">
           {renderContent()}
         </main>
       </div>

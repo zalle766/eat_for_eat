@@ -230,17 +230,17 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Mes livraisons</h2>
-        <p className="text-gray-600">Gérez et suivez vos livraisons</p>
+    <div className="min-w-0 w-full">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Mes livraisons</h2>
+        <p className="text-sm sm:text-base text-gray-600">Gérez et suivez vos livraisons</p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
         <button
           onClick={() => setFilter('active')}
-          className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+          className={`px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap text-sm sm:text-base ${
             filter === 'active'
               ? 'bg-orange-500 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -250,7 +250,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
         </button>
         <button
           onClick={() => setFilter('completed')}
-          className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+          className={`px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap text-sm sm:text-base ${
             filter === 'completed'
               ? 'bg-orange-500 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -260,7 +260,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
         </button>
         <button
           onClick={() => setFilter('all')}
-          className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+          className={`px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap text-sm sm:text-base ${
             filter === 'all'
               ? 'bg-orange-500 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -283,11 +283,11 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
       ) : (
         <div className="space-y-4">
           {deliveries.map((delivery) => (
-            <div key={delivery.id} className="bg-white rounded-xl p-6 border border-gray-200">
+            <div key={delivery.id} className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 min-w-0">
               {/* Header */}
-              <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-200">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4 pb-4 border-b border-gray-200">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                     <h3 className="font-semibold text-gray-900">Commande #{delivery.order_id.slice(0, 8)}</h3>
                     {getStatusBadge(delivery.status)}
                   </div>
@@ -301,13 +301,13 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
                     })}
                   </p>
                 </div>
-                <div className="text-left">
-                  <p className="text-2xl font-bold text-gray-900">{delivery.total_amount.toFixed(2)} DH</p>
+                <div className="text-left flex-shrink-0">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">{delivery.total_amount.toFixed(2)} DH</p>
                   <p className="text-sm text-green-600 font-medium">Vos revenus : {delivery.driver_earnings.toFixed(2)} DH</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4">
                 {/* Pickup Info */}
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -357,7 +357,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
 
               {/* Action Buttons */}
               {(delivery.status === 'assigned' || delivery.status === 'picked_up') && (
-                <div className="flex flex-wrap items-center gap-2 mb-3">
+                <div className="flex flex-wrap items-center gap-2 mb-3 text-sm sm:text-base">
                   {delivery.customer_phone && (
                     <a
                       href={`tel:${delivery.customer_phone}`}
@@ -387,7 +387,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               )}
 
               {delivery.status === 'assigned' && (
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() => updateDeliveryStatus(delivery.id, 'picked_up')}
                     className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
@@ -420,7 +420,7 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
               )}
 
               {delivery.status === 'picked_up' && (
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() => updateDeliveryStatus(delivery.id, 'delivered')}
                     className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"

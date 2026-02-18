@@ -72,67 +72,67 @@ export default function DashboardOverview({ driver }: DashboardOverviewProps) {
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Tableau de bord</h2>
-        <p className="text-gray-600">Aperçu de vos performances du jour</p>
+    <div className="min-w-0 w-full">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Tableau de bord</h2>
+        <p className="text-sm sm:text-base text-gray-600">Aperçu de vos performances du jour</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-truck-line text-2xl text-blue-600"></i>
             </div>
-            <span className="text-sm text-gray-500">Aujourd'hui</span>
+            <span className="text-sm text-gray-500">Aujourd&apos;hui</span>
           </div>
-          <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.todayDeliveries}</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{stats.todayDeliveries}</h3>
           <p className="text-sm text-gray-600">Livraisons terminées</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-money-dollar-circle-line text-2xl text-green-600"></i>
             </div>
-            <span className="text-sm text-gray-500">Aujourd'hui</span>
+            <span className="text-sm text-gray-500">Aujourd&apos;hui</span>
           </div>
-          <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.todayEarnings.toFixed(2)} DH</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 truncate">{stats.todayEarnings.toFixed(2)} DH</h3>
           <p className="text-sm text-gray-600">Revenus</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-time-line text-2xl text-orange-600"></i>
             </div>
             <span className="text-sm text-gray-500">En cours</span>
           </div>
-          <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.pendingDeliveries}</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{stats.pendingDeliveries}</h3>
           <p className="text-sm text-gray-600">Livraisons actives</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-checkbox-circle-line text-2xl text-purple-600"></i>
             </div>
             <span className="text-sm text-gray-500">Total</span>
           </div>
-          <h3 className="text-3xl font-bold text-gray-900 mb-1">{stats.completedDeliveries}</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">{stats.completedDeliveries}</h3>
           <p className="text-sm text-gray-600">Livraisons terminées</p>
         </div>
       </div>
 
       {/* Status Card */}
-      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-8 text-white mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-2xl font-bold mb-2">
+      <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 sm:p-8 text-white mb-6 sm:mb-8 min-w-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg sm:text-2xl font-bold mb-2">
               {driver.is_available ? 'Vous êtes disponible pour livrer' : 'Vous n\'êtes pas disponible'}
             </h3>
-            <p className="text-orange-100 mb-4">
+            <p className="text-orange-100 mb-4 text-sm sm:text-base">
               {driver.is_available 
                 ? 'Vous pouvez recevoir de nouvelles commandes'
                 : 'Activez votre statut pour recevoir des commandes'
@@ -147,16 +147,16 @@ export default function DashboardOverview({ driver }: DashboardOverviewProps) {
               </button>
             )}
           </div>
-          <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
-            <i className={`${driver.is_available ? 'ri-checkbox-circle-line' : 'ri-close-circle-line'} text-6xl`}></i>
+          <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <i className={`${driver.is_available ? 'ri-checkbox-circle-line' : 'ri-close-circle-line'} text-4xl sm:text-6xl`}></i>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-xl p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 min-w-0">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Actions rapides</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <button
             onClick={() => window.location.href = '#available-orders'}
             className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"

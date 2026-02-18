@@ -51,16 +51,16 @@ export default function DriverProfile({ driver, setDriver }: DriverProfileProps)
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Mon profil</h2>
-        <p className="text-gray-600">Gérez vos informations personnelles</p>
+    <div className="min-w-0 w-full">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Mon profil</h2>
+        <p className="text-sm sm:text-base text-gray-600">Gérez vos informations personnelles</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Profile Card */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
+        <div className="lg:col-span-1 min-w-0">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
             <div className="text-center mb-6">
               <div className="w-24 h-24 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-3xl font-bold text-white">

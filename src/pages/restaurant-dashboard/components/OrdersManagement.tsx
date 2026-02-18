@@ -419,15 +419,15 @@ export default function OrdersManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 min-w-0 w-full">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Gestion des commandes</h2>
-        <p className="text-gray-600">Suivez et gérez les commandes clients de {currentRestaurant.name}</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Gestion des commandes</h2>
+        <p className="text-sm sm:text-base text-gray-600 truncate">Suivez et gérez les commandes clients de {currentRestaurant.name}</p>
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 min-w-0">
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>

@@ -194,76 +194,76 @@ export default function DashboardOverview({ restaurant, setActiveTab }: Dashboar
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 min-w-0 w-full">
       {/* Message de bienvenue */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white">
-        <h2 className="text-2xl font-bold mb-2">Bienvenue sur le tableau de bord {restaurant.name}</h2>
-        <p className="text-orange-100">Voici un aperçu des performances de votre restaurant aujourd'hui</p>
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 sm:p-6 text-white min-w-0">
+        <h2 className="text-xl sm:text-2xl font-bold mb-2 truncate">Bienvenue sur le tableau de bord {restaurant.name}</h2>
+        <p className="text-orange-100 text-sm sm:text-base">Voici un aperçu des performances de votre restaurant aujourd&apos;hui</p>
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 min-w-0">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-600">Total des commandes</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.totalOrders}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalOrders}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-shopping-bag-3-line text-2xl text-blue-600"></i>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 min-w-0">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-600">Commandes du jour</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.todayOrders}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.todayOrders}</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-calendar-todo-line text-2xl text-green-600"></i>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 min-w-0">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-600">Revenus mensuels</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.monthlyRevenue.toLocaleString()} dh</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{stats.monthlyRevenue.toLocaleString()} dh</p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-money-dollar-circle-line text-2xl text-orange-600"></i>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 min-w-0">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-600">Revenus totaux</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.totalRevenue.toLocaleString()} dh</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 truncate">{stats.totalRevenue.toLocaleString()} dh</p>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-line-chart-line text-2xl text-purple-600"></i>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 min-w-0">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-600">Nombre de produits</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.totalProducts}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalProducts}</p>
             </div>
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-restaurant-line text-2xl text-indigo-600"></i>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-200 min-w-0">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Note moyenne</p>
@@ -283,9 +283,9 @@ export default function DashboardOverview({ restaurant, setActiveTab }: Dashboar
         </div>
       </div>
 
-      {/* Avis et évaluations - في الأعلى لرؤية صاحب المطعم */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
+      {/* Avis et évaluations */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 min-w-0 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold text-gray-900">Avis et évaluations</h3>
@@ -362,9 +362,9 @@ export default function DashboardOverview({ restaurant, setActiveTab }: Dashboar
       </div>
 
       {/* Actions rapides */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Actions rapides</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 min-w-0">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4">Actions rapides</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <button onClick={() => setActiveTab?.('menu')} className="p-4 bg-orange-50 hover:bg-orange-100 rounded-lg border border-orange-200 transition-colors text-center cursor-pointer">
             <i className="ri-add-circle-line text-2xl text-orange-600 mb-2"></i>
             <p className="text-sm font-medium text-orange-800">Ajouter un produit</p>

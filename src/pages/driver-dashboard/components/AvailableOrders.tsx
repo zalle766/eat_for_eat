@@ -101,10 +101,10 @@ export default function AvailableOrders({ driver }: AvailableOrdersProps) {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Commandes disponibles</h2>
-        <p className="text-gray-600">Choisissez les commandes que vous souhaitez livrer</p>
+    <div className="min-w-0 w-full">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Commandes disponibles</h2>
+        <p className="text-sm sm:text-base text-gray-600">Choisissez les commandes que vous souhaitez livrer</p>
       </div>
 
       {!driver.is_available && (
@@ -131,17 +131,17 @@ export default function AvailableOrders({ driver }: AvailableOrdersProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {orders.map((order) => (
-            <div key={order.id} className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+            <div key={order.id} className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-lg transition-shadow min-w-0">
               {/* Order Header */}
-              <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-200">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4 pb-4 border-b border-gray-200">
+                <div className="min-w-0">
                   <h3 className="font-semibold text-gray-900 mb-1">Commande #{order.id.slice(0, 8)}</h3>
-                  <p className="text-sm text-gray-600">{order.restaurantName}</p>
+                  <p className="text-sm text-gray-600 truncate">{order.restaurantName}</p>
                 </div>
-                <div className="text-left">
-                  <p className="text-2xl font-bold text-orange-600">{order.total.toFixed(2)} DH</p>
+                <div className="text-left flex-shrink-0">
+                  <p className="text-xl sm:text-2xl font-bold text-orange-600">{order.total.toFixed(2)} DH</p>
                   <p className="text-sm text-gray-600">Frais de livraison: {order.deliveryFee.toFixed(2)} DH</p>
                 </div>
               </div>

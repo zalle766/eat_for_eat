@@ -15,6 +15,7 @@ export default function DriverDashboardPage() {
   const [currentView, setCurrentView] = useState('overview');
   const [driver, setDriver] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     checkDriver();
@@ -66,12 +67,17 @@ export default function DriverDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DriverHeader driver={driver} />
+      <DriverHeader driver={driver} onToggleSidebar={() => setIsSidebarOpen((o) => !o)} />
       
-      <div className="flex">
-        <DriverSidebar currentView={currentView} setCurrentView={setCurrentView} />
+      <div className="flex min-w-0 w-full">
+        <DriverSidebar
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
         
-        <main className="flex-1 mr-64 mt-16 p-8">
+        <main className="flex-1 min-w-0 mr-0 lg:mr-64 mt-16 p-4 sm:p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
           {currentView === 'overview' && <DashboardOverview driver={driver} />}
           {currentView === 'available-orders' && <AvailableOrders driver={driver} />}
           {currentView === 'my-deliveries' && <MyDeliveries driver={driver} />}

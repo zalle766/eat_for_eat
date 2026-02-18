@@ -80,67 +80,67 @@ export default function Earnings({ driver }: EarningsProps) {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Revenus</h2>
-        <p className="text-gray-600">Suivez vos revenus des livraisons</p>
+    <div className="min-w-0 w-full">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Revenus</h2>
+        <p className="text-sm sm:text-base text-gray-600">Suivez vos revenus des livraisons</p>
       </div>
 
       {/* Earnings Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 text-white min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-calendar-line text-2xl"></i>
             </div>
-            <span className="text-sm opacity-90">Aujourd'hui</span>
+            <span className="text-sm opacity-90">Aujourd&apos;hui</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.today.toFixed(2)} DH</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold mb-1 truncate">{earnings.today.toFixed(2)} DH</h3>
           <p className="text-sm opacity-90">Revenus du jour</p>
         </div>
 
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-calendar-week-line text-2xl"></i>
             </div>
             <span className="text-sm opacity-90">Cette semaine</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.week.toFixed(2)} DH</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold mb-1 truncate">{earnings.week.toFixed(2)} DH</h3>
           <p className="text-sm opacity-90">Revenus de la semaine</p>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-calendar-month-line text-2xl"></i>
             </div>
             <span className="text-sm opacity-90">Ce mois</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.month.toFixed(2)} DH</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold mb-1 truncate">{earnings.month.toFixed(2)} DH</h3>
           <p className="text-sm opacity-90">Revenus du mois</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-4 sm:p-6 text-white min-w-0">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
               <i className="ri-money-dollar-circle-line text-2xl"></i>
             </div>
             <span className="text-sm opacity-90">Total</span>
           </div>
-          <h3 className="text-3xl font-bold mb-1">{earnings.total.toFixed(2)} DH</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold mb-1 truncate">{earnings.total.toFixed(2)} DH</h3>
           <p className="text-sm opacity-90">Revenus totaux</p>
         </div>
       </div>
 
       {/* Earnings History */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Historique des revenus</h3>
+      <div className="bg-white rounded-xl border border-gray-200 min-w-0 overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Historique des revenus</h3>
         </div>
 
         {deliveries.length === 0 ? (
-          <div className="p-12 text-center">
+          <div className="p-6 sm:p-12 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="ri-money-dollar-circle-line text-4xl text-gray-400"></i>
             </div>
@@ -149,7 +149,7 @@ export default function Earnings({ driver }: EarningsProps) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[500px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">N° commande</th>
