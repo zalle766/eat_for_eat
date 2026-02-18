@@ -18,38 +18,39 @@ export default function AdminHeader({ user, onToggleSidebar }: AdminHeaderProps)
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between">
+      <div className="px-3 sm:px-6 py-3 sm:py-4">
+        <div className="flex items-center justify-between gap-2 min-w-0">
           {/* Left Side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
             <button
               onClick={onToggleSidebar}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              className="lg:hidden flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              aria-label="Menu"
             >
               <i className="ri-menu-line text-xl text-gray-600"></i>
             </button>
             
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="w-8 h-8 flex-shrink-0 bg-orange-500 rounded-lg flex items-center justify-center">
                 <i className="ri-admin-line text-white text-lg"></i>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Panneau d'Administration</h1>
-                <p className="text-sm text-gray-500">Gestion complète du site</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">Panneau d&apos;Administration</h1>
+                <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">Gestion complète du site</p>
               </div>
             </div>
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-4">
-            {/* Notifications */}
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+          <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
+            {/* Notifications - masquer sur très petit écran */}
+            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer hidden sm:flex" aria-label="Notifications">
               <i className="ri-notification-line text-xl text-gray-600"></i>
               <span className="absolute -top-1 -left-1 w-3 h-3 bg-red-500 rounded-full"></span>
             </button>
 
-            {/* Settings */}
-            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+            {/* Settings - masquer sur petit écran */}
+            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer hidden sm:block" aria-label="Paramètres">
               <i className="ri-settings-line text-xl text-gray-600"></i>
             </button>
 
@@ -57,16 +58,16 @@ export default function AdminHeader({ user, onToggleSidebar }: AdminHeaderProps)
             <div className="relative">
               <button
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <i className="ri-user-line text-orange-600"></i>
                 </div>
-                <div className="text-left hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">{user?.email}</p>
+                <div className="text-left hidden md:block min-w-0 max-w-[140px] sm:max-w-[200px]">
+                  <p className="text-sm font-medium text-gray-900 truncate">{user?.email}</p>
                   <p className="text-xs text-gray-500">Administrateur</p>
                 </div>
-                <i className="ri-arrow-down-s-line text-gray-400"></i>
+                <i className="ri-arrow-down-s-line text-gray-400 flex-shrink-0"></i>
               </button>
 
               {isProfileMenuOpen && (

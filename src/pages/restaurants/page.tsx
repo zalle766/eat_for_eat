@@ -1,11 +1,11 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import RatingStars from '../../components/feature/RatingStars';
 import RatingModal from '../../components/feature/RatingModal';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
+import { calculateDistanceKm } from '../../lib/distance';
 
 interface FavoriteItem {
   id: string;
@@ -20,6 +20,34 @@ export default function RestaurantsPage() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [ratingTarget, setRatingTarget] = useState<{id: string, name: string} | null>(null);
   const [restaurantRatings, setRestaurantRatings] = useState<{[key: string]: {rating: number, count: number}}>({});
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  // موقع المستخدم: من localStorage أولاً، ثم من الجيولوكيشن إن وُجد
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('userCoordinates');
+      if (saved) {
+        const coords = JSON.parse(saved);
+        if (typeof coords?.latitude === 'number' && typeof coords?.longitude === 'number') {
+          setUserLocation({ latitude: coords.latitude, longitude: coords.longitude });
+          return;
+        }
+      }
+    } catch (_) {}
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setUserLocation({ latitude, longitude });
+          try {
+            localStorage.setItem('userCoordinates', JSON.stringify({ latitude, longitude }));
+          } catch (_) {}
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+      );
+    }
+  }, []);
 
   // تحميل المطاعم من قاعدة البيانات
   const loadRestaurants = async () => {
@@ -41,6 +69,25 @@ export default function RestaurantsPage() {
       setLoading(false);
     }
   };
+
+  // ترتيب المطاعم: الأقرب أولاً (حسب المسافة من المستخدم)
+  const sortedRestaurants = useMemo(() => {
+    const list = [...restaurants];
+    if (!userLocation) return list;
+    const hasCoords = (r: any) =>
+      typeof r.latitude === 'number' && typeof r.longitude === 'number' &&
+      r.latitude !== 0 && r.longitude !== 0;
+    list.sort((a, b) => {
+      const distA = hasCoords(a)
+        ? calculateDistanceKm(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude)
+        : Infinity;
+      const distB = hasCoords(b)
+        ? calculateDistanceKm(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude)
+        : Infinity;
+      return distA - distB;
+    });
+    return list;
+  }, [restaurants, userLocation]);
 
   useEffect(() => {
     loadRestaurants();
@@ -234,9 +281,20 @@ export default function RestaurantsPage() {
               <p className="text-gray-600">Aucun restaurant disponible pour le moment</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {restaurants.map((restaurant) => {
+            <>
+              {userLocation && (
+                <p className="text-sm text-gray-500 mb-4 flex items-center gap-2">
+                  <i className="ri-map-pin-line text-orange-500"></i>
+                  Classés par distance — les plus proches en premier
+                </p>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedRestaurants.map((restaurant) => {
                 const rating = restaurantRatings[restaurant.id];
+                const hasCoords = userLocation && typeof restaurant.latitude === 'number' && typeof restaurant.longitude === 'number' && restaurant.latitude !== 0 && restaurant.longitude !== 0;
+                const distanceKm = hasCoords && userLocation
+                  ? calculateDistanceKm(userLocation.latitude, userLocation.longitude, restaurant.latitude, restaurant.longitude)
+                  : null;
                 return (
                   <div key={restaurant.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                     <div className="relative">
@@ -252,7 +310,7 @@ export default function RestaurantsPage() {
                         <i className={`ri-heart-${isFavorite(restaurant.id, 'restaurant') ? 'fill text-red-500' : 'line text-gray-600'} w-4 h-4`}></i>
                       </button>
                       
-                      <div className="absolute top-3 left-3">
+                      <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           restaurant.status === 'closed' 
                             ? 'bg-red-100 text-red-800' 
@@ -260,6 +318,12 @@ export default function RestaurantsPage() {
                         }`}>
                           {restaurant.status === 'closed' ? 'Fermé' : 'Ouvert'}
                         </span>
+                        {distanceKm != null && (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex items-center gap-1">
+                            <i className="ri-map-pin-line"></i>
+                            {distanceKm < 1 ? `${Math.round(distanceKm * 1000)} m` : `${distanceKm.toFixed(1)} km`}
+                          </span>
+                        )}
                       </div>
                     </div>
                     
@@ -309,7 +373,8 @@ export default function RestaurantsPage() {
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </>
           )}
         </div>
       </main>

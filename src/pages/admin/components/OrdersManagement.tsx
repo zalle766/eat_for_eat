@@ -175,54 +175,54 @@ export default function OrdersManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0 w-full">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Gestion des Commandes</h1>
-        <p className="text-gray-600">Gérer et suivre toutes les commandes</p>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gestion des Commandes</h1>
+        <p className="text-sm sm:text-base text-gray-600">Gérer et suivre toutes les commandes</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
+      {/* Stats Cards - grille responsive, pas de débordement */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
               <i className="ri-shopping-bag-line text-xl text-blue-600"></i>
             </div>
-            <div className="ml-4">
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-600">Total Commandes</p>
-              <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{totalOrders}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
               <i className="ri-calendar-line text-xl text-green-600"></i>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Commandes Aujourd'hui</p>
-              <p className="text-2xl font-bold text-gray-900">{todayOrders}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-600">Commandes Aujourd&apos;hui</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">{todayOrders}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 min-w-0 sm:col-span-2 lg:col-span-1">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-yellow-100 rounded-lg flex-shrink-0">
               <i className="ri-money-dollar-circle-line text-xl text-yellow-600"></i>
             </div>
-            <div className="ml-4">
+            <div className="min-w-0">
               <p className="text-sm font-medium text-gray-600">Revenus Total</p>
-              <p className="text-2xl font-bold text-gray-900">{totalRevenue.toFixed(2)} dh</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{totalRevenue.toFixed(2)} dh</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow p-4 sm:p-6 min-w-0">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -261,10 +261,10 @@ export default function OrdersManagement() {
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* Orders Table - défilement horizontal sur mobile */}
+      <div className="bg-white rounded-lg shadow overflow-hidden min-w-0 w-full">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-[640px] sm:min-w-full divide-y divide-gray-200 w-full">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

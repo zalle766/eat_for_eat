@@ -5,6 +5,7 @@ import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
 import { geocodeAddress } from '../../lib/geocode';
+import { calculateDistanceKm, calculateDeliveryFee, MIN_DELIVERY_FEE } from '../../lib/distance';
 
 interface CartItem {
   id: string;
@@ -41,6 +42,10 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [restaurantCoords, setRestaurantCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [deliveryFee, setDeliveryFee] = useState<number>(MIN_DELIVERY_FEE);
+  const [deliveryFeeLoading, setDeliveryFeeLoading] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -51,6 +56,66 @@ export default function CheckoutPage() {
     };
     init();
   }, []);
+
+  // جلب إحداثيات المطعم عند تغيير السلة
+  useEffect(() => {
+    const restaurantId = cartItems[0]?.restaurant_id;
+    if (!restaurantId) {
+      setRestaurantCoords(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('restaurants')
+        .select('latitude, longitude')
+        .eq('id', restaurantId)
+        .single();
+      if (!cancelled && data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        setRestaurantCoords({ lat: data.latitude, lng: data.longitude });
+      } else {
+        setRestaurantCoords(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [cartItems[0]?.restaurant_id ?? '']);
+
+  // جيو-كود عنوان التوصيل عند تغيير العنوان (مع تأخير بسيط)
+  useEffect(() => {
+    const address = deliveryInfo.address.trim();
+    const city = deliveryInfo.city.trim();
+    if (address.length < 10 || !city) {
+      setDeliveryCoords(null);
+      return;
+    }
+    const t = setTimeout(async () => {
+      setDeliveryFeeLoading(true);
+      try {
+        const geo = await geocodeAddress(address, city);
+        setDeliveryCoords({ lat: geo.lat, lng: geo.lng });
+      } catch {
+        setDeliveryCoords(null);
+      } finally {
+        setDeliveryFeeLoading(false);
+      }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [deliveryInfo.address, deliveryInfo.city]);
+
+  // حساب رسوم التوصيل حسب المسافة
+  useEffect(() => {
+    if (restaurantCoords && deliveryCoords) {
+      const distanceKm = calculateDistanceKm(
+        restaurantCoords.lat,
+        restaurantCoords.lng,
+        deliveryCoords.lat,
+        deliveryCoords.lng
+      );
+      setDeliveryFee(calculateDeliveryFee(distanceKm));
+    } else {
+      setDeliveryFee(MIN_DELIVERY_FEE);
+    }
+  }, [restaurantCoords, deliveryCoords]);
 
   const [profileComplete, setProfileComplete] = useState<boolean | null>(null);
 
@@ -241,7 +306,6 @@ export default function CheckoutPage() {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = 25;
   const getDiscount = () => {
     if (!appliedPromo) return 0;
     let d = 0;
@@ -674,9 +738,14 @@ export default function CheckoutPage() {
                   <span className="text-gray-600">Sous-total</span>
                   <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Frais de livraison</span>
-                  <span className="font-medium">{deliveryFee.toFixed(2)} DH</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">
+                    Frais de livraison
+                    <span className="block text-xs text-gray-400 font-normal">(5 DH/km selon la distance)</span>
+                  </span>
+                  <span className="font-medium">
+                    {deliveryFeeLoading ? '...' : `${deliveryFee.toFixed(2)} DH`}
+                  </span>
                 </div>
                 {appliedPromo && (
                   <div className="flex justify-between text-green-600">

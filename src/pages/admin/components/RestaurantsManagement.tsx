@@ -255,9 +255,9 @@ export default function RestaurantsManagement() {
       </div>
 
       {/* Restaurants Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden min-w-0 w-full">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="min-w-[640px] sm:min-w-full w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">

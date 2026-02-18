@@ -90,17 +90,16 @@ export default function AdminPage() {
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      <div className="flex">
+      <div className="flex min-h-0 w-full">
         <AdminSidebar 
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onClose={() => setIsSidebarOpen(false)}
           isOpen={isSidebarOpen}
         />
 
-        <main className={`flex-1 transition-all duration-300 ${
-          isSidebarOpen ? 'lg:ml-64' : 'ml-0'
-        }`}>
-          <div className="p-6">
+        <main className="flex-1 min-w-0 ml-0 lg:ml-64 transition-all duration-300">
+          <div className="p-4 sm:p-6 w-full max-w-full overflow-x-hidden">
             {renderActiveComponent()}
           </div>
         </main>

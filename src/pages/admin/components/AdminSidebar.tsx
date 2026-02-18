@@ -1,10 +1,11 @@
 interface AdminSidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onClose: () => void;
   isOpen: boolean;
 }
 
-export default function AdminSidebar({ activeTab, onTabChange, isOpen }: AdminSidebarProps) {
+export default function AdminSidebar({ activeTab, onTabChange, onClose, isOpen }: AdminSidebarProps) {
   const menuItems = [
     {
       id: 'dashboard',
@@ -52,11 +53,12 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen }: AdminSi
 
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - fermer le menu au clic */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
-          onClick={() => {}}
+          onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
@@ -64,28 +66,35 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen }: AdminSi
       <aside className={`
         fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-white shadow-lg border-r border-gray-200 z-40
         transform transition-transform duration-300 ease-in-out
+        flex flex-col
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         lg:sticky lg:top-16
       `}>
-        <div className="p-6">
-          <nav className="space-y-2">
+        {/* Navigation - défilement si contenu long */}
+        <div className="p-4 sm:p-6 flex-1 min-h-0 overflow-y-auto">
+          <nav className="space-y-3">
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => onTabChange(item.id)}
+                onClick={() => {
+                  onTabChange(item.id);
+                  onClose();
+                }}
                 className={`
-                  w-full text-left p-4 rounded-lg transition-all duration-200 cursor-pointer
+                  w-full text-left rounded-lg transition-all duration-200 cursor-pointer
+                  py-3 px-4
+                  border-l-4
                   ${activeTab === item.id 
-                    ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-500' 
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-orange-600'
+                    ? 'bg-orange-50 text-orange-600 border-orange-500' 
+                    : 'border-transparent text-gray-700 hover:bg-gray-50 hover:text-orange-600'
                   }
                 `}
               >
-                <div className="flex items-center gap-3">
-                  <i className={`${item.icon} text-xl`}></i>
-                  <div className="flex-1 text-left">
-                    <div className="font-medium">{item.label}</div>
-                    <div className="text-xs text-gray-500 mt-1">{item.description}</div>
+                <div className="flex items-start gap-3 min-h-[2.5rem]">
+                  <i className={`${item.icon} text-xl flex-shrink-0 mt-0.5`} aria-hidden></i>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="font-medium leading-tight">{item.label}</div>
+                    <div className="text-xs text-gray-500 mt-1 leading-snug">{item.description}</div>
                   </div>
                 </div>
               </button>
@@ -93,9 +102,9 @@ export default function AdminSidebar({ activeTab, onTabChange, isOpen }: AdminSi
           </nav>
         </div>
 
-        {/* Quick Stats */}
-        <div className="p-6 border-t border-gray-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-4">Statistiques Rapides</h3>
+        {/* Quick Stats - toujours visible en bas */}
+        <div className="p-4 sm:p-6 border-t border-gray-200 flex-shrink-0 bg-gray-50/50">
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Statistiques Rapides</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-500">Restaurants Actifs</span>

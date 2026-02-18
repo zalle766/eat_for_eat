@@ -4,6 +4,7 @@ import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
+import { MIN_DELIVERY_FEE } from '../../lib/distance';
 
 interface CartItem {
   id: string;
@@ -278,7 +279,8 @@ export default function CartPage() {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = 25;
+  // تقدير في Panier؛ الرسوم الفعلية تُحسب في صفحة الدفع حسب المسافة (5 DH/km)
+  const deliveryFee = MIN_DELIVERY_FEE;
   const getDiscount = () => {
     if (!appliedPromo) return 0;
     let d = 0;
@@ -487,9 +489,12 @@ export default function CartPage() {
                   <span className="text-gray-600">Sous-total</span>
                   <span className="font-medium">{subtotal.toFixed(2)} DH</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Frais de livraison</span>
-                  <span className="font-medium">{deliveryFee.toFixed(2)} DH</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">
+                    Frais de livraison
+                    <span className="block text-xs text-gray-400 font-normal">(5 DH/km, calculés à l&apos;étape suivante)</span>
+                  </span>
+                  <span className="font-medium">à partir de 05 DH</span>
                 </div>
                 {appliedPromo && (
                   <div className="flex justify-between text-green-600">
