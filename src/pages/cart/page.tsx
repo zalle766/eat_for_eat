@@ -15,6 +15,16 @@ interface CartItem {
   image: string;
 }
 
+interface SuggestedProduct {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string | null;
+  restaurant_id: string;
+  category: string;
+  restaurants: { id: string; name: string } | null;
+}
+
 export default function CartPage() {
   const navigate = useNavigate();
   const toast = useToast();
@@ -23,6 +33,7 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<any>(null);
   const [promoLoading, setPromoLoading] = useState(false);
+  const [suggestedProducts, setSuggestedProducts] = useState<SuggestedProduct[]>([]);
 
   // تحميل عناصر السلة من localStorage وقاعدة البيانات
   useEffect(() => {
@@ -39,6 +50,34 @@ export default function CartPage() {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
   }, []);
+
+  // اقتراح المشروبات والحلويات من نفس المطاعم عند وجود عناصر في السلة
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      setSuggestedProducts([]);
+      return;
+    }
+    const restaurantIds = [...new Set(cartItems.map(i => i.restaurant_id).filter(Boolean))];
+    const cartProductIds = cartItems.map(i => i.id);
+    if (restaurantIds.length === 0) return;
+
+    const fetchSuggestions = async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, price, image_url, restaurant_id, category, restaurants(id, name)')
+        .in('restaurant_id', restaurantIds)
+        .in('category', ['Boissons', 'Desserts', 'Pâtisseries'])
+        .eq('is_available', true);
+
+      if (error) {
+        setSuggestedProducts([]);
+        return;
+      }
+      const filtered = (data || []).filter((p: any) => !cartProductIds.includes(p.id));
+      setSuggestedProducts(filtered.slice(0, 6));
+    };
+    fetchSuggestions();
+  }, [cartItems]);
 
   const loadCartItems = async () => {
     try {
@@ -132,6 +171,21 @@ export default function CartPage() {
       window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (error) {
       console.error('خطأ في حذف العنصر:', error);
+    }
+  };
+
+  const addSuggestionToCart = (product: SuggestedProduct) => {
+    try {
+      const savedCart = localStorage.getItem('cart');
+      const cart = savedCart ? JSON.parse(savedCart) : {};
+      cart[product.id] = (cart[product.id] || 0) + 1;
+      localStorage.setItem('cart', JSON.stringify(cart));
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      loadCartItems();
+      toast.success(`${product.name} ajouté au panier`);
+    } catch (error) {
+      console.error('خطأ في الإضافة للسلة:', error);
+      toast.error('Impossible d\'ajouter au panier');
     }
   };
 
@@ -337,6 +391,50 @@ export default function CartPage() {
                 ))}
               </div>
             </div>
+
+            {/* اقتراح المشروبات والحلويات */}
+            {suggestedProducts.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <i className="ri-cup-line text-2xl text-amber-500"></i>
+                  <h2 className="text-xl font-bold text-gray-800">Complétez votre commande</h2>
+                </div>
+                <p className="text-gray-600 text-sm mb-5">
+                  Un dessert ou une boisson accompagne parfaitement votre repas. Profitez de nos suggestions du même restaurant.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {suggestedProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="border border-gray-200 rounded-lg overflow-hidden hover:border-orange-300 hover:shadow-md transition-all duration-200"
+                    >
+                      <div className="aspect-square relative bg-gray-100">
+                        <img
+                          src={product.image_url || `https://readdy.ai/api/search-image?query=delicious%20${encodeURIComponent(product.name)}%20food%20professional%20photography&width=200&height=200&seq=sugg-${product.id}`}
+                          alt={product.name}
+                          className="w-full h-full object-cover object-center"
+                        />
+                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-xs font-medium bg-white/90 text-gray-700 shadow-sm">
+                          {product.category}
+                        </span>
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-semibold text-gray-800 text-sm line-clamp-2 mb-1">{product.name}</h3>
+                        <p className="text-orange-600 font-bold text-sm mb-2">{product.price} DH</p>
+                        <button
+                          type="button"
+                          onClick={() => addSuggestionToCart(product)}
+                          className="w-full py-2 px-3 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 text-sm font-medium transition-colors cursor-pointer flex items-center justify-center gap-1"
+                        >
+                          <i className="ri-add-line text-base"></i>
+                          Ajouter
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Order Summary */}
