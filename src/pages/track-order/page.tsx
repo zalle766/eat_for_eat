@@ -68,6 +68,13 @@ const statusInfo = {
     color: 'text-purple-500',
     bgColor: 'bg-purple-100'
   },
+  assigned: {
+    title: 'Livreur assigné',
+    description: 'Un livreur a été assigné à votre commande',
+    icon: 'ri-user-line',
+    color: 'text-indigo-500',
+    bgColor: 'bg-indigo-100'
+  },
   on_way: {
     title: 'En route',
     description: 'Le livreur est en chemin pour vous livrer',
@@ -270,7 +277,7 @@ export default function TrackOrderPage() {
     }
     const info = order.deliveryInfo;
     const orderStatus = order.status;
-    const showMap = ['ready', 'on_way'].includes(orderStatus);
+    const showMap = ['ready', 'on_way', 'assigned'].includes(orderStatus);
 
     if (!showMap) {
       setDeliveryCoords(null);
@@ -419,7 +426,7 @@ export default function TrackOrderPage() {
   };
 
   const getProgressPercentage = (status: string) => {
-    const statusOrder = ['confirmed', 'preparing', 'ready', 'on_way', 'delivered'];
+    const statusOrder = ['confirmed', 'preparing', 'ready', 'assigned', 'on_way', 'delivered'];
     const currentIndex = statusOrder.indexOf(status);
     return currentIndex >= 0 ? ((currentIndex + 1) / statusOrder.length) * 100 : 0;
   };

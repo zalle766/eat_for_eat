@@ -206,15 +206,32 @@ export default function MyDeliveries({ driver }: MyDeliveriesProps) {
 
       const delivery = deliveries.find(d => d.id === deliveryId);
       if (delivery) {
-        // تحديث حالة الطلب في Supabase (للتتبع على الخريطة)
-        const orderStatus = newStatus === 'picked_up' ? 'on_way' : newStatus === 'delivered' ? 'delivered' : null;
-        if (orderStatus) {
-          const orderUpdate: { status: string; driver_lat?: null; driver_lng?: null } = { status: orderStatus };
-          if (newStatus === 'delivered') {
-            orderUpdate.driver_lat = null;
-            orderUpdate.driver_lng = null;
-          }
+        if (newStatus === 'delivered') {
+          const orderUpdate = { status: 'delivered' as const, driver_lat: null as number | null, driver_lng: null as number | null };
           await supabase.from('orders').update(orderUpdate).eq('id', delivery.order_id);
+        } else if (newStatus === 'picked_up') {
+          // تحديث حالة الطلب فوراً + إرسال موقع الموصّل ليظهر التتبع للزبون على الخريطة
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                supabase
+                  .from('orders')
+                  .update({
+                    status: 'on_way',
+                    driver_lat: pos.coords.latitude,
+                    driver_lng: pos.coords.longitude,
+                  })
+                  .eq('id', delivery.order_id)
+                  .then(() => {});
+              },
+              () => {
+                supabase.from('orders').update({ status: 'on_way' }).eq('id', delivery.order_id).then(() => {});
+              },
+              { enableHighAccuracy: true, maximumAge: 5000 }
+            );
+          } else {
+            await supabase.from('orders').update({ status: 'on_way' }).eq('id', delivery.order_id);
+          }
         }
 
         // تحديث حالة الطلب في localStorage
