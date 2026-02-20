@@ -264,104 +264,134 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-white to-gray-50">
       <Header />
       
-      <main className="pt-20">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+      <main className="pt-24 pb-16">
+        <div className="max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Product Details */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-md lg:shadow-xl overflow-hidden border border-orange-50">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-6 lg:gap-10 items-stretch">
               {/* Product Image */}
-              <div className="relative">
+              <div className="relative lg:flex lg:items-center lg:justify-center lg:p-4">
                 <img
                   src={product.image_url || `https://readdy.ai/api/search-image?query=delicious%20$%7Bproduct.name%7D%20food%20dish%20on%20white%20plate%2C%20professional%20food%20photography%2C%20appetizing%20presentation%20with%20garnish%2C%20restaurant%20quality%20meal&width=600&height=600&seq=product-detail-${product.id}&orientation=squarish`}
                   alt={product.name}
-                  className="w-full h-96 lg:h-full object-cover object-top"
+                  className="w-full h-80 sm:h-96 lg:h-auto lg:max-h-[460px] object-cover object-center rounded-b-2xl lg:rounded-2xl"
                 />
                 <button
                   onClick={() => toggleFavorite(product.id, 'product')}
-                  className="absolute top-4 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                  className="absolute top-4 right-4 w-11 h-11 sm:w-12 sm:h-12 bg-white/95 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer"
                 >
                   <i className={`ri-heart-${isFavorite(product.id, 'product') ? 'fill text-red-500' : 'line text-gray-600'} w-6 h-6`}></i>
                 </button>
               </div>
 
               {/* Product Info */}
-              <div className="p-6 lg:p-8">
-                <div className="mb-4">
-                  <button
-                    onClick={() => window.REACT_APP_NAVIGATE(`/restaurant?id=${restaurant?.id}`)}
-                    className="text-orange-500 hover:text-orange-600 text-sm font-medium cursor-pointer"
-                  >
-                    {restaurant?.name}
-                  </button>
-                </div>
-
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-                
-                <div className="flex items-center gap-4 mb-6">
-                  <RatingStars 
-                    rating={averageRating} 
-                    readonly 
-                    showCount 
-                    count={totalReviews}
-                  />
-                  <button
-                    onClick={handleRateClick}
-                    className="text-orange-500 hover:text-orange-600 transition-colors cursor-pointer"
-                  >
-                    <i className="ri-star-line w-4 h-4 ml-1"></i>
-                    Évaluer le produit
-                  </button>
-                </div>
-
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {product.description || 'Délicieux produit de notre restaurant'}
-                </p>
-
-                <div className="text-3xl font-bold text-orange-600 mb-8">
-                  {product.price} DH
-                </div>
-
-                {/* Quantity Selector */}
-                <div className="flex items-center gap-4 mb-8">
-                  <span className="text-gray-700 font-medium">Quantité :</span>
-                  <div className="flex items-center gap-3">
+              <div className="p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
+                <div>
+                  <div className="mb-4 flex items-center justify-between gap-3">
                     <button
-                      onClick={() => updateQuantity(quantity - 1)}
-                      className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors cursor-pointer"
+                      onClick={() => window.REACT_APP_NAVIGATE(`/restaurant?id=${restaurant?.id}`)}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 text-xs sm:text-sm font-semibold tracking-wide uppercase cursor-pointer"
                     >
-                      <i className="ri-subtract-line w-4 h-4"></i>
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                      {restaurant?.name}
                     </button>
-                    <span className="text-xl font-medium w-12 text-center">{quantity}</span>
+                    {product.category && (
+                      <span className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-full bg-gray-50 text-gray-600 text-xs font-medium">
+                        {product.category}
+                      </span>
+                    )}
+                  </div>
+
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-3 sm:mb-4 leading-tight">
+                    {product.name}
+                  </h1>
+                  
+                  <div className="flex flex-wrap items-center gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <RatingStars 
+                        rating={averageRating} 
+                        readonly 
+                        showCount 
+                        count={totalReviews}
+                      />
+                      <span className="text-xs sm:text-sm text-gray-500">
+                        ({totalReviews} avis)
+                      </span>
+                    </div>
                     <button
-                      onClick={() => updateQuantity(quantity + 1)}
-                      className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors cursor-pointer"
+                      onClick={handleRateClick}
+                      className="inline-flex items-center gap-2 text-sm text-orange-500 hover:text-orange-600 transition-colors cursor-pointer"
                     >
-                      <i className="ri-add-line w-4 h-4"></i>
+                      <i className="ri-star-line w-4 h-4 ml-1"></i>
+                      Évaluer le produit
                     </button>
                   </div>
-                </div>
 
-                {/* Add to Cart Button */}
-                <button
-                  onClick={addToCart}
-                  className="w-full bg-orange-500 text-white py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-colors whitespace-nowrap cursor-pointer"
-                >
-                  <i className="ri-shopping-cart-line w-5 h-5 ml-2"></i>
-                  Ajouter au panier ({quantity} × {product.price} = {quantity * product.price} DH)
-                </button>
+                  <p className="text-gray-600 mb-6 leading-relaxed text-sm sm:text-base">
+                    {product.description || 'Délicieux produit de notre restaurant, préparé avec des ingrédients frais et une présentation soignée.'}
+                  </p>
 
-                {/* Current Cart Count */}
-                {cart[product.id] > 0 && (
-                  <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                    <p className="text-green-800 text-sm">
-                      <i className="ri-check-line w-4 h-4 ml-1"></i>
-                      {cart[product.id]} article(s) de ce produit dans le panier
-                    </p>
+                  <div className="flex items-baseline gap-3 mb-8">
+                    <div className="text-3xl sm:text-4xl font-extrabold text-orange-600">
+                      {product.price} DH
+                    </div>
+                    {product.old_price && product.old_price > product.price && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400 line-through">
+                          {product.old_price} DH
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-green-50 text-green-600 text-xs font-semibold">
+                          -{Math.round(((product.old_price - product.price) / product.old_price) * 100)}%
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  {/* Quantity + Add to Cart */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
+                    {/* Quantity Selector */}
+                    <div className="flex items-center gap-4">
+                      <span className="text-gray-700 font-medium text-sm sm:text-base">Quantité :</span>
+                      <div className="flex items-center gap-3 bg-gray-50 rounded-full px-2 py-1.5">
+                        <button
+                          onClick={() => updateQuantity(quantity - 1)}
+                          className="w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
+                        >
+                          <i className="ri-subtract-line w-4 h-4"></i>
+                        </button>
+                        <span className="text-lg sm:text-xl font-semibold w-10 text-center">{quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(quantity + 1)}
+                          className="w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
+                        >
+                          <i className="ri-add-line w-4 h-4"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Add to Cart Button */}
+                    <button
+                      onClick={addToCart}
+                      className="w-full sm:flex-1 bg-orange-500 text-white py-3.5 sm:py-4 rounded-full text-sm sm:text-lg font-semibold hover:bg-orange-600 shadow-md hover:shadow-lg transition-all whitespace-nowrap cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <i className="ri-shopping-cart-line w-5 h-5 ml-1"></i>
+                      Ajouter au panier ({quantity} × {product.price} = {quantity * product.price} DH)
+                    </button>
+                  </div>
+
+                  {/* Current Cart Count */}
+                  {cart[product.id] > 0 && (
+                    <div className="mt-3 sm:mt-4 p-3.5 bg-green-50 border border-green-100 rounded-xl">
+                      <p className="text-green-800 text-xs sm:text-sm">
+                        <i className="ri-check-line w-4 h-4 ml-1"></i>
+                        {cart[product.id]} article(s) de ce produit dans le panier
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
