@@ -27,7 +27,31 @@ export default function AuthPage() {
   const redirectTo = (location.state as { from?: string })?.from === 'checkout' ? '/checkout' : '/';
 
   useEffect(() => {
-    checkUser();
+    // معالجة callback من Google OAuth
+    const handleAuthCallback = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (session && !error) {
+        // تم تسجيل الدخول بنجاح، إعادة توجيه حسب نوع المستخدم
+        await redirectUserBasedOnType(session.user, redirectTo);
+        return;
+      }
+      
+      // التحقق من وجود خطأ في URL (مثل error_description)
+      const errorDescription = searchParams.get('error_description');
+      const errorCode = searchParams.get('error');
+      if (errorDescription || errorCode) {
+        setMessage(errorDescription || `Erreur d'authentification: ${errorCode || 'inconnue'}`);
+        setMessageType('error');
+        setIsGoogleLoading(false);
+        return;
+      }
+      
+      // إذا لم يكن هناك session، تحقق من المستخدم الحالي
+      checkUser();
+    };
+
+    handleAuthCallback();
+    
     const mode = searchParams.get('mode');
     if (mode === 'restaurant') {
       setIsRestaurantMode(true);
@@ -92,26 +116,36 @@ export default function AuthPage() {
     setIsGoogleLoading(true);
     setMessage('');
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      // بناء redirectTo URL مع الحفاظ على أي معاملات موجودة
+      const currentUrl = new URL(window.location.href);
+      const redirectUrl = `${window.location.origin}/auth`;
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'
-          }
+          },
+          skipBrowserRedirect: false
         }
       });
+      
       if (error) {
-        setMessage(error.message || 'Erreur lors de la connexion avec Google');
+        console.error('Google OAuth error:', error);
+        setMessage(error.message || 'Erreur lors de la connexion avec Google. Vérifiez que Google OAuth est correctement configuré dans Supabase.');
         setMessageType('error');
         setIsGoogleLoading(false);
         return;
       }
-      // Redirection gérée par Supabase vers Google puis retour vers redirectTo
-    } catch (err) {
+      
+      // إذا كان هناك URL للانتقال إليه، سيتم إعادة التوجيه تلقائياً
+      // لا نحتاج لإيقاف التحميل هنا لأن الصفحة ستتغير
+    } catch (err: any) {
       console.error('Google sign-in error:', err);
-      setMessage('Une erreur inattendue s\'est produite.');
+      const errorMessage = err?.message || 'Une erreur inattendue s\'est produite lors de la connexion avec Google.';
+      setMessage(errorMessage);
       setMessageType('error');
       setIsGoogleLoading(false);
     }

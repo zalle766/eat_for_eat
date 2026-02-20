@@ -90,3 +90,59 @@
 إذا لم تضف `https://www.eatforeat.com/auth` في **Redirect URLs**، قد يظهر خطأ من Supabase أو لا يتم إكمال تسجيل الدخول. تأكدي أن هذا الرابط مضاف وحُفظ.
 
 بعد حفظ هذه الإعدادات، جرّبي في الموقع المنشور زر « Continuer avec Google ». إن ظهر أي خطأ أو رسالة معيّنة، انسخيها أو التقطي لقطة شاشة وأرسليها لمتابعة الحل.
+
+---
+
+## 4. حل مشكلة الخطأ 500 (Unexpected failure)
+
+إذا ظهرت رسالة خطأ مثل:
+```json
+{"code": 500, "error_code": "unexpected_failure", "msg": "Unexpected failure, please check server logs for more information"}
+```
+
+هذا يعني أن هناك مشكلة في إعدادات Supabase أو Google OAuth. اتبع الخطوات التالية:
+
+### الخطوات لحل المشكلة:
+
+1. **التحقق من Redirect URLs في Supabase:**
+   - اذهب إلى Supabase → Authentication → URL Configuration
+   - تأكد من إضافة الرابط الصحيح في **Redirect URLs**:
+     - للإنتاج: `https://www.eatforeat.com/auth`
+     - للتطوير: `http://localhost:5173/auth`
+   - تأكد من الضغط على **Save**
+
+2. **التحقق من Site URL في Supabase:**
+   - في نفس الصفحة (URL Configuration)
+   - تأكد من أن **Site URL** مضبوط بشكل صحيح:
+     - للإنتاج: `https://www.eatforeat.com` (بدون `/` في النهاية)
+     - للتطوير: `http://localhost:5173`
+
+3. **التحقق من Google OAuth Credentials:**
+   - اذهب إلى Google Cloud Console → APIs & Services → Credentials
+   - تأكد من أن **Authorized redirect URIs** يحتوي على:
+     - `https://<PROJECT_REF>.supabase.co/auth/v1/callback`
+     - (استبدل `<PROJECT_REF>` بمعرف مشروع Supabase الخاص بك)
+   - تأكد من نسخ **Client ID** و **Client Secret** بشكل صحيح في Supabase
+
+4. **فحص Supabase Logs:**
+   - اذهب إلى Supabase → Logs → API Logs
+   - ابحث عن الأخطاء المتعلقة بـ `auth/v1/callback`
+   - الأخطاء ستخبرك بالضبط ما هي المشكلة
+
+5. **التحقق من أن Google OAuth مفعّل:**
+   - في Supabase → Authentication → Providers → Google
+   - تأكد من أن **Enable Sign in with Google** مفعّل
+   - تأكد من حفظ التغييرات
+
+6. **إعادة المحاولة:**
+   - بعد إصلاح الإعدادات، انتظر دقيقة أو دقيقتين
+   - امسح الكاش في المتصفح (Ctrl+Shift+Delete)
+   - جرّب تسجيل الدخول مرة أخرى
+
+### ملاحظات مهمة:
+
+- **تأكد من تطابق النطاق:** إذا كان موقعك يعمل على `www.eatforeat.com`، استخدم `www` في جميع الإعدادات. إذا كان بدون `www`، استخدم `eatforeat.com` فقط.
+- **لا تستخدم `http://` للإنتاج:** تأكد من استخدام `https://` في جميع الإعدادات للإنتاج.
+- **انتظر قليلاً بعد التعديل:** Supabase قد يحتاج إلى بضع دقائق لتطبيق التغييرات.
+
+إذا استمرت المشكلة بعد اتباع جميع الخطوات، راجع سجلات Supabase (Logs) للحصول على تفاصيل أكثر عن الخطأ.
