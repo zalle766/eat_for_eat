@@ -4,7 +4,7 @@ import Header from '../../components/feature/Header';
 import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase';
 import { useToast } from '../../context/ToastContext';
-import { geocodeAddress } from '../../lib/geocode';
+import { geocodeAddress, reverseGeocode } from '../../lib/geocode';
 import { calculateDistanceKm, calculateDeliveryFee, MIN_DELIVERY_FEE } from '../../lib/distance';
 
 interface CartItem {
@@ -46,6 +46,7 @@ export default function CheckoutPage() {
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryFee, setDeliveryFee] = useState<number>(MIN_DELIVERY_FEE);
   const [deliveryFeeLoading, setDeliveryFeeLoading] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -247,6 +248,83 @@ export default function CheckoutPage() {
       }
     } catch (error) {
       console.error('خطأ في تحميل الخصم:', error);
+    }
+  };
+
+  const handleGetLocation = async () => {
+    if (!currentUser) return;
+    
+    setIsGettingLocation(true);
+    try {
+      if (!navigator.geolocation) {
+        toast.error('La géolocalisation n\'est pas supportée par votre navigateur');
+        setIsGettingLocation(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { lat, lng } = position.coords;
+            // استخدام reverse geocoding للحصول على العنوان والمدينة
+            const { address, city } = await reverseGeocode(lat, lng);
+            
+            if (!address || !city) {
+              toast.error('Impossible de déterminer votre adresse. Veuillez la saisir manuellement.');
+              setIsGettingLocation(false);
+              return;
+            }
+
+            // حفظ العنوان والمدينة في ملف المستخدم الشخصي
+            const { error: updateError } = await supabase
+              .from('users')
+              .update({
+                address: address,
+                city: city
+              })
+              .eq('auth_id', currentUser.id);
+
+            if (updateError) {
+              console.error('Erreur lors de la mise à jour du profil:', updateError);
+              toast.error('Erreur lors de la sauvegarde de votre adresse');
+              setIsGettingLocation(false);
+              return;
+            }
+
+            toast.success('Votre adresse a été enregistrée avec succès !');
+            // إعادة تحميل الملف الشخصي والتحقق من اكتماله
+            const complete = await loadUserProfile(currentUser.id);
+            setProfileComplete(complete);
+            setIsGettingLocation(false);
+            
+            // إذا كان الملف الشخصي مكتملاً الآن، الصفحة ستُعاد تحميلها تلقائياً
+          } catch (error) {
+            console.error('Erreur lors de la récupération de l\'adresse:', error);
+            toast.error('Erreur lors de la récupération de votre adresse');
+            setIsGettingLocation(false);
+          }
+        },
+        (error) => {
+          console.error('Erreur de géolocalisation:', error);
+          let errorMessage = 'Impossible d\'accéder à votre position.';
+          if (error.code === error.PERMISSION_DENIED) {
+            errorMessage = 'Permission de géolocalisation refusée. Veuillez autoriser l\'accès à votre position.';
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            errorMessage = 'Position indisponible. Veuillez saisir votre adresse manuellement.';
+          }
+          toast.error(errorMessage);
+          setIsGettingLocation(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } catch (error) {
+      console.error('Erreur lors de la demande de géolocalisation:', error);
+      toast.error('Une erreur est survenue lors de la demande de votre position');
+      setIsGettingLocation(false);
     }
   };
 
@@ -525,10 +603,27 @@ export default function CheckoutPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
-                onClick={() => navigate('/profile')}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
+                onClick={handleGetLocation}
+                disabled={isGettingLocation}
+                className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2"
               >
-                Compléter mon profil
+                {isGettingLocation ? (
+                  <>
+                    <i className="ri-loader-4-line animate-spin"></i>
+                    <span>Détection en cours...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="ri-map-pin-3-line"></i>
+                    <span>Utiliser ma position actuelle</span>
+                  </>
+                )}
+              </button>
+              <button 
+                onClick={() => navigate('/profile')}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Compléter mon profil manuellement
               </button>
               <button 
                 onClick={() => navigate('/cart')}

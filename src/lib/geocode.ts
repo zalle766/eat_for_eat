@@ -33,6 +33,40 @@ export async function geocodeAddress(address: string, city: string): Promise<Geo
   return MARRAKECH_FALLBACK;
 }
 
+/** Reverse geocoding: convert coordinates to address */
+export async function reverseGeocode(lat: number, lng: number): Promise<{ address: string; city: string }> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
+      { headers: { Accept: 'application/json' } }
+    );
+    const data = await res.json();
+    if (data && data.address) {
+      const addr = data.address;
+      // بناء العنوان من المكونات المتاحة
+      const streetParts = [
+        addr.road,
+        addr.house_number,
+        addr.house
+      ].filter(Boolean);
+      const address = streetParts.length > 0 
+        ? streetParts.join(' ') 
+        : addr.suburb || addr.neighbourhood || addr.quarter || '';
+      
+      // المدينة من address object
+      const city = addr.city || addr.town || addr.village || addr.municipality || 'Marrakech';
+      
+      return {
+        address: address || data.display_name?.split(',')[0] || '',
+        city: city
+      };
+    }
+  } catch (e) {
+    console.warn('Reverse geocoding failed:', e);
+  }
+  return { address: '', city: 'Marrakech' };
+}
+
 /** Offset from delivery point to simulate driver position when no real GPS. */
 export function simulateDriverPosition(deliveryLat: number, deliveryLng: number): GeoResult {
   return {
