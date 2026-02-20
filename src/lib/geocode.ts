@@ -37,34 +37,93 @@ export async function geocodeAddress(address: string, city: string): Promise<Geo
 export async function reverseGeocode(lat: number, lng: number): Promise<{ address: string; city: string }> {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`,
-      { headers: { Accept: 'application/json' } }
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1&zoom=18`,
+      { 
+        headers: { 
+          Accept: 'application/json',
+          'User-Agent': 'EatForEat/1.0'
+        } 
+      }
     );
+    
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    
     const data = await res.json();
+    
     if (data && data.address) {
       const addr = data.address;
-      // بناء العنوان من المكونات المتاحة
+      
+      // بناء العنوان من المكونات المتاحة (أفضل طريقة)
       const streetParts = [
         addr.road,
         addr.house_number,
         addr.house
       ].filter(Boolean);
-      const address = streetParts.length > 0 
-        ? streetParts.join(' ') 
-        : addr.suburb || addr.neighbourhood || addr.quarter || '';
       
-      // المدينة من address object
-      const city = addr.city || addr.town || addr.village || addr.municipality || 'Marrakech';
+      let address = '';
+      if (streetParts.length > 0) {
+        address = streetParts.join(' ');
+      } else {
+        // استخدام بدائل إذا لم يكن هناك road
+        const alternatives = [
+          addr.suburb,
+          addr.neighbourhood,
+          addr.quarter,
+          addr.district,
+          addr.village
+        ].filter(Boolean);
+        address = alternatives[0] || '';
+      }
+      
+      // إذا لم نجد عنواناً بعد، استخدم display_name
+      if (!address && data.display_name) {
+        // أخذ الجزء الأول من display_name (عادة يكون العنوان)
+        const parts = data.display_name.split(',');
+        address = parts[0]?.trim() || '';
+        // إذا كان العنوان طويلاً جداً، خذ أول جزئين
+        if (address.length > 50 && parts.length > 1) {
+          address = `${parts[0]?.trim()}, ${parts[1]?.trim()}`;
+        }
+      }
+      
+      // المدينة من address object (مع بدائل متعددة)
+      const city = addr.city || addr.town || addr.village || addr.municipality || addr.county || 'Marrakech';
+      
+      // إذا لم نجد عنواناً نهائياً، استخدم "Position actuelle" مع المدينة
+      if (!address || address.length < 3) {
+        address = `Position actuelle (${city})`;
+      }
       
       return {
-        address: address || data.display_name?.split(',')[0] || '',
+        address: address,
         city: city
+      };
+    } else if (data && data.display_name) {
+      // إذا لم يكن هناك address object، استخدم display_name
+      const parts = data.display_name.split(',');
+      const address = parts[0]?.trim() || 'Position actuelle';
+      const city = parts.find(p => 
+        p.includes('Marrakech') || 
+        p.includes('مراكش') ||
+        p.includes('Morocco')
+      )?.trim() || 'Marrakech';
+      
+      return {
+        address: address,
+        city: city.replace(/Marrakech|مراكش|Morocco/gi, '').trim() || 'Marrakech'
       };
     }
   } catch (e) {
     console.warn('Reverse geocoding failed:', e);
   }
-  return { address: '', city: 'Marrakech' };
+  
+  // Fallback: إرجاع عنوان افتراضي مع المدينة
+  return { 
+    address: 'Position actuelle (Marrakech)', 
+    city: 'Marrakech' 
+  };
 }
 
 /** Offset from delivery point to simulate driver position when no real GPS. */

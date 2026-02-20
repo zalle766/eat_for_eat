@@ -269,9 +269,19 @@ export default function CheckoutPage() {
             // استخدام reverse geocoding للحصول على العنوان والمدينة
             const { address, city } = await reverseGeocode(lat, lng);
             
-            if (!address || !city) {
-              toast.error('Impossible de déterminer votre adresse. Veuillez la saisir manuellement.');
+            // التحقق من أن العنوان والمدينة موجودان وصالحان
+            if (!address || address.trim().length < 3 || !city || city.trim().length < 2) {
+              toast.error('Impossible de déterminer votre adresse avec précision. Veuillez la saisir manuellement.');
               setIsGettingLocation(false);
+              return;
+            }
+            
+            // إذا كان العنوان يحتوي على "Position actuelle"، اطلب من المستخدم إدخال العنوان يدوياً
+            if (address.includes('Position actuelle')) {
+              toast.warning('Adresse approximative détectée. Veuillez compléter votre adresse exacte manuellement.');
+              setIsGettingLocation(false);
+              // الانتقال إلى صفحة الملف الشخصي لإكمال العنوان
+              navigate('/profile');
               return;
             }
 
