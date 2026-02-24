@@ -84,8 +84,9 @@ export default function AuthPage() {
 
       const { data: admin, error: adminError } = await supabase
         .from('admins')
-        .select('*')
+        .select('id, email, role, is_active')
         .eq('email', user.email)
+        .eq('is_active', true)
         .single();
 
       if (admin && !adminError) {

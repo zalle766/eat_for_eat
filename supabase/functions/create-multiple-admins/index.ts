@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const DEFAULT_ADMIN_PASSWORD = Deno.env.get('DEFAULT_ADMIN_PASSWORD') ?? 'change-me-now-please'
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -21,7 +23,7 @@ serve(async (req) => {
     const adminsToCreate = [
       {
         email: 'ahmed@fooddelivery.com',
-        password: 'admin123456',
+        password: DEFAULT_ADMIN_PASSWORD,
         name: 'أحمد محمد',
         phone: '+966501234567',
         role: 'admin',
@@ -29,7 +31,7 @@ serve(async (req) => {
       },
       {
         email: 'fatima@fooddelivery.com',
-        password: 'admin123456',
+        password: DEFAULT_ADMIN_PASSWORD,
         name: 'فاطمة علي',
         phone: '+966507654321',
         role: 'admin',
@@ -37,7 +39,7 @@ serve(async (req) => {
       },
       {
         email: 'mohammed@fooddelivery.com',
-        password: 'admin123456',
+        password: DEFAULT_ADMIN_PASSWORD,
         name: 'محمد السعيد',
         phone: '+966509876543',
         role: 'manager',
@@ -45,7 +47,7 @@ serve(async (req) => {
       },
       {
         email: 'nora@fooddelivery.com',
-        password: 'admin123456',
+        password: DEFAULT_ADMIN_PASSWORD,
         name: 'نورا خالد',
         phone: '+966502468135',
         role: 'supervisor',
@@ -53,7 +55,7 @@ serve(async (req) => {
       },
       {
         email: 'abdullah@fooddelivery.com',
-        password: 'admin123456',
+        password: DEFAULT_ADMIN_PASSWORD,
         name: 'عبدالله أحمد',
         phone: '+966505551234',
         role: 'admin',

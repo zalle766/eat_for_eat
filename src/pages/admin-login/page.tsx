@@ -29,43 +29,45 @@ const AdminLoginPage: React.FC = () => {
     try {
       const cleanEmail = formData.email.trim().toLowerCase();
 
-      // جلب بيانات المدير
+      // تسجيل الدخول عبر نظام المصادقة في Supabase
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: cleanEmail,
+        password: formData.password,
+      });
+
+      if (signInError || !signInData?.user) {
+        throw new Error('Email ou mot de passe incorrect');
+      }
+
+      const authUser = signInData.user;
+
+      // جلب بيانات المدير المرتبطة بحساب المصادقة
       const { data: adminData, error: adminError } = await supabase
         .from('admins')
-        .select('*')
-        .eq('email', cleanEmail)
+        .select('id, name, email, role, is_active')
+        .eq('auth_id', authUser.id)
         .eq('is_active', true)
         .single();
 
       if (adminError || !adminData) {
-        throw new Error('Email introuvable ou compte inactif');
+        throw new Error('Compte administrateur introuvable ou inactif');
       }
 
-      // التحقق من كلمة المرور
-      if (formData.password !== adminData.password) {
-        throw new Error('Mot de passe incorrect');
-      }
-
-      // حفظ بيانات المدير
+      // حفظ بيانات المدير في المتصفح (بدون كلمة مرور)
       localStorage.setItem('adminSession', JSON.stringify({
         id: adminData.id,
         name: adminData.name,
         email: adminData.email,
         role: adminData.role,
-        isLoggedIn: true
+        isLoggedIn: true,
       }));
-
-      // تحديث آخر تسجيل دخول
-      await supabase
-        .from('admins')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', adminData.id);
 
       // التوجيه مباشرة
       navigate('/admin', { replace: true });
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur s\'est produite lors de la connexion');
+    } finally {
       setLoading(false);
     }
   };
@@ -155,18 +157,15 @@ const AdminLoginPage: React.FC = () => {
           </button>
         </form>
 
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Comptes de test :</h3>
-          <div className="text-xs text-gray-600 space-y-1">
-            <p>• admin@fooddelivery.com</p>
-            <p>• ahmed@fooddelivery.com</p>
-            <p>• fatima@fooddelivery.com</p>
-            <p>• mohammed@fooddelivery.com</p>
-            <p>• nora@fooddelivery.com</p>
-            <p>• abdullah@fooddelivery.com</p>
-            <p className="font-medium mt-2">Mot de passe : admin123456</p>
+        {import.meta.env.DEV && (
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Comptes de test (DEV uniquement) :</h3>
+            <p className="text-xs text-gray-600">
+              Ces comptes et mots de passe sont réservés à l&apos;environnement de développement. 
+              Ne les utilisez jamais en production.
+            </p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

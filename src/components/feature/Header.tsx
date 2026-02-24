@@ -98,11 +98,12 @@ export default function Header() {
         return;
       }
 
-      // التحقق من كونه مدير
+      // التحقق من كونه مدير (بدون جلب أي أعمدة حساسة)
       const { data: admin } = await supabase
         .from('admins')
-        .select('*')
+        .select('id, email, role, is_active')
         .eq('email', user.email)
+        .eq('is_active', true)
         .single();
 
       if (admin) {
